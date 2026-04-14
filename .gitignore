@@ -1,0 +1,6 @@
+node_modules
+.env
+.env.local
+find-unused.js
+script/
+.next/
