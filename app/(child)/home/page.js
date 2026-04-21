@@ -17,6 +17,8 @@ export default function ChildDashboard() {
   const [realStats, setRealStats] = useState({ played: 0, won: 0 });
   const [loadingStats, setLoadingStats] = useState(true);
   const [growth, setGrowth] = useState(null); // Real growth data ke liye
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
 
   useEffect(() => {
     const storedName = localStorage.getItem('kidai_student_name');
@@ -79,6 +81,14 @@ export default function ChildDashboard() {
     loadRealStats();
   }, []);
 
+  const handleSaveName = () => {
+    if(editName.trim()) {
+      setName(editName.trim());
+      localStorage.setItem('kidai_student_name', editName.trim());
+    }
+    setIsEditing(false);
+  }
+
   return (
     <div style={{ background: C.bg, minHeight: '100vh', color: C.text, fontFamily: "'Nunito', sans-serif", padding: '20px 20px 120px' }}>
       
@@ -88,7 +98,17 @@ export default function ChildDashboard() {
           <div style={{ fontSize: 36, background: C.card2, padding: 8, borderRadius: 20, border: `2px solid ${C.cyan}` }}>{avatar}</div>
           <div>
             <div style={{ fontSize: 14, color: C.muted, fontWeight: 800, textTransform: 'uppercase' }}>Welcome back,</div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: C.text }}>{name}! 🚀</div>
+            {isEditing ? (
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <input value={editName} onChange={e => setEditName(e.target.value)} style={{ padding: '4px 8px', borderRadius: 8, background: C.card2, border: `1px solid ${C.border}`, color: C.text, fontSize: 16, fontWeight: 900, outline: 'none', width: '120px' }} autoFocus />
+                <button onClick={handleSaveName} style={{ background: C.green, color: '#000', border: 'none', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontWeight: 'bold' }}>Save</button>
+              </div>
+            ) : (
+              <div style={{ fontSize: 24, fontWeight: 900, color: C.text, display: 'flex', alignItems: 'center', gap: 8 }}>
+                {name}! 🚀
+                <button onClick={() => { setEditName(name); setIsEditing(true); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 14, opacity: 0.6, padding: 0 }}>✏️</button>
+              </div>
+            )}
           </div>
         </div>
         
@@ -160,8 +180,8 @@ export default function ChildDashboard() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ width: 60, height: 60, background: C.orange+'22', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>⚔️</div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 16 }}>Table Battle</div>
-            <div style={{ color: C.muted, fontSize: 13 }}>Maths • 5 mins</div>
+            <div style={{ fontWeight: 800, fontSize: 16 }}>Games Arena</div>
+            <div style={{ color: C.muted, fontSize: 13 }}>Ludo, Chess & More</div>
             <div style={{ width: '100%', height: 6, background: C.card2, borderRadius: 10, marginTop: 8, overflow: 'hidden' }}>
               <div style={{ width: '40%', height: '100%', background: C.orange, borderRadius: 10 }}></div>
             </div>
@@ -173,10 +193,10 @@ export default function ChildDashboard() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ width: 60, height: 60, background: C.cyan+'22', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🪐</div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 16 }}>Space Explorer</div>
-            <div style={{ color: C.muted, fontSize: 13 }}>Science • New!</div>
+            <div style={{ fontWeight: 800, fontSize: 16 }}>Smart Quiz</div>
+            <div style={{ color: C.muted, fontSize: 13 }}>Science & General</div>
           </div>
-          <button onClick={() => router.push('/learn')} style={{ background: C.cyan, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>Start</button>
+          <button onClick={() => router.push('/seekho')} style={{ background: C.cyan, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>Start</button>
         </div>
       </div>
 

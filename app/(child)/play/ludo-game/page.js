@@ -32,7 +32,7 @@ export default function LudoGame() {
   // Engine se match karne ke liye exact values use karte hain
   const START_POS = { red: 0, green: 13, yellow: 26, blue: 39 };
   const HOME_START = { red: 51, green: 57, yellow: 63, blue: 69 };
-  const ENTRY_POINT = { red: 50, green: 63, yellow: 76, blue: 89 }; // Jahan se home run start hota hai
+  const ENTRY_POINT = { red: 50, green: 11, yellow: 24, blue: 37 }; // Board ke index (0-51) jahan se token ghar ke raste mudta hai
 
   // Safe Name/Color getters
   const getPlayerName = (colorKey) => {

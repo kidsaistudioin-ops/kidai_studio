@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { speak } from "@/lib/voice";
 
 const T = {
@@ -1134,6 +1134,74 @@ function ListenTypeGame({ onComplete }) {
 }
 
 // ==========================================
+// AI SCANNED GAME (HOMEWORK TO GAME)
+// ==========================================
+function AIGeneratedGame({ gameData, onComplete }) {
+  const [current, setCurrent] = useState(0);
+  const [score, setScore] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+
+  if (!gameData || !gameData.questions || gameData.questions.length === 0) {
+    return <div style={{ color: T.text, textAlign: 'center', padding: 20 }}>Game load ho raha hai...</div>;
+  }
+
+  const question = gameData.questions[current];
+
+  const checkAnswer = (idx) => {
+    if (idx === question.correct) {
+      setFeedback("correct");
+      setScore(score + 10);
+      speak("Correct! Bahut badhiya");
+      setTimeout(() => {
+        setFeedback(null);
+        if (current < gameData.questions.length - 1) {
+          setCurrent(current + 1);
+        } else {
+          onComplete();
+        }
+      }, 1500);
+    } else {
+      setFeedback("wrong");
+      speak("Oops, Try again!");
+      setTimeout(() => setFeedback(null), 1500);
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "20px" }}>
+      <div style={{ color: T.orange, fontWeight: 800, marginBottom: 10, fontSize: 14 }}>
+        ✨ AI Magic Game: {gameData.title || "Scanned Mission"}
+      </div>
+      <h2 style={{ color: T.cyan, marginBottom: 15, fontSize: 22, lineHeight: 1.4 }}>
+        {question.q}
+      </h2>
+      
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, maxWidth: 400, margin: "20px auto" }}>
+        {question.opts.map((opt, idx) => (
+          <button 
+            key={idx}
+            onClick={() => checkAnswer(idx)}
+            style={{ 
+              ...btnStyle(T.card2), 
+              padding: "16px", 
+              fontSize: 16, 
+              border: `2px solid ${feedback === "correct" && idx === question.correct ? T.green : feedback === "wrong" && idx !== question.correct ? T.red : T.border}`,
+              background: feedback === "correct" && idx === question.correct ? T.green + '33' : T.card2
+            }}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 20, color: T.yellow, fontWeight: 700 }}>
+        Score: {score} | Q: {current + 1} / {gameData.questions.length}
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
 // GAME MAPPING
 // ==========================================
 
@@ -1189,17 +1257,45 @@ export default function SeekhoEnglishPage() {
   const [activeGame, setActiveGame] = useState(null);
   const [xp, setXp] = useState(0);
   const [completedGames, setCompletedGames] = useState([]);
+  const [scannedGame, setScannedGame] = useState(null);
+
+  // Check agar Scanner ne koi game banakar bheja hai
+  useEffect(() => {
+    const saved = localStorage.getItem('kidai_scanned_game');
+    if (saved) {
+      try {
+        setScannedGame(JSON.parse(saved));
+      } catch(e) {}
+    }
+  }, []);
 
   const handleGameComplete = (gameId) => {
     setXp(xp + 15);
     setCompletedGames([...completedGames, gameId]);
     speak("Great job! You earned 15 XP!");
     setActiveGame(null);
+    
+    // Agar scanned game khatam ho gaya, toh memory se hata do
+    if (gameId === 'ai_scanned') {
+      localStorage.removeItem('kidai_scanned_game');
+      setScannedGame(null);
+    }
   };
 
   const GameComponent = activeGame ? GAME_COMPONENTS[activeGame] : null;
 
-  if (GameComponent) {
+  if (activeGame === 'ai_scanned' && scannedGame) {
+    return (
+      <div style={{ minHeight: "100vh", background: T.bg, padding: 20, fontFamily: "system-ui, sans-serif" }}>
+        <button onClick={() => setActiveGame(null)} style={{ background: T.card2, color: T.text, border: "none", borderRadius: 10, padding: "10px 20px", cursor: "pointer", marginBottom: 20 }}>← Back</button>
+        <div style={{ background: T.card, borderRadius: 20, padding: 30, maxWidth: 600, margin: "0 auto", border: `2px solid ${T.orange}`, boxShadow: `0 0 30px ${T.orange}33` }}>
+          <AIGeneratedGame gameData={scannedGame} onComplete={() => handleGameComplete('ai_scanned')} />
+        </div>
+      </div>
+    );
+  }
+
+  if (GameComponent && activeGame !== 'ai_scanned') {
     return (
       <div style={{ 
         minHeight: "100vh", 
@@ -1282,6 +1378,33 @@ export default function SeekhoEnglishPage() {
           </div>
         </div>
       </div>
+
+      {/* AI Scanned Game Banner - Tab dikhega jab user scan karke aayega */}
+      {scannedGame && (
+        <div 
+          onClick={() => setActiveGame('ai_scanned')}
+          style={{
+            background: `linear-gradient(135deg, ${T.card}, ${T.card2})`,
+            border: `2px dashed ${T.orange}`,
+            borderRadius: 16,
+            padding: 24,
+            maxWidth: 800,
+            margin: "0 auto 30px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 20,
+            boxShadow: `0 8px 30px ${T.orange}22`,
+            animation: "pulse-glow 2s infinite"
+          }}
+        >
+          <div style={{ fontSize: 50, animation: "bounce 2s infinite" }}>🎁</div>
+          <div>
+            <h2 style={{ color: T.orange, margin: "0 0 8px" }}>Homework Game Ready!</h2>
+            <p style={{ color: T.muted, margin: 0, fontSize: 14 }}>Aapke scan kiye hue photo se naya game ban gaya hai. <b>Abhi khelo!</b></p>
+          </div>
+        </div>
+      )}
 
       {/* Games Grid */}
       <div style={{ 

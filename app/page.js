@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LandingChatbot from '@/components/ui/LandingChatbot';
+import MainHeader from '@/components/ui/MainHeader';
+import MainFooter from '@/components/ui/MainFooter';
 
 const C = {
   bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
@@ -92,20 +94,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Header */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(7,9,15,.97)', backdropFilter: 'blur(16px)', borderBottom: `1px solid ${C.border}`, padding: '0 16px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontFamily: "'Baloo 2', cursive", fontWeight: 800, fontSize: 20 }}>Kid<span style={{ color: C.orange }}>AI</span></div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <Link href="/about" className="nav-link">About</Link>
-          <Link href="/pricing" className="nav-link">Pricing</Link>
-          <Link href="/faq" className="nav-link">FAQ</Link>
-          <Link href="/contact" className="nav-link">Contact</Link>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button style={btnStyle(C.purple, false, true)} onClick={() => router.push('/dashboard')}>👨‍👩‍👧 Parents</button>
-          <button style={{...btnStyle(C.orange), padding: '8px 14px', fontSize: 12}} onClick={() => router.push('/login')}>Login</button>
-        </div>
-      </header>
+      {/* Naya Clean Header */}
+      <MainHeader />
 
       <div style={{ padding: '0 16px 32px', maxWidth: 600, margin: '0 auto' }}>
         {/* Hero */}
@@ -175,8 +165,8 @@ export default function HomePage() {
                   <div style={{ marginLeft: 'auto', fontSize: 18, color: game.color }}>▶</div>
                 </div>
               ))}
-              {/* The missing 50+ games button */}
-              <button style={{...btnStyle(C.purple, true), marginTop: 4}} onClick={() => router.push('/library')}>🌟 View 50+ Games Library</button>
+              {/* Naye users ko signup ke liye bhejein taki 404 na aaye */}
+              <button style={{...btnStyle(C.purple, true), marginTop: 4}} onClick={() => router.push('/signup')}>🌟 View 50+ Games Library</button>
             </div>
           )}
         </div>
@@ -198,16 +188,8 @@ export default function HomePage() {
       {/* Naya API Connected Chatbot */}
       <LandingChatbot />
 
-      {/* Footer */}
-      <footer style={{ textAlign: 'center', padding: '20px 0', borderTop: `1px solid ${C.border}`, color: C.muted, fontSize: 12 }}>
-        <div style={{ marginBottom: 10, fontSize: 18, fontWeight: 800, color: C.text }}>Kid<span style={{ color: C.orange }}>AI</span> Studio</div>
-        <div>© 2025 KidAI Studio. All rights reserved.</div>
-        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 16 }}>
-          <Link href="/faq" style={{ color: C.muted, textDecoration: 'none' }}>FAQ</Link>
-          <Link href="/about" style={{ color: C.muted, textDecoration: 'none' }}>About Us</Link>
-          <Link href="/contact" style={{ color: C.muted, textDecoration: 'none' }}>Contact Us</Link>
-        </div>
-      </footer>
+      {/* Naya Clean Footer Jisme Saare Links Hain */}
+      <MainFooter />
     </div>
   );
 }

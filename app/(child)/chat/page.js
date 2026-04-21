@@ -85,7 +85,16 @@ export default function ChatPage() {
         }),
       })
       const data = await res.json()
-      const reply = data.message + (data.followUp ? '\n\n' + data.followUp : '')
+      let reply = data.message + (data.followUp ? '\n\n' + data.followUp : '')
+      
+      // Smart Auto-Navigation Logic
+      let redirectPath = null;
+      const gotoMatch = reply.match(/\[GOTO:\s*([^\]]+)\]/);
+      if (gotoMatch) {
+        redirectPath = gotoMatch[1].trim();
+        reply = reply.replace(gotoMatch[0], '').trim();
+      }
+
       setMessages(m => [...m, { ai: true, text: reply }])
       
       stopSpeaking();
@@ -97,12 +106,18 @@ export default function ChatPage() {
       setXp(x => x + 5)
       showToast('+5 XP! ⚡')
       
-      // Agar AI ne naya game generate kar diya hai, toh bacche ko games page par redirect karo
+      // Agar AI ne naya game generate kiya hai (Khelne ke liye)
       if (data.rawData?.newGameData || data.rawData?.suggestGame) {
+        if (data.rawData.newGameData) {
+          // Game ko memory me daalo taaki Seekho page ise padh sake
+          localStorage.setItem('kidai_scanned_game', JSON.stringify(data.rawData.newGameData));
+        }
         showToast('🎮 Naya Game ban gaya! Chalo khelte hain...');
-        setTimeout(() => {
-          router.push('/home'); // Yahan aap apne games wale page ka path daal sakte hain
-        }, 3500); // 3.5 seconds ka wait karega taaki baccha Arya ka message padh sake
+        setTimeout(() => router.push('/seekho'), 3500); // Redirect to Play
+      } else if (redirectPath) {
+        // Agar AI ne Coding/Studio seekhne ke liye bheja hai
+        showToast(`🚀 Chalo kuch naya banate hain...`);
+        setTimeout(() => router.push(redirectPath), 3500); // Redirect to Studio
       }
     } catch {
       setMessages(m => [...m, { ai: true, text: 'Oops! Kuch error aa gaya. Dobara try karo! 😅' }])
