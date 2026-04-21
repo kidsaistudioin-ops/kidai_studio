@@ -13,19 +13,37 @@ const PAGES = [
   { id: 1, icon: '🦁', name: 'Lion King' },
   { id: 2, icon: '🚗', name: 'Super Car' },
   { id: 3, icon: '🏡', name: 'My House' },
-  { id: 4, icon: '🚀', name: 'Spaceship' }
+  { id: 4, icon: '🚀', name: 'Spaceship' },
+  { id: 5, icon: '🦋', name: 'Butterfly' },
+  { id: 6, icon: '🐉', name: 'Dragon' },
+  { id: 7, icon: '🌸', name: 'Flower' },
+  { id: 8, icon: '🏰', name: 'Castle' },
+  { id: 9, icon: '🐱', name: 'Cat' },
+  { id: 10, icon: '🌈', name: 'Rainbow' },
+  { id: 11, icon: '⛵', name: 'Boat' },
+  { id: 12, icon: '🌻', name: 'Sunflower' }
 ];
 
-const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#ffffff'];
+const COLORS = [
+  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#10b981', '#14b8a6', 
+  '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', 
+  '#ec4899', '#f43f5e', '#000000', '#ffffff', '#78716c'
+];
 
 export default function ColoringBookPage() {
   const router = useRouter();
   const [selectedPage, setSelectedPage] = useState(null);
   const [activeColor, setActiveColor] = useState(COLORS[0]);
   const [fillColor, setFillColor] = useState('transparent');
+  const [brushSize, setBrushSize] = useState(20);
+  const [colorMode, setColorMode] = useState('fill'); // fill or draw
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const clearCanvas = () => {
+    setFillColor('transparent');
   };
 
   return (
@@ -54,15 +72,22 @@ export default function ColoringBookPage() {
         ) : (
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 20 }}>
-              <button onClick={handlePrint} style={{ background: C.card2, color: C.text, border: `1px solid ${C.border}`, padding: '8px 16px', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>🖨️ Print Page</button>
+              <button onClick={handlePrint} style={{ background: C.card2, color: C.text, border: `1px solid ${C.border}`, padding: '8px 16px', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>🖨️ Print</button>
+              <button onClick={clearCanvas} style={{ background: C.card2, color: C.text, border: `1px solid ${C.border}`, padding: '8px 16px', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>🗑️ Clear</button>
+            </div>
+
+            {/* Mode Toggle */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 20 }}>
+              <button onClick={() => setColorMode('fill')} style={{ padding: '8px 20px', background: colorMode === 'fill' ? C.cyan : C.card2, color: colorMode === 'fill' ? '#000' : C.text, border: 'none', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>🎨 Fill</button>
+              <button onClick={() => setColorMode('draw')} style={{ padding: '8px 20px', background: colorMode === 'draw' ? C.purple : C.card2, color: colorMode === 'draw' ? '#fff' : C.text, border: 'none', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>✏️ Draw</button>
             </div>
 
             {/* Coloring Canvas */}
             <div 
-              onClick={() => setFillColor(activeColor)}
+              onClick={() => colorMode === 'fill' ? setFillColor(activeColor) : null}
               style={{ 
                 background: '#fff', width: 300, height: 300, margin: '0 auto', borderRadius: 20, 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'crosshair',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: colorMode === 'fill' ? 'pointer' : 'crosshair',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.5)', position: 'relative', overflow: 'hidden'
               }}
             >
@@ -74,10 +99,25 @@ export default function ColoringBookPage() {
               </div>
             </div>
 
+            {/* Brush Size */}
+            {colorMode === 'draw' && (
+              <div style={{ marginTop: 20, background: C.card, padding: 16, borderRadius: 16, border: `1px solid ${C.border}` }}>
+                <div style={{ fontWeight: 800, marginBottom: 10, color: C.orange }}>Brush Size: {brushSize}px</div>
+                <input 
+                  type="range" 
+                  min="5" 
+                  max="50" 
+                  value={brushSize} 
+                  onChange={(e) => setBrushSize(Number(e.target.value))}
+                  style={{ width: '100%', cursor: 'pointer' }}
+                />
+              </div>
+            )}
+
             {/* Color Palette */}
-            <div style={{ marginTop: 30, background: C.card, padding: 20, borderRadius: 20, border: `1px solid ${C.border}` }}>
-              <div style={{ fontWeight: 800, marginBottom: 16, color: C.cyan }}>Color Palette</div>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div style={{ marginTop: 20, background: C.card, padding: 20, borderRadius: 20, border: `1px solid ${C.border}` }}>
+              <div style={{ fontWeight: 800, marginBottom: 16, color: C.cyan }}>🎨 Color Palette</div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
                 {COLORS.map(c => (
                   <div 
                     key={c} onClick={() => setActiveColor(c)}

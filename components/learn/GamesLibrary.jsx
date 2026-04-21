@@ -1721,21 +1721,43 @@ export default function GamesLibrary() {
 
             <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 16, color: T.text }}>📚 Learning Games Library</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              {GAME_TYPES.map(game => (
-                <div 
-                  key={game.id} 
-                  onClick={() => setActiveGame(game)}
-                  style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, padding: 16, cursor: "pointer", transition: "transform 0.2s, border-color 0.2s" }}
-                  onMouseOver={(e) => e.currentTarget.style.borderColor = game.color}
-                  onMouseOut={(e) => e.currentTarget.style.borderColor = T.border}
-                >
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: `${game.color}22`, color: game.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 }}>
-                    {game.icon}
+              {GAME_TYPES.map(game => {
+                const isLinked = game.page;
+                return (
+                  <div 
+                    key={game.id} 
+                    onClick={() => isLinked ? window.location.href = game.page : setActiveGame(game)}
+                    style={{ 
+                      background: T.card, 
+                      border: `1px solid ${isLinked ? game.color + '55' : T.border}`, 
+                      borderRadius: 16, 
+                      padding: 16, 
+                      cursor: "pointer", 
+                      transition: "transform 0.2s, border-color 0.2s",
+                      position: "relative",
+                      overflow: "hidden"
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.borderColor = game.color}
+                    onMouseOut={(e) => e.currentTarget.style.borderColor = isLinked ? game.color + '55' : T.border}
+                  >
+                    {isLinked && (
+                      <div style={{ position: 'absolute', top: 8, right: 8, fontSize: 10, background: T.green, color: '#fff', padding: '2px 6px', borderRadius: 8, fontWeight: 800 }}>
+                        ✅
+                      </div>
+                    )}
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: `${game.color}22`, color: game.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 }}>
+                      {game.icon}
+                    </div>
+                    <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{game.name}</div>
+                    <div style={{ fontSize: 11, color: T.muted }}>{game.desc}</div>
+                    {isLinked && (
+                      <div style={{ fontSize: 10, color: game.color, marginTop: 8, fontWeight: 800 }}>
+                        → Go to Page
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{game.name}</div>
-                  <div style={{ fontSize: 11, color: T.muted }}>{game.desc}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

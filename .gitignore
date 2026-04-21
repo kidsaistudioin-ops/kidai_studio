@@ -4,3 +4,4 @@ node_modules
 find-unused.js
 script/
 .next/
+.brain/

@@ -10,12 +10,19 @@ const C = {
 };
 
 const SCENES = [
-  { id: 'city', name: 'City', bg: 'linear-gradient(to bottom, #1e3a8a, #0f172a)' },
-  { id: 'forest', name: 'Forest', bg: 'linear-gradient(to bottom, #14532d, #064e3b)' },
-  { id: 'space', name: 'Space', bg: 'linear-gradient(to bottom, #2e1065, #000000)' }
+  { id: 'city', name: 'City', bg: 'linear-gradient(to bottom, #1e3a8a, #0f172a)', emoji: '🏙️' },
+  { id: 'forest', name: 'Forest', bg: 'linear-gradient(to bottom, #14532d, #064e3b)', emoji: '🌲' },
+  { id: 'space', name: 'Space', bg: 'linear-gradient(to bottom, #2e1065, #000000)', emoji: '🚀' },
+  { id: 'beach', name: 'Beach', bg: 'linear-gradient(to bottom, #0ea5e9, #0284c7)', emoji: '🏖️' },
+  { id: 'desert', name: 'Desert', bg: 'linear-gradient(to bottom, #78350f, #451a03)', emoji: '🏜️' },
+  { id: 'snow', name: 'Snow', bg: 'linear-gradient(to bottom, #64748b, #334155)', emoji: '❄️' },
+  { id: 'sunset', name: 'Sunset', bg: 'linear-gradient(to bottom, #7c2d12, #451a03)', emoji: '🌅' },
+  { id: 'night', name: 'Night', bg: 'linear-gradient(to bottom, #0f172a, #000000)', emoji: '🌙' }
 ];
 
-const CHARS = ['🤖', '🦁', '👧', '🦸‍♂️', '🐶', '👽'];
+const CHARS = ['🤖', '🦁', '👧', '🦸‍♂️', '🐶', '👽', '🐱', '🦊', '🐼', '🐨', '🦄', '🐸', '🦋', '🐝', '🦖', '🐲'];
+const PROPS = ['🌳', '🌲', '🌺', '🌻', '🍄', '🌈', '☁️', '⭐', '🌙', '🔥', '💎', '🎁', '📦', '🚗', '🛸', '🏰'];
+const EFFECTS = ['💥', '💫', '✨', '💢', '💕', '💦', '🌊', '⚡', '🌩️', '❄️'];
 
 export default function ComicMakerPage() {
   const router = useRouter();
@@ -25,6 +32,14 @@ export default function ComicMakerPage() {
 
   const addChar = (emoji) => {
     setElements([...elements, { id: Date.now(), type: 'char', content: emoji, x: 50, y: 100 }]);
+  };
+
+  const addProp = (emoji) => {
+    setElements([...elements, { id: Date.now(), type: 'prop', content: emoji, x: 30, y: 150 }]);
+  };
+
+  const addEffect = (emoji) => {
+    setElements([...elements, { id: Date.now(), type: 'effect', content: emoji, x: 60, y: 80 }]);
   };
 
   const addBubble = () => {
@@ -71,6 +86,10 @@ export default function ComicMakerPage() {
             >
               {el.type === 'char' ? (
                 <div style={{ fontSize: 64, filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }}>{el.content}</div>
+              ) : el.type === 'prop' ? (
+                <div style={{ fontSize: 48, filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }}>{el.content}</div>
+              ) : el.type === 'effect' ? (
+                <div style={{ fontSize: 36, animation: 'pulse 0.5s infinite' }}>{el.content}</div>
               ) : (
                 <div style={{ background: '#fff', color: '#000', padding: '8px 12px', borderRadius: 16, fontWeight: 800, fontSize: 14, position: 'relative' }}>
                   {el.content}
@@ -93,6 +112,18 @@ export default function ComicMakerPage() {
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
               {CHARS.map(c => (
                 <button key={c} onClick={() => addChar(c)} style={{ fontSize: 24, background: C.card2, border: 'none', borderRadius: 8, padding: '4px 8px', cursor: 'pointer' }}>{c}</button>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: C.muted, marginBottom: 6 }}>Props:</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+              {PROPS.map(p => (
+                <button key={p} onClick={() => addProp(p)} style={{ fontSize: 20, background: C.card2, border: 'none', borderRadius: 6, padding: '2px 6px', cursor: 'pointer' }}>{p}</button>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: C.muted, marginBottom: 6 }}>Effects:</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+              {EFFECTS.map(e => (
+                <button key={e} onClick={() => addEffect(e)} style={{ fontSize: 18, background: C.card2, border: 'none', borderRadius: 6, padding: '2px 6px', cursor: 'pointer' }}>{e}</button>
               ))}
             </div>
             <button onClick={addBubble} style={{ width: '100%', padding: 10, background: C.purple, color: '#fff', border: 'none', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>+ Add Chat Bubble 💬</button>

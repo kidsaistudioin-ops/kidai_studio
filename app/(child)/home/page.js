@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 const C = {
   bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
@@ -13,12 +14,69 @@ export default function ChildDashboard() {
   const router = useRouter();
   const [name, setName] = useState('Hero');
   const [avatar, setAvatar] = useState('🦁');
+  const [realStats, setRealStats] = useState({ played: 0, won: 0 });
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [growth, setGrowth] = useState(null); // Real growth data ke liye
 
   useEffect(() => {
     const storedName = localStorage.getItem('kidai_student_name');
     const storedAvatar = localStorage.getItem('kidai_student_avatar');
     if (storedName) setName(storedName);
     if (storedAvatar) setAvatar(storedAvatar);
+
+    // Supabase se asli history ka data uthana
+    async function loadRealStats() {
+      const studentId = 'student_123'; // NOTE: Baad mein isko actual logged-in user ID se replace karenge
+      const { data } = await supabase
+        .from('daily_sessions')
+        .select('quizzes_attempted, quizzes_correct')
+        .eq('student_id', studentId);
+      
+      if (data) {
+        setRealStats({
+          played: data.reduce((sum, row) => sum + (row.quizzes_attempted || 0), 0),
+          won: data.reduce((sum, row) => sum + (row.quizzes_correct || 0), 0)
+        });
+      }
+
+      // --- ORIGINAL GROWTH CALCULATION ---
+      // Bacche ke sabse purane aur naye scores ko compare karna
+      const { data: attempts } = await supabase
+        .from('quiz_attempts')
+        .select('last_score, updated_at, quizzes(topic_tags)')
+        .eq('student_id', studentId)
+        .order('updated_at', { ascending: true }); // Purane se naya
+
+      if (attempts && attempts.length > 0) {
+        const topicScores = {};
+        attempts.forEach(a => {
+          const tags = a.quizzes?.topic_tags;
+          const topic = (tags && tags.length > 0) ? tags[0] : 'General Topic';
+          if (!topicScores[topic]) topicScores[topic] = [];
+          topicScores[topic].push(a.last_score || 0); // Scores jama karna
+        });
+
+        let bestGrowth = null;
+        let maxDiff = 0;
+        
+        for (const topic in topicScores) {
+          const scores = topicScores[topic];
+          if (scores.length >= 2) {
+            const oldScore = scores[0]; // Pehla score
+            const newScore = scores[scores.length - 1]; // Aakhri (Latest) score
+            if (newScore - oldScore > maxDiff) {
+              maxDiff = newScore - oldScore;
+              const formattedTopic = topic.charAt(0).toUpperCase() + topic.slice(1);
+              bestGrowth = { subject: formattedTopic, old: oldScore, new: newScore };
+            }
+          }
+        }
+        if (bestGrowth && maxDiff > 0) setGrowth(bestGrowth);
+      }
+
+      setLoadingStats(false);
+    }
+    loadRealStats();
   }, []);
 
   return (
@@ -57,32 +115,44 @@ export default function ChildDashboard() {
       <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 16 }}>📈 Meri Journey</h2>
       <div style={{ display: 'flex', overflowX: 'auto', gap: 12, paddingBottom: 10, marginBottom: 20, scrollbarWidth: 'none' }}>
         {/* Metric 1 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, minWidth: 140 }}>
+        <div onClick={() => router.push('/history')} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, minWidth: 140, cursor: 'pointer', transition: 'transform 0.2s' }}>
           <div style={{ fontSize: 24, marginBottom: 8 }}>🎮</div>
-          <div style={{ fontSize: 20, fontWeight: 900 }}>42</div>
+          <div style={{ fontSize: 20, fontWeight: 900 }}>{loadingStats ? '...' : realStats.played}</div>
           <div style={{ fontSize: 12, color: C.muted, fontWeight: 700 }}>Games Khele</div>
         </div>
         {/* Metric 2 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, minWidth: 140 }}>
+        <div onClick={() => router.push('/history')} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, minWidth: 140, cursor: 'pointer', transition: 'transform 0.2s' }}>
           <div style={{ fontSize: 24, marginBottom: 8 }}>🏆</div>
-          <div style={{ fontSize: 20, fontWeight: 900 }}>18</div>
+          <div style={{ fontSize: 20, fontWeight: 900 }}>{loadingStats ? '...' : realStats.won}</div>
           <div style={{ fontSize: 12, color: C.muted, fontWeight: 700 }}>Challenges Jeete</div>
         </div>
         {/* Improvement */}
-        <div style={{ background: `linear-gradient(135deg, ${C.green}22, transparent)`, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 16, minWidth: 160 }}>
+        <div onClick={() => router.push('/history')} style={{ background: `linear-gradient(135deg, ${C.green}22, transparent)`, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 16, minWidth: 160, cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div style={{ fontSize: 13, color: C.green, fontWeight: 800, marginBottom: 4 }}>💪 Super Growth!</div>
-          <div style={{ fontSize: 12, color: '#e2e8f0' }}>Pehle <strong>Maths</strong> me score <span style={{ color: C.pink }}>45%</span> tha, ab <span style={{ color: C.green, fontWeight: 900 }}>85%</span> ho gaya hai!</div>
+          {loadingStats ? <div style={{ fontSize: 12, color: C.muted }}>Loading...</div> : growth ? (
+            <div style={{ fontSize: 12, color: '#e2e8f0' }}>Pehle <strong>{growth.subject}</strong> me score <span style={{ color: C.pink }}>{growth.old}%</span> tha, ab <span style={{ color: C.green, fontWeight: 900 }}>{growth.new}%</span> ho gaya hai!</div>
+          ) : (
+            <div style={{ fontSize: 12, color: '#e2e8f0', marginBottom: 6 }}>Khelte raho aur apna result yahan dekho! 🚀</div>
+          )}
+          <div style={{ fontSize: 12, color: C.green, fontWeight: 900, marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>▶ Growth Dekho</div>
         </div>
       </div>
 
       {/* Weaknesses Turned to Strengths */}
-      <div style={{ background: C.card2, borderRadius: 16, padding: 16, marginBottom: 30, display: 'flex', alignItems: 'center', gap: 12, borderLeft: `4px solid ${C.cyan}` }}>
-         <div style={{ fontSize: 24 }}>🧠</div>
-         <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 800 }}>'Fractions' pehle mushkil lagta tha na?</div>
-            <div style={{ fontSize: 12, color: C.muted }}>Ab tumne iske 5 level pass kar liye hain. You mastered it!</div>
-         </div>
-      </div>
+      {!loadingStats ? (
+        <div onClick={() => router.push('/history')} style={{ background: C.card2, borderRadius: 16, padding: 16, marginBottom: 30, display: 'flex', alignItems: 'center', gap: 12, borderLeft: `4px solid ${C.cyan}`, cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}>
+           <div style={{ fontSize: 24 }}>🧠</div>
+           <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.text }}>Weakness Turned to Strength!</div>
+              {growth ? (
+                <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>'{growth.subject}' pehle mushkil lagta tha, ab score badhkar {growth.new}% ho gaya hai. You mastered it!</div>
+              ) : (
+                <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>AI abhi tumhari kamzoriyan track kar raha hai. Daily games khelo aur apni taqat badhao!</div>
+              )}
+           </div>
+           <div style={{ fontSize: 12, color: C.cyan, fontWeight: 900, padding: '6px 12px', background: C.cyan+'22', borderRadius: 8 }}>View ▶</div>
+        </div>
+      ) : null}
 
       <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 16 }}>🎮 Today's Quests</h2>
       <div style={{ display: 'grid', gap: 16, marginBottom: 30 }}>

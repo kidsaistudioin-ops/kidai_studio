@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/ui/Header'
 import Toast from '@/components/ui/Toast'
 import AryaChat from '@/components/arya/AryaChat'
@@ -18,6 +19,7 @@ const QUICK_CHIPS = {
 }
 
 export default function ChatPage() {
+  const router = useRouter()
   const [age, setAge] = useState('10-13')
   const [messages, setMessages] = useState([
     { ai: true, text: "Heyy! Main Arya hoon 🤖\n\nMujhse kuch bhi poochho — Math, Science, English, ya AI ke baare mein! Hinglish mein baat karo — main samjhunga! 😊" }
@@ -25,11 +27,35 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false)
   const [xp, setXp] = useState(120)
   const [toast, setToast] = useState({ visible: false, msg: '' })
+  const [voiceEnabled, setVoiceEnabled] = useState(false) // Default aawaz band rahegi
 
   const showToast = (msg) => {
     setToast({ visible: true, msg })
     setTimeout(() => setToast({ visible: false, msg: '' }), 2000)
   }
+
+  // Load Chat History from LocalStorage (3 Days Expiry)
+  useEffect(() => {
+    const saved = localStorage.getItem('kidai_chat_history');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Check if history is older than 3 days (3 * 24 * 60 * 60 * 1000 ms)
+        if (Date.now() - parsed.timestamp < 259200000) {
+          setMessages(parsed.data);
+        } else {
+          localStorage.removeItem('kidai_chat_history'); // 3 din baad auto delete
+        }
+      } catch (e) {}
+    }
+  }, []);
+
+  // Save Chat History to LocalStorage whenever it updates
+  useEffect(() => {
+    if (messages.length > 1) {
+      localStorage.setItem('kidai_chat_history', JSON.stringify({ timestamp: Date.now(), data: messages }));
+    }
+  }, [messages]);
 
   // Jab page chhodein toh aawaz band ho jaye
   useEffect(() => {
@@ -41,22 +67,43 @@ export default function ChatPage() {
     setMessages(m => [...m, { ai: false, text }])
     setLoading(true)
 
+    // AI ko memory yaad rakhne ke liye last 12 messages bhejenge (achhi memory ke liye)
+    const recentHistory = messages.slice(-12).map(m => ({
+      role: m.ai ? 'assistant' : 'user',
+      content: m.text
+    }));
+
     try {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, childAge: parseInt(age.split('-')[0]) }),
+        body: JSON.stringify({ 
+          message: text, 
+          childAge: parseInt(age.split('-')[0]),
+          childId: 'student_123',
+          history: recentHistory // Yahan hum memory bhej rahe hain
+        }),
       })
       const data = await res.json()
       const reply = data.message + (data.followUp ? '\n\n' + data.followUp : '')
       setMessages(m => [...m, { ai: true, text: reply }])
       
-      // Aawaz mein padh ke sunao (Free Web Speech API)
       stopSpeaking();
-      speak(reply, { pitch: 1.2, rate: 0.9 }); 
+      // Aawaz tabhi aayegi jab user ne button ON kiya hoga
+      if (voiceEnabled) {
+        speak(reply, { pitch: 1.2, rate: 0.9 }); 
+      }
 
       setXp(x => x + 5)
       showToast('+5 XP! ⚡')
+      
+      // Agar AI ne naya game generate kar diya hai, toh bacche ko games page par redirect karo
+      if (data.rawData?.newGameData || data.rawData?.suggestGame) {
+        showToast('🎮 Naya Game ban gaya! Chalo khelte hain...');
+        setTimeout(() => {
+          router.push('/home'); // Yahan aap apne games wale page ka path daal sakte hain
+        }, 3500); // 3.5 seconds ka wait karega taaki baccha Arya ka message padh sake
+      }
     } catch {
       setMessages(m => [...m, { ai: true, text: 'Oops! Kuch error aa gaya. Dobara try karo! 😅' }])
     }
@@ -71,11 +118,28 @@ export default function ChatPage() {
       <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column', animation: 'slideUp .3s ease', paddingBottom: 80 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'linear-gradient(135deg,#1e1b4b,#0f1629)', border: `1px solid ${C.purple}44`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
           <div style={{ width: 50, height: 50, borderRadius: 16, background: `linear-gradient(135deg, ${C.purple}, ${C.cyan})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>🤖</div>
-          <div>
+          <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: 15 }}>Arya — AI Tutor</div>
             <div style={{ fontSize: 12, color: C.muted }}>Teacher • Guide • Dost</div>
             <div style={{ fontSize: 11, color: C.green, marginTop: 3 }}>● Hinglish mein baat karo!</div>
           </div>
+          <button 
+            onClick={() => {
+              setVoiceEnabled(!voiceEnabled);
+              if (voiceEnabled) stopSpeaking(); // Agar OFF kiya toh bolna turant ruk jayega
+            }}
+            style={{
+              background: voiceEnabled ? C.cyan + '22' : 'transparent',
+              border: `1.5px solid ${voiceEnabled ? C.cyan : C.border}`,
+              color: voiceEnabled ? C.cyan : C.muted,
+              padding: '8px 12px',
+              borderRadius: 12,
+              fontSize: 18,
+              cursor: 'pointer'
+            }}
+          >
+            {voiceEnabled ? '🔊' : '🔈'}
+          </button>
         </div>
 
         <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>

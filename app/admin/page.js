@@ -1,116 +1,100 @@
-'use client';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-
-const C = { bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45', cyan: '#06b6d4', text: '#f1f5f9', muted: '#64748b', purple: '#7c3aed', orange: '#ff6b35', green: '#10b981', yellow: '#f59e0b' };
+'use client'
+import { useState, useEffect } from 'react'
 
 export default function AdminDashboard() {
-  const router = useRouter();
+  const [msgs, setMsgs] = useState([{ ai: true, text: "Hello Boss! 🫡 Main aapka Admin Assistant AI hoon. Boliye aaj kya command hai? (Jaise: 'Aaj 100 naye games generate karo')" }])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  // Load Admin Chat History from LocalStorage (3 Days Expiry)
+  useEffect(() => {
+    const saved = localStorage.getItem('kidai_admin_history');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Date.now() - parsed.timestamp < 259200000) {
+          setMsgs(parsed.data);
+        } else {
+          localStorage.removeItem('kidai_admin_history');
+        }
+      } catch (e) {}
+    }
+  }, []);
+
+  // Save Admin Chat History to LocalStorage
+  useEffect(() => {
+    if (msgs.length > 1) {
+      localStorage.setItem('kidai_admin_history', JSON.stringify({ timestamp: Date.now(), data: msgs }));
+    }
+  }, [msgs]);
+
+  const sendCmd = async () => {
+    if(!input.trim() || loading) return
+    const text = input
+    setInput('')
+    setMsgs(prev => [...prev, { ai: false, text }])
+    setLoading(true)
+
+    const recentHistory = msgs.slice(-10).map(m => ({
+      role: m.ai ? 'assistant' : 'user',
+      content: m.text
+    }));
+
+    try {
+      const res = await fetch('/api/admin/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: recentHistory })
+      })
+      const data = await res.json()
+      
+      setMsgs(prev => [...prev, { ai: true, text: data.message }])
+      
+      if(data.action === 'generate_games') {
+        // Yahan se hum direct wo 100 game banane wala API trigger kar sakte hain
+        setMsgs(prev => [...prev, { ai: true, text: "⚙️ [SYSTEM]: Background Game Generation mode On ho gaya hai..." }])
+      }
+    } catch (e) {
+      setMsgs(prev => [...prev, { ai: true, text: "❌ Error connecting to AI." }])
+    }
+    setLoading(false)
+  }
 
   return (
-    <div style={{ background: C.bg, minHeight: '100vh', color: C.text, fontFamily: "'Nunito', sans-serif", padding: '20px 40px', paddingBottom: 100 }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, borderBottom: `1px solid ${C.border}`, paddingBottom: 20 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 32, fontWeight: 900 }}>🛠️ Super Admin HQ</h1>
-            <p style={{ color: C.muted, margin: '4px 0 0', fontSize: 14 }}>Global Platform Analytics & Control</p>
-          </div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => router.push('/admin/scanner')} style={{ background: C.purple, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>🕵️ Game Scanner</button>
-            <Link href="/" style={{ color: C.cyan, textDecoration: 'none', fontWeight: 800, background: C.card2, padding: '10px 20px', borderRadius: 12 }}>← Exit Admin</Link>
-          </div>
-        </header>
-
-        {/* Top KPI Metrics */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 30 }}>
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, borderLeft: `4px solid ${C.cyan}` }}>
-            <div style={{ color: C.muted, fontSize: 13, fontWeight: 800, textTransform: 'uppercase' }}>Total Users</div>
-            <div style={{ fontSize: 32, fontWeight: 900, marginTop: 5 }}>12,450</div>
-            <div style={{ fontSize: 12, color: C.green, marginTop: 5 }}>↑ 4,200 (Logged In) • 8,250 (Guest)</div>
-          </div>
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, borderLeft: `4px solid ${C.orange}` }}>
-            <div style={{ color: C.muted, fontSize: 13, fontWeight: 800, textTransform: 'uppercase' }}>Games Played (Today)</div>
-            <div style={{ fontSize: 32, fontWeight: 900, marginTop: 5 }}>45.2K</div>
-            <div style={{ fontSize: 12, color: C.green, marginTop: 5 }}>↑ 12% vs Yesterday</div>
-          </div>
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, borderLeft: `4px solid ${C.yellow}` }}>
-            <div style={{ color: C.muted, fontSize: 13, fontWeight: 800, textTransform: 'uppercase' }}>Total Coins Earned</div>
-            <div style={{ fontSize: 32, fontWeight: 900, marginTop: 5 }}>2.4M 🪙</div>
-            <div style={{ fontSize: 12, color: C.muted, marginTop: 5 }}>By 8,400 active kids</div>
-          </div>
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, borderLeft: `4px solid ${C.purple}` }}>
-            <div style={{ color: C.muted, fontSize: 13, fontWeight: 800, textTransform: 'uppercase' }}>Referral Signups</div>
-            <div style={{ fontSize: 32, fontWeight: 900, marginTop: 5 }}>3,890</div>
-            <div style={{ fontSize: 12, color: C.cyan, marginTop: 5 }}>🔗 Highly Viral Growth!</div>
-          </div>
+    <div style={{ padding: 20, background: '#07090f', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' }}>
+      <h1 style={{ color: '#06b6d4', borderBottom: '1px solid #1e2d45', paddingBottom: 10 }}>🛡️ Admin Command Center</h1>
+      
+      <div style={{ display: 'flex', gap: 20, marginTop: 20, flexWrap: 'wrap' }}>
+        {/* Stats Panel */}
+        <div style={{ flex: 1, background: '#0f1520', padding: 20, borderRadius: 12, border: '1px solid #1e2d45', minWidth: 300 }}>
+          <h3>📊 App Statistics (Live)</h3>
+          <p>Total Games in Library: <strong style={{color: '#10b981'}}>Fetching...</strong></p>
+          <p>Active Students Today: <strong style={{color: '#7c3aed'}}>Fetching...</strong></p>
+          <p>Auto-Generator Status: <strong style={{color: '#f59e0b'}}>Standby</strong></p>
+          <p>Next Cron Job: <strong style={{color: '#06b6d4'}}>12:00 AM Night</strong></p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
-          {/* Left Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            
-            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24 }}>
-              <h3 style={{ margin: '0 0 20px', fontSize: 18 }}>🎮 Most Popular Games / Modules</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {[
-                  { name: 'Table Battle (Maths)', plays: '18.5K', percent: '80%', color: C.cyan },
-                  { name: 'Space Explorer (Science)', plays: '12.2K', percent: '65%', color: C.purple },
-                  { name: 'AI Story Maker', plays: '8.4K', percent: '45%', color: C.orange },
-                  { name: 'Smart Homework Scanner', plays: '6.1K', percent: '30%', color: C.green }
-                ].map(g => (
-                  <div key={g.name}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6, fontWeight: 700 }}>
-                      <span>{g.name}</span>
-                      <span>{g.plays} Plays</span>
-                    </div>
-                    <div style={{ width: '100%', height: 8, background: C.card2, borderRadius: 10, overflow: 'hidden' }}>
-                      <div style={{ width: g.percent, height: '100%', background: g.color, borderRadius: 10 }}></div>
-                    </div>
-                  </div>
-                ))}
+        {/* Admin AI Chat */}
+        <div style={{ flex: 2, background: '#0f1520', borderRadius: 12, border: '1px solid #1e2d45', display: 'flex', flexDirection: 'column', height: '70vh', minWidth: 350 }}>
+          <div style={{ padding: 15, borderBottom: '1px solid #1e2d45', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 10 }}>
+            🤖 <span>Admin Assistant AI</span>
+          </div>
+          
+          <div style={{ flex: 1, padding: 15, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {msgs.map((m, i) => (
+              <div key={i} style={{ alignSelf: m.ai ? 'flex-start' : 'flex-end', background: m.ai ? '#1e2d45' : '#7c3aed', padding: '10px 15px', borderRadius: 12, maxWidth: '80%' }}>
+                {m.text}
               </div>
-            </div>
-
-            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24 }}>
-              <h3 style={{ margin: '0 0 16px', fontSize: 18 }}>💼 Earn Mode Analytics</h3>
-              <p style={{ color: C.muted, fontSize: 14, margin: '0 0 20px' }}>Bacche 'Earn Mode' me kaisa perform kar rahe hain.</p>
-              <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', background: C.card2, padding: 20, borderRadius: 12 }}>
-                 <div>
-                    <div style={{ fontSize: 28, fontWeight: 900, color: C.green }}>4.2K</div>
-                    <div style={{ fontSize: 12, color: C.muted }}>Kids in Earn Mode</div>
-                 </div>
-                 <div>
-                    <div style={{ fontSize: 28, fontWeight: 900, color: C.yellow }}>1.2M</div>
-                    <div style={{ fontSize: 12, color: C.muted }}>Coins Generated</div>
-                 </div>
-                 <div>
-                    <div style={{ fontSize: 28, fontWeight: 900, color: C.cyan }}>850</div>
-                    <div style={{ fontSize: 12, color: C.muted }}>Rewards Redeemed</div>
-                 </div>
-              </div>
-            </div>
-
+            ))}
+            {loading && <div style={{ color: '#06b6d4', fontSize: 14 }}>AI soch raha hai...</div>}
           </div>
 
-          {/* Right Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ background: `linear-gradient(135deg, ${C.card}, ${C.card2})`, border: `1px solid ${C.purple}55`, borderRadius: 16, padding: 24 }}>
-              <h3 style={{ margin: '0 0 16px', fontSize: 18 }}>🚨 System Alerts & Insights</h3>
-              <div style={{ fontSize: 13, color: '#e2e8f0', background: 'rgba(0,0,0,0.3)', padding: 12, borderRadius: 8, borderLeft: `3px solid ${C.orange}`, marginBottom: 10 }}>
-                <strong>Trend:</strong> Pichle 3 dino se "Fractions" wale games me bacche fail ho rahe hain. AI difficulty auto-adjust kar raha hai.
-              </div>
-              <div style={{ fontSize: 13, color: '#e2e8f0', background: 'rgba(0,0,0,0.3)', padding: 12, borderRadius: 8, borderLeft: `3px solid ${C.green}`, marginBottom: 10 }}>
-                <strong>Success:</strong> "Referral Code" feature hit hai! 40% naye users friends ke invite se aaye hain.
-              </div>
-              <div style={{ fontSize: 13, color: '#e2e8f0', background: 'rgba(0,0,0,0.3)', padding: 12, borderRadius: 8, borderLeft: `3px solid ${C.cyan}` }}>
-                <strong>AI Scanner:</strong> 99.8% accuracy maintain ho rahi hai. Baki 0.2% manual review queue me hain.
-              </div>
-            </div>
+          <div style={{ padding: 15, borderTop: '1px solid #1e2d45', display: 'flex', gap: 10 }}>
+            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendCmd()} placeholder="AI ko command do (e.g. Aaj 50 naye Math games banao)..." style={{ flex: 1, padding: 12, borderRadius: 8, background: '#07090f', border: '1px solid #1e2d45', color: '#fff', outline: 'none' }} />
+            <button onClick={sendCmd} style={{ padding: '0 20px', background: '#06b6d4', color: '#000', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer' }}>Send</button>
           </div>
         </div>
-
       </div>
     </div>
-  );
+  )
 }

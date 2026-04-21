@@ -3,10 +3,10 @@ import { usePathname, useRouter } from 'next/navigation'
 
 const NAV_ITEMS = [
   { href: '/home',    icon: '🏠', label: 'Home' },
-  { href: '/learn',   icon: '📚', label: 'Seekho' },
-  { href: '/library', icon: '🕹️', label: '50+ Games' },
+  { href: '/seekho',  icon: '📖', label: 'Seekho' },
+  { href: '/learn',   icon: '📚', label: 'Learn' },
+  { href: '/library', icon: '🕹️', label: 'Games' },
   { href: '/create',  icon: '🎨', label: 'Creator' },
-  { href: '/chat',    icon: '🤖', label: 'Arya' },
 ]
 
 export default function BottomNav() {

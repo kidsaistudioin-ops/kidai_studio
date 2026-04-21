@@ -31,6 +31,15 @@ export default function Dice({ onRoll, disabled }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <style>{`
+        @keyframes dice-roll-anim {
+          0% { transform: rotate(0deg) scale(1); }
+          25% { transform: rotate(90deg) scale(1.1); }
+          50% { transform: rotate(180deg) scale(0.9); }
+          75% { transform: rotate(270deg) scale(1.1); }
+          100% { transform: rotate(360deg) scale(1); }
+        }
+      `}</style>
       <button 
         onClick={rollDice} 
         disabled={disabled || rolling}
@@ -42,7 +51,8 @@ export default function Dice({ onRoll, disabled }) {
           cursor: disabled || rolling ? 'not-allowed' : 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: disabled || rolling ? 'none' : '0 4px 12px rgba(245, 158, 11, 0.4)',
-          transform: rolling ? 'scale(0.95)' : 'scale(1)',
+          animation: rolling ? 'dice-roll-anim 0.3s infinite linear' : 'none',
+          transform: 'scale(1)',
           transition: 'all 0.2s'
         }}
       >

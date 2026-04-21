@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const C = {
   bg: '#07090f', card: '#0f1520', border: '#1e2d45',
@@ -9,64 +9,38 @@ const C = {
   text: '#f1f5f9', muted: '#64748b'
 };
 
-export default function PlayArenaHub() {
+const GAMES = [
+  { id: 'chess', title: 'Chess (Chase)', emoji: '♟️', path: '/play/chess', color: C.cyan, desc: 'Play with Arya AI or pass & play!' },
+  { id: 'ludo', title: 'Ludo Race', emoji: '🎲', path: '/play/ludo-game', color: C.orange, desc: '4-Player classic racing game.' },
+  { id: 'carrace', title: 'Car Race', emoji: '🏎️', path: '/play/car-race-game', color: C.green, desc: 'Dodge the rocks & survive!' },
+  { id: 'snakes', title: 'Snakes & Ladders', emoji: '🐍', path: '/play/snake-ladder', color: C.purple, desc: 'Climb up, but watch out for snakes!' },
+  { id: 'quiz', title: 'Smart Quiz', emoji: '🧠', path: '/play/quiz', color: C.orange, desc: 'Test your knowledge with Arya!' }
+];
+
+export default function PlayDashboard() {
   const router = useRouter();
 
   return (
-    <div style={{ background: C.bg, minHeight: '100vh', color: C.text, padding: 16 }}>
-      <style>{`
-        @keyframes pulse-green {
-          0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); }
-          70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-      `}</style>
-
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
-        <Link href="/home" style={{ textDecoration: 'none', color: C.muted, fontSize: 24, marginRight: 16 }}>←</Link>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Play <span style={{ color: C.orange }}>Arena</span> 🎮</h1>
+    <div style={{ background: C.bg, minHeight: '100vh', color: C.text, fontFamily: "'Nunito', sans-serif", padding: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 30 }}>
+        <Link href="/" style={{ textDecoration: 'none', color: C.muted, fontSize: 24, marginRight: 16 }}>←</Link>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Game <span style={{ color: C.purple }}>Zone</span> 🎮</h1>
       </div>
 
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <div style={{ width: 10, height: 10, background: C.green, borderRadius: '50%', animation: 'pulse 2s infinite' }} />
-          <div style={{ fontWeight: 800, color: C.green, fontSize: 14 }}>17 Groups Live Right Now</div>
-        </div>
-        <div style={{ fontSize: 12, color: C.muted }}>Apne doston ke saath khelo ya Arya (AI) ko harane ka try karo!</div>
+      <div style={{ color: C.muted, fontSize: 14, marginBottom: 24 }}>
+        Apna favourite game choose karo aur khelna shuru karo!
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Snakes & Ladders */}
-        <div onClick={() => router.push('/play-animation/snakes-ladder')} style={{ background: `linear-gradient(135deg, ${C.cyan}22, ${C.purple}22)`, border: `1px solid ${C.cyan}44`, borderRadius: 16, padding: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ fontSize: 40 }}>🐍</div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>Saanp Seedi</div>
-            <div style={{ fontSize: 12, color: C.muted, display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-              Play vs Arya
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: `${C.green}22`, color: C.green, padding: '2px 6px', borderRadius: 8, fontWeight: 700, fontSize: 10 }}>
-                <span style={{ width: 6, height: 6, background: C.green, borderRadius: '50%', animation: 'pulse-green 2s infinite' }} />
-                Online
-              </span>
-            </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16 }}>
+        {GAMES.map((g) => (
+          <div key={g.id} onClick={() => router.push(g.path)} style={{ background: C.card, border: `2px solid ${C.border}`, borderRadius: 16, padding: 20, textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', boxShadow: `0 8px 0 ${g.color}22` }}>
+            <div style={{ fontSize: 48, marginBottom: 12, filter: `drop-shadow(0 4px 8px ${g.color}66)` }}>{g.emoji}</div>
+            <div style={{ fontWeight: 900, fontSize: 16, color: g.color, marginBottom: 6 }}>{g.title}</div>
+            <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.4 }}>{g.desc}</div>
+            <button style={{ marginTop: 16, width: '100%', padding: '8px', background: `${g.color}22`, color: g.color, border: 'none', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>Play Now ▶</button>
           </div>
-        </div>
-
-        {/* Chess */}
-        <div onClick={() => router.push('/play/chess')} style={{ background: `linear-gradient(135deg, ${C.orange}22, ${C.card})`, border: `1px solid ${C.orange}44`, borderRadius: 16, padding: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ fontSize: 40 }}>♟️</div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>Chess (Chase)</div>
-            <div style={{ fontSize: 12, color: C.muted, display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-              Mind Game vs Arya
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: `${C.green}22`, color: C.green, padding: '2px 6px', borderRadius: 8, fontWeight: 700, fontSize: 10 }}>
-                <span style={{ width: 6, height: 6, background: C.green, borderRadius: '50%', animation: 'pulse-green 2s infinite' }} />
-                Online
-              </span>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
-
     </div>
   );
 }

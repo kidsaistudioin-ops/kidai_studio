@@ -1,0 +1,17 @@
+<svg viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Left side -->
+  <line x1="20" y1="0" x2="20" y2="200" stroke="#8B4513" stroke-width="6"/>
+
+  <!-- Right side -->
+  <line x1="80" y1="0" x2="80" y2="200" stroke="#8B4513" stroke-width="6"/>
+
+  <!-- Steps -->
+  <line x1="20" y1="30" x2="80" y2="30" stroke="#A0522D" stroke-width="5"/>
+  <line x1="20" y1="60" x2="80" y2="60" stroke="#A0522D" stroke-width="5"/>
+  <line x1="20" y1="90" x2="80" y2="90" stroke="#A0522D" stroke-width="5"/>
+  <line x1="20" y1="120" x2="80" y2="120" stroke="#A0522D" stroke-width="5"/>
+  <line x1="20" y1="150" x2="80" y2="150" stroke="#A0522D" stroke-width="5"/>
+  <line x1="20" y1="180" x2="80" y2="180" stroke="#A0522D" stroke-width="5"/>
+
+</svg>

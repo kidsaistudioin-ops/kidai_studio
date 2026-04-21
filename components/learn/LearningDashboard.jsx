@@ -80,6 +80,7 @@ export default function LearningDashboard() {
   const currentQuiz = allQuizzes[currentQuizIdx];
 
   useEffect(() => {
+    console.log("✅ LearningDashboard component is connected and has mounted!");
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages]);
 
@@ -155,10 +156,17 @@ export default function LearningDashboard() {
     setLoading(true);
 
     try {
-      // Claude AI se Real API request
-      const history = messages.map(m => ({ role: m.role, message: m.text }));
-      const res = await chatWithArya(DUMMY_UUID, input, history);
-      setMessages(m => [...m, { role: "arya", text: res.reply }]);
+      // Using your newly created API route
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input, childAge: 10 })
+      });
+      
+      if (!response.ok) throw new Error("API failed");
+      
+      const resData = await response.json();
+      setMessages(m => [...m, { role: "arya", text: resData.message || resData }]);
     } catch(e) {
       console.error("Chat Error:", e);
       setMessages(m => [...m, { role: "arya", text: "Main network se connect nahi ho pa rahi hoon! 🔌" }]);

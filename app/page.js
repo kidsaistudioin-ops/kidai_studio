@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import LandingChatbot from '@/components/ui/LandingChatbot';
 
 const C = {
   bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
@@ -69,19 +70,6 @@ export default function HomePage() {
     setGamesPlayed(next);
     setActiveGame(null);
     if (next < MAX_FREE) showToast('✅ +10 XP!');
-  };
-
-  // Chatbot States
-  const [chatOpen, setChatOpen] = useState(false);
-  const [messages, setMessages] = useState([{ sender: 'ai', text: 'Hello! Main Arya hoon. Aaiye milkar kuch naya seekhein! 🚀' }]);
-  const [input, setInput] = useState('');
-
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    const newMessages = [...messages, { sender: 'user', text: input }];
-    setMessages(newMessages);
-    setInput('');
-    setTimeout(() => setMessages([...newMessages, { sender: 'ai', text: 'Abhi main theek se connect nahi hoon, par jaldi hi aapse dher saari baatein karungi! 🤖' }]), 1000);
   };
 
   return (
@@ -207,34 +195,8 @@ export default function HomePage() {
         <button style={btnStyle(C.orange, true)} onClick={() => router.push('/signup')}>🚀 Abhi Shuru Karo — Free!</button>
       </div>
 
-      {/* Chatbot Bottom Right */}
-      <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 999 }}>
-        {chatOpen ? (
-          <div style={{ width: 300, height: 420, background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, marginBottom: 12, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
-            <div style={{ background: C.purple, padding: '12px 16px', fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span>🤖 Arya AI</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, background: 'rgba(0,0,0,0.2)', padding: '3px 8px', borderRadius: 12, fontWeight: 700 }}>
-                  <span style={{ width: 8, height: 8, background: C.green, borderRadius: '50%', animation: 'pulse-green 2s infinite' }} />
-                  Online
-                </span>
-              </div>
-              <button onClick={() => setChatOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 16 }}>✖</button>
-            </div>
-            <div style={{ flex: 1, padding: 12, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {messages.map((m, i) => (
-                <div key={i} style={{ alignSelf: m.sender === 'ai' ? 'flex-start' : 'flex-end', background: m.sender === 'ai' ? C.card2 : C.cyan, padding: '8px 12px', borderRadius: 12, maxWidth: '85%', fontSize: 13, color: m.sender === 'ai' ? C.text : '#fff', fontWeight: m.sender === 'ai' ? 400 : 700 }}>{m.text}</div>
-              ))}
-            </div>
-            <div style={{ padding: 10, borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6, background: C.card }}>
-              <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder="Mujhse kuch bhi poocho..." style={{ flex: 1, background: C.bg, border: `1px solid ${C.border}`, color: C.text, padding: '8px 12px', borderRadius: 8, outline: 'none', fontSize: 13 }} />
-              <button onClick={sendMessage} style={{ background: C.cyan, border: 'none', borderRadius: 8, padding: '0 14px', cursor: 'pointer', color: '#fff', fontWeight: 800 }}>▶</button>
-            </div>
-          </div>
-        ) : (
-          <button onClick={() => setChatOpen(true)} style={{ background: C.purple, width: 60, height: 60, borderRadius: '50%', border: 'none', color: '#fff', fontSize: 28, cursor: 'pointer', boxShadow: '0 4px 12px rgba(124, 58, 237, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>💬</button>
-        )}
-      </div>
+      {/* Naya API Connected Chatbot */}
+      <LandingChatbot />
 
       {/* Footer */}
       <footer style={{ textAlign: 'center', padding: '20px 0', borderTop: `1px solid ${C.border}`, color: C.muted, fontSize: 12 }}>

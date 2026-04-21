@@ -56,7 +56,7 @@ export default function MagicScannerPage() {
     processImage(); // Magic start!
   };
 
-  // Safed background hatane ka Logic (Chroma Keying type)
+  // Safed background hatane ka Logic (Chroma Keying type) - Enhanced
   const processImage = () => {
     setIsScanning(true);
     setTimeout(() => {
@@ -65,22 +65,41 @@ export default function MagicScannerPage() {
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imgData.data;
 
-      // Loop through all pixels
+      // Enhanced threshold for better background removal
+      const threshold = 200; // Adjustable sensitivity
+      const colorDiff = 30; // How similar colors are considered background
+      
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
         const g = data[i+1];
         const b = data[i+2];
         
-        // Agar pixel safed/light grey hai (Paper color)
-        if (r > 180 && g > 180 && b > 180) {
-          data[i+3] = 0; // Alpha 0 (Transparent kar do)
+        // Check if pixel is light (paper-like)
+        const brightness = (r + g + b) / 3;
+        if (brightness > threshold) {
+          // Check if it's white/light gray/light blue (paper colors)
+          const isWhite = r > 200 && g > 200 && b > 200;
+          const isLightGray = r > 150 && g > 150 && b > 150 && Math.abs(r - g) < colorDiff && Math.abs(g - b) < colorDiff;
+          const isLightBlue = r > 200 && g > 200 && b > 230; // Blue-ish paper
+          
+          if (isWhite || isLightGray || isLightBlue) {
+            data[i+3] = 0; // Alpha 0 (Transparent)
+          }
         }
       }
       
       ctx.putImageData(imgData, 0, 0);
       setProcessedImg(canvas.toDataURL('image/png'));
       setIsScanning(false);
-    }, 2000); // 2 sec fake delay for cool scanning effect
+    }, 2000);
+  };
+
+  // Download as PNG
+  const downloadImage = () => {
+    const link = document.createElement('a');
+    link.download = 'magic-scanned-' + Date.now() + '.png';
+    link.href = processedImg;
+    link.click();
   };
 
   return (
@@ -126,10 +145,13 @@ export default function MagicScannerPage() {
                   <button onClick={() => { setCapturedImg(null); startCamera(); }} style={{ flex: 1, padding: '12px', background: C.card2, border: 'none', color: '#fff', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>
                     🔄 Retake
                   </button>
-                  <button onClick={() => alert('Saved to Library! (Agle step me Library page me link karenge)')} style={{ flex: 1, padding: '12px', background: C.green, border: 'none', color: '#000', borderRadius: 12, fontWeight: 900, cursor: 'pointer' }}>
-                    💾 Save to Library
+                  <button onClick={downloadImage} style={{ flex: 1, padding: '12px', background: C.cyan, border: 'none', color: '#000', borderRadius: 12, fontWeight: 900, cursor: 'pointer' }}>
+                    ⬇️ Download
                   </button>
                 </div>
+                <button onClick={() => alert('Saved to Library!')} style={{ width: '100%', marginTop: 10, padding: '12px', background: C.green + '22', border: `1px solid ${C.green}`, color: C.green, borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>
+                  💾 Save to Library
+                </button>
               </div>
             )}
           </div>

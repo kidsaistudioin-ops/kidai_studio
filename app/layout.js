@@ -1,5 +1,9 @@
 import './globals.css'
 
+// Global Libs linking
+import '@/lib/cache';
+import '@/lib/language';
+
 export const metadata = {
   title: 'KidAI Studio — Bacho Ka AI School',
   description: 'Indian bacchon ke liye AI-powered learning platform. Homework games, visual learning, parent dashboard.',

@@ -22,7 +22,7 @@ export default function CreatorStudioPage() {
     },
     {
       id: "comic-maker",
-      title: "Comic & Animation",
+      title: "Comic Maker",
       desc: "Apne characters ko canvas pe dalo aur unse baatein karwao.",
       icon: "💬",
       color: C.purple,
@@ -38,11 +38,38 @@ export default function CreatorStudioPage() {
     },
     {
       id: "logo-maker",
-      title: "Logo & Template",
+      title: "Logo Maker",
       desc: "AI se apne naye project ke liye sundar logos aur templates banao.",
       icon: "✨",
       color: C.cyan,
       tag: "Pro"
+    }
+  ];
+
+  const VIDEO_TOOLS = [
+    {
+      id: "story-video",
+      title: "Story Video",
+      desc: "Apni kahani ko animated video me badlo!",
+      icon: "🎬",
+      color: C.orange,
+      tag: "NEW"
+    },
+    {
+      id: "brand-promo",
+      title: "Brand Promo",
+      desc: "Scalio jaise professional promotional videos banao!",
+      icon: "📢",
+      color: C.yellow,
+      tag: "NEW"
+    },
+    {
+      id: "2d-animation",
+      title: "2D Animation",
+      desc: "Frame-by-frame 2D animation create karo!",
+      icon: "🎞️",
+      color: C.green,
+      tag: "NEW"
     }
   ];
 
@@ -110,6 +137,58 @@ export default function CreatorStudioPage() {
               <div style={{ fontSize: 24, color: tool.color, opacity: 0.5 }}>→</div>
             </div>
           ))}
+        </div>
+
+        {/* Video Pipeline Section */}
+        <div style={{ marginTop: 30, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <div style={{ fontSize: 24 }}>🎬</div>
+            <div style={{ fontWeight: 900, fontSize: 20 }}>Video Pipeline <span style={{ color: C.orange }}>(Beta)</span></div>
+          </div>
+          <p style={{ color: C.muted, fontSize: 13, marginBottom: 16 }}>
+            AI-powered video generation. (API integration pending)
+          </p>
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {VIDEO_TOOLS.map((tool) => (
+              <div 
+                key={tool.id} 
+                onClick={() => router.push(`/studio/${tool.id}`)}
+                style={{ 
+                  background: `linear-gradient(135deg, ${tool.color}15, ${C.card})`, 
+                  border: `1px solid ${tool.color}44`, 
+                  borderRadius: 16, 
+                  padding: 16, 
+                  cursor: "pointer",
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "center",
+                  transition: "transform 0.2s"
+                }}
+                onMouseOver={e => e.currentTarget.style.transform = "scale(1.02)"}
+                onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
+              >
+                <div style={{ 
+                  width: 48, height: 48, borderRadius: 12, background: `${tool.color}22`, 
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 
+                }}>
+                  {tool.icon}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                    <div style={{ fontWeight: 800, fontSize: 15, color: tool.color }}>{tool.title}</div>
+                    <span style={{ background: tool.color, color: "#fff", fontSize: 9, fontWeight: 900, padding: "2px 6px", borderRadius: 6 }}>
+                      {tool.tag}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: C.muted }}>
+                    {tool.desc}
+                  </div>
+                </div>
+                <div style={{ fontSize: 20, color: tool.color, opacity: 0.5 }}>→</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
