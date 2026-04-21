@@ -107,9 +107,6 @@ const Token = ({ token, turn, onClick, allTokens, validTokenIds, glowingTokens =
   const offsetX = isMultiple ? (overlapIdx % 2 === 0 ? -15 : 15) : 0;
   const offsetY = isMultiple ? (overlapIdx < 2 ? -15 : 15) : 0;
 
-  // Green character ko change kar diya gaya hai taaki wo bright dikhe
-  const emoji = color === 'red' ? '🧍‍♂️' : color === 'blue' ? '🦸' : color === 'green' ? '🐸' : '🧙';
-
   return (
     <div 
       onClick={() => canMove && onClick(token.id)}
@@ -121,34 +118,32 @@ const Token = ({ token, turn, onClick, allTokens, validTokenIds, glowingTokens =
         height: '6.666%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         cursor: canMove ? 'pointer' : 'default',
-        zIndex: canMove ? 20 : 10,
-        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        transform: `translate(${offsetX}%, ${offsetY}%) scale(${isMultiple ? 0.75 : 1.1})`,
+        zIndex: canMove ? 20 : (state === 'home' ? 5 : 10),
+        transition: 'all 0.4s ease-in-out',
+        transform: `translate(${offsetX}%, ${offsetY}%) scale(${isMultiple ? 0.75 : 1})`,
       }}
     >
-      <div style={{
-        width: '85%', height: '85%',
-        background: `radial-gradient(circle at 30% 30%, #ffffff, ${C[color]} 60%, #000000)`,
-        borderRadius: '50%',
-        // 🎯 GLOW EFFECT: Jab token chal sakta hai ya 6 aaya hai to glow karega
-        boxShadow: isGlowing 
-          ? `0 0 25px ${C[color]}, 0 0 50px ${C[color]}88, 0 8px 15px rgba(0,0,0,0.6)` 
-          : canMove 
-            ? `0 0 15px ${C[color]}, 0 8px 15px rgba(0,0,0,0.6)` 
-            : '0 4px 8px rgba(0,0,0,0.6)',
-        border: isGlowing ? `3px solid #fff` : '2px solid #fff',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        // Glowing tokens ke liye special pulse animation
-        animation: isGlowing 
-          ? 'token-glow-pulse 0.8s ease-in-out infinite' 
-          : canMove 
-            ? 'pulse-green 1s infinite' 
-            : 'none'
-      }}>
-        <div style={{ fontSize: '1.4rem', transform: 'translateY(-15%)', filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))' }}>
-          {emoji}
-        </div>
-      </div>
+      <img
+        src="/characters/player.svg"
+        alt="player token"
+        style={{
+          width: '160%',
+          height: '160%',
+          objectFit: 'contain',
+          transform: canMove ? 'translateY(-25%) scale(1.15)' : 'translateY(-15%) scale(1)',
+          filter: `drop-shadow(0 5px 8px rgba(0,0,0,0.5)) ${
+            color === 'red' ? 'hue-rotate(320deg) saturate(1.5)' :
+            color === 'green' ? 'hue-rotate(80deg) saturate(1.5)' :
+            color === 'yellow' ? 'hue-rotate(30deg) saturate(2)' :
+            color === 'blue' ? 'hue-rotate(180deg) saturate(2)' : ''
+          }`,
+          animation: isGlowing 
+            ? 'token-glow-pulse 0.8s ease-in-out infinite' 
+            : canMove 
+              ? 'pulse-green 1s infinite' 
+              : 'none'
+        }}
+      />
     </div>
   );
 };

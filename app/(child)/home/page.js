@@ -19,6 +19,9 @@ export default function ChildDashboard() {
   const [growth, setGrowth] = useState(null); // Real growth data ke liye
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
+  const [coins, setCoins] = useState(0);
+  const [xp, setXp] = useState(0);
+  const [refCode, setRefCode] = useState('');
 
   useEffect(() => {
     const storedName = localStorage.getItem('kidai_student_name');
@@ -29,6 +32,18 @@ export default function ChildDashboard() {
     // Supabase se asli history ka data uthana
     async function loadRealStats() {
       const studentId = 'student_123'; // NOTE: Baad mein isko actual logged-in user ID se replace karenge
+      
+      // Real Coins aur XP lana
+      const { data: studentData } = await supabase.from('students').select('coins, total_xp, referral_code').eq('id', studentId).single();
+      if (studentData) {
+        setCoins(studentData.coins || 0);
+        setXp(studentData.total_xp || 0);
+        // Referral code agar nahi hai toh generate karna
+        let code = studentData.referral_code;
+        if (!code) { code = 'KIDAI' + Math.floor(1000 + Math.random() * 9000); await supabase.from('students').update({ referral_code: code }).eq('id', studentId); }
+        setRefCode(code);
+      }
+
       const { data } = await supabase
         .from('daily_sessions')
         .select('quizzes_attempted, quizzes_correct')
@@ -114,10 +129,10 @@ export default function ChildDashboard() {
         
         <div style={{ display: 'flex', gap: 8 }}>
           <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '6px 12px', borderRadius: 12, fontWeight: 900, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: C.orange }}>🔥</span> 5
+            <span style={{ color: C.cyan }}>⚡</span> {loadingStats ? '...' : xp} XP
           </div>
           <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '6px 12px', borderRadius: 12, fontWeight: 900, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: C.yellow }}>🪙</span> 1240
+            <span style={{ color: C.yellow }}>🪙</span> {loadingStats ? '...' : coins}
           </div>
         </div>
       </div>
@@ -127,7 +142,24 @@ export default function ChildDashboard() {
         <div style={{ fontSize: 40, animation: 'bounce 2s infinite' }}>🤖</div>
         <div>
           <div style={{ fontWeight: 900, fontSize: 18, color: '#fff' }}>Arya is waiting!</div>
-          <div style={{ color: '#cbd5e1', fontSize: 13, marginTop: 4 }}>Arrey wah {name}! Tumhare dost Rahul ne tumhara invite code use kiya. Tumhe +500 Coins mile! 🎉 ▶</div>
+          <div style={{ color: '#cbd5e1', fontSize: 13, marginTop: 4 }}>
+            Hey {name}! Tumhara <b>Premium</b> active hai! Apni school book ya homework ko <b style={{color: C.orange}}>Smart Scanner 📸</b> se scan karo, main uska mazedar game bana dungi! ▶
+          </div>
+        </div>
+      </div>
+
+      {/* 🚀 NEW: Referral / Premium System */}
+      <div style={{ background: `linear-gradient(135deg, ${C.card}, ${C.card2})`, border: `2px dashed ${C.orange}`, borderRadius: 20, padding: 20, marginBottom: 30, display: 'flex', flexDirection: 'column', gap: 12, boxShadow: `0 8px 30px rgba(255, 107, 53, 0.15)` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ fontSize: 32 }}>🎁</div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 18, color: C.orange }}>Free Premium & XP!</div>
+            <div style={{ color: C.muted, fontSize: 13, marginTop: 2 }}>Doston ko invite karo. Tumhe aur dost dono ko <b>5 Days Premium (50 XP)</b> aur free games milenge!</div>
+          </div>
+        </div>
+        <div style={{ background: '#000', borderRadius: 12, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${C.border}` }}>
+          <span style={{ color: C.muted, fontSize: 12, fontWeight: 700 }}>YOUR CODE:</span>
+          <span style={{ color: C.cyan, fontSize: 20, fontWeight: 900, letterSpacing: 2 }}>{refCode || 'LOADING...'}</span>
         </div>
       </div>
 

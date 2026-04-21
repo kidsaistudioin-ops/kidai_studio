@@ -263,6 +263,27 @@ export default function LudoGame() {
     }
   };
 
+  // ==========================================
+  // 🤖 PURE JAVASCRIPT BOT LOGIC
+  // Red = Aap (Human), Baaki sab Computer hain!
+  // ==========================================
+  const COMPUTER_PLAYERS = ['green', 'yellow', 'blue'];
+
+  useEffect(() => {
+    if (COMPUTER_PLAYERS.includes(turn) && winner === null) {
+      if (gameState === 'roll' && !isRollingRef.current) {
+        const timer = setTimeout(() => handleDiceRoll(), 1000); // 1 second ruk kar dice roll karega
+        return () => clearTimeout(timer);
+      } else if (gameState === 'move' && dice) {
+        if (validTokenIds.length > 0) {
+          const selectedTokenId = validTokenIds[Math.floor(Math.random() * validTokenIds.length)];
+          const timer = setTimeout(() => handleTokenClick(selectedTokenId), 800); // 0.8s ruk kar valid goti chalega
+          return () => clearTimeout(timer);
+        }
+      }
+    }
+  }, [turn, gameState, dice, winner, validTokenIds]);
+
   const resetGame = () => {
     setTokens(getInitialTokens());
     setTurn('red');

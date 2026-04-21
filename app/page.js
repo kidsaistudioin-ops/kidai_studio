@@ -171,6 +171,34 @@ export default function HomePage() {
           )}
         </div>
 
+        {/* HOW IT WORKS Section */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: '24px 16px', marginBottom: 16, marginTop: 24 }}>
+          <h2 style={{ textAlign: 'center', fontWeight: 800, fontSize: 18, marginBottom: 20 }}>🎮 Aise Kaam Karta Hai! 🕹️</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: C.card2, padding: 12, borderRadius: 12, borderLeft: `4px solid ${C.green}` }}>
+              <div style={{ fontSize: 28 }}>📚</div>
+              <div>
+                <div style={{ fontWeight: 800, color: C.green }}>1. Padhai Karo (Seekho)</div>
+                <div style={{ fontSize: 12, color: C.muted }}>Maths, English ke games khelo aur har sahi jawab par <b>+1 Coin</b> kamao.</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: C.card2, padding: 12, borderRadius: 12, borderLeft: `4px solid ${C.yellow}` }}>
+              <div style={{ fontSize: 28 }}>🪙</div>
+              <div>
+                <div style={{ fontWeight: 800, color: C.yellow }}>2. Coins Jama Karo</div>
+                <div style={{ fontSize: 12, color: C.muted }}>Galat jawab par <b>-1 Coin</b> katega. Apne coins dashboard me dekho.</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: C.card2, padding: 12, borderRadius: 12, borderLeft: `4px solid ${C.purple}` }}>
+              <div style={{ fontSize: 28 }}>🎲</div>
+              <div>
+                <div style={{ fontWeight: 800, color: C.purple }}>3. Games Khelo (Play)</div>
+                <div style={{ fontSize: 12, color: C.muted }}>Ludo, Chess jaise games khelne ke liye <b>-10 Coins</b> kharch karo.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Age Sections */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12 }}>👦👧 Umar Ke Hisab Se</div>

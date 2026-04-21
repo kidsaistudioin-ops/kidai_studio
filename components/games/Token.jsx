@@ -11,17 +11,30 @@ const Token = ({ token, style, onClick, isMovable }) => {
       style={{
         ...style,
         position: 'relative',
-        background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${baseColor} 50%, #000000 150%)`,
-        borderRadius: '50%',
-        border: `2px solid ${baseColor}`,
-        boxShadow: isMovable ? `0 0 15px 4px ${baseColor}, 0 8px 12px rgba(0,0,0,0.5)` : '0 4px 8px rgba(0,0,0,0.6)',
         cursor: isMovable ? 'pointer' : 'default',
-        transform: isMovable ? 'scale(1.15)' : 'scale(0.9)',
-        zIndex: isMovable ? 20 : 5,
-        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+        zIndex: isMovable ? 20 : (token.state === 'home' ? 5 : 10),
+        transition: 'all 0.4s ease-in-out',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }} 
     >
-      <div style={{ position: 'absolute', top: '15%', left: '15%', width: '25%', height: '25%', background: 'rgba(255,255,255,0.6)', borderRadius: '50%' }} />
+      <img
+        src="/characters/player.svg"
+        alt="player token"
+        style={{
+          width: '160%',
+          height: '160%',
+          objectFit: 'contain',
+          transform: isMovable ? 'translateY(-25%) scale(1.15)' : 'translateY(-15%) scale(1)',
+          filter: `drop-shadow(0 5px 8px rgba(0,0,0,0.5)) ${
+            token.color === 'red' ? 'hue-rotate(320deg) saturate(1.5)' :
+            token.color === 'green' ? 'hue-rotate(80deg) saturate(1.5)' :
+            token.color === 'yellow' ? 'hue-rotate(30deg) saturate(2)' :
+            token.color === 'blue' ? 'hue-rotate(180deg) saturate(2)' : ''
+          }`
+        }}
+      />
     </div>
   );
 };

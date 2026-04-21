@@ -46,7 +46,8 @@ CRITICAL RULES:
 2. SEEKHO PAGE INTEGRATION: Tumhare paas 50+ games ke templates hain. Bacche ki history padho aur uska pattern samjho. Jo template use pasand ho (jaise Table Battle, Word Builder), usi mein uske naye topics daal kar generate karo.
 3. SMART DISTRIBUTION: Agar concept bahut bada hai, toh usko alag-alag games me divide kar do. (Example: Thoda hissa Quiz me banao, thoda Fill-in-the-blanks me). Baccha jo game zyada khel raha hai, use usi type me serve karo.
 4. SUBJECT FATIGUE: Agar tumhe history dekh kar lage ki baccha bahut der se ek hi game/subject me atka hua hai, toh use pyaar se message karo: "Wah! Tum toh isme master ban gaye 🏆 Chalo ab kuch doosre mazedar games explore karein!" aur message ke end me [GOTO:/seekho] laga do.
-5. NEVER STOP (1000+ VISION): Hamara goal har subject ke 1000+ micro-games database me fill karna hai. Bacche ke chat karne par uske current knowledge level se thoda sa advance game khud se auto-generate karke do, bhale hi usne explicitly "game banao" na bola ho (lekin agar wo bas casual hi/hello kar raha hai toh sirf chat karo).`;
+5. NEVER STOP (1000+ VISION): Hamara goal har subject ke 1000+ micro-games database me fill karna hai. Bacche ke chat karne par uske current knowledge level se thoda sa advance game khud se auto-generate karke do, bhale hi usne explicitly "game banao" na bola ho (lekin agar wo bas casual hi/hello kar raha hai toh sirf chat karo).
+6. HOMEWORK SCANNER PROMO: Bacchon ko hamesha yaad dilao ki unke paas 'Premium' hai. Unhe motivate karo ki wo apni school books, drawings ya homework ko 'Smart Scanner' se scan karein taaki tum usse game bana sako. Chat ke end me kabhi-kabhi [GOTO:/scanner] bhi lagao.`;
     const userPrompt = PROMPTS.chat(message, childAge, []);
 
     // Universal AI Router Engine: Groq -> Gemini -> OpenAI (ChatGPT) -> Claude

@@ -1,100 +1,113 @@
-'use client'
-import { useState, useEffect } from 'react'
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+
+const C = {
+  bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
+  orange: '#ff6b35', purple: '#7c3aed', cyan: '#06b6d4', green: '#10b981',
+  text: '#f1f5f9', muted: '#64748b'
+};
 
 export default function AdminDashboard() {
-  const [msgs, setMsgs] = useState([{ ai: true, text: "Hello Boss! 🫡 Main aapka Admin Assistant AI hoon. Boliye aaj kya command hai? (Jaise: 'Aaj 100 naye games generate karo')" }])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [students, setStudents] = useState([]);
+  const [stats, setStats] = useState({ totalUsers: 0, totalXP: 0, totalCoins: 0 });
+  const [loading, setLoading] = useState(true);
 
-  // Load Admin Chat History from LocalStorage (3 Days Expiry)
   useEffect(() => {
-    const saved = localStorage.getItem('kidai_admin_history');
-    if (saved) {
+    // SECURITY CHECK: Sirf wahi khol paye jisne admin email se login kiya ho
+    if (!localStorage.getItem('kidai_admin')) {
+      router.push('/signup');
+      return;
+    }
+
+    async function fetchAdminData() {
       try {
-        const parsed = JSON.parse(saved);
-        if (Date.now() - parsed.timestamp < 259200000) {
-          setMsgs(parsed.data);
-        } else {
-          localStorage.removeItem('kidai_admin_history');
-        }
-      } catch (e) {}
-    }
-  }, []);
+        const { data } = await supabase.from('students').select('*').order('created_at', { ascending: false });
+        
+        // Agar database mein data nahi hai, toh dummy data dikhayenge taaki UI achha lage
+        const users = (data && data.length > 0) ? data : [
+          { id: '1', name: 'Arjun', email: 'parent1@test.com', total_xp: 450, coins: 120, streak_days: 5, current_class: 5 },
+          { id: '2', name: 'Neha', email: 'parent2@test.com', total_xp: 890, coins: 340, streak_days: 12, current_class: 7 },
+          { id: '3', name: 'Rahul', email: 'parent3@test.com', total_xp: 120, coins: 50, streak_days: 2, current_class: 4 },
+        ];
 
-  // Save Admin Chat History to LocalStorage
-  useEffect(() => {
-    if (msgs.length > 1) {
-      localStorage.setItem('kidai_admin_history', JSON.stringify({ timestamp: Date.now(), data: msgs }));
-    }
-  }, [msgs]);
-
-  const sendCmd = async () => {
-    if(!input.trim() || loading) return
-    const text = input
-    setInput('')
-    setMsgs(prev => [...prev, { ai: false, text }])
-    setLoading(true)
-
-    const recentHistory = msgs.slice(-10).map(m => ({
-      role: m.ai ? 'assistant' : 'user',
-      content: m.text
-    }));
-
-    try {
-      const res = await fetch('/api/admin/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: recentHistory })
-      })
-      const data = await res.json()
-      
-      setMsgs(prev => [...prev, { ai: true, text: data.message }])
-      
-      if(data.action === 'generate_games') {
-        // Yahan se hum direct wo 100 game banane wala API trigger kar sakte hain
-        setMsgs(prev => [...prev, { ai: true, text: "⚙️ [SYSTEM]: Background Game Generation mode On ho gaya hai..." }])
+        setStudents(users);
+        setStats({
+          totalUsers: users.length,
+          totalXP: users.reduce((sum, u) => sum + (u.total_xp || 0), 0),
+          totalCoins: users.reduce((sum, u) => sum + (u.coins || 0), 0)
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      setMsgs(prev => [...prev, { ai: true, text: "❌ Error connecting to AI." }])
     }
-    setLoading(false)
-  }
+    fetchAdminData();
+  }, [router]);
+
+  const logoutAdmin = () => {
+    localStorage.removeItem('kidai_admin');
+    router.push('/signup');
+  };
+
+  if (loading) return <div style={{ background: C.bg, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.cyan }}>Loading Admin Panel...</div>;
 
   return (
-    <div style={{ padding: 20, background: '#07090f', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' }}>
-      <h1 style={{ color: '#06b6d4', borderBottom: '1px solid #1e2d45', paddingBottom: 10 }}>🛡️ Admin Command Center</h1>
-      
-      <div style={{ display: 'flex', gap: 20, marginTop: 20, flexWrap: 'wrap' }}>
-        {/* Stats Panel */}
-        <div style={{ flex: 1, background: '#0f1520', padding: 20, borderRadius: 12, border: '1px solid #1e2d45', minWidth: 300 }}>
-          <h3>📊 App Statistics (Live)</h3>
-          <p>Total Games in Library: <strong style={{color: '#10b981'}}>Fetching...</strong></p>
-          <p>Active Students Today: <strong style={{color: '#7c3aed'}}>Fetching...</strong></p>
-          <p>Auto-Generator Status: <strong style={{color: '#f59e0b'}}>Standby</strong></p>
-          <p>Next Cron Job: <strong style={{color: '#06b6d4'}}>12:00 AM Night</strong></p>
+    <div style={{ background: C.bg, minHeight: '100vh', color: C.text, fontFamily: "'Nunito', sans-serif", padding: 24 }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, background: C.card, padding: 20, borderRadius: 20, border: `1px solid ${C.border}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ fontSize: 32 }}>👑</div>
+            <div>
+              <h1 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: C.orange }}>KidAI Control Center</h1>
+              <p style={{ margin: 0, color: C.muted, fontSize: 13 }}>Super Admin Dashboard</p>
+            </div>
+          </div>
+          <button onClick={logoutAdmin} style={{ background: C.card2, color: C.red, border: `1px solid ${C.red}44`, padding: '8px 16px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>Exit Admin</button>
         </div>
 
-        {/* Admin AI Chat */}
-        <div style={{ flex: 2, background: '#0f1520', borderRadius: 12, border: '1px solid #1e2d45', display: 'flex', flexDirection: 'column', height: '70vh', minWidth: 350 }}>
-          <div style={{ padding: 15, borderBottom: '1px solid #1e2d45', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 10 }}>
-            🤖 <span>Admin Assistant AI</span>
+        {/* System Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 30 }}>
+          <div style={{ background: `linear-gradient(135deg, ${C.card}, ${C.card2})`, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20 }}>
+            <div style={{ color: C.muted, fontSize: 13, fontWeight: 800 }}>TOTAL STUDENTS</div>
+            <div style={{ fontSize: 36, fontWeight: 900, color: C.cyan }}>{stats.totalUsers}</div>
           </div>
-          
-          <div style={{ flex: 1, padding: 15, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {msgs.map((m, i) => (
-              <div key={i} style={{ alignSelf: m.ai ? 'flex-start' : 'flex-end', background: m.ai ? '#1e2d45' : '#7c3aed', padding: '10px 15px', borderRadius: 12, maxWidth: '80%' }}>
-                {m.text}
+          <div style={{ background: `linear-gradient(135deg, ${C.card}, ${C.card2})`, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20 }}>
+            <div style={{ color: C.muted, fontSize: 13, fontWeight: 800 }}>TOTAL XP GENERATED</div>
+            <div style={{ fontSize: 36, fontWeight: 900, color: C.green }}>{stats.totalXP}</div>
+          </div>
+          <div style={{ background: `linear-gradient(135deg, ${C.card}, ${C.card2})`, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20 }}>
+            <div style={{ color: C.muted, fontSize: 13, fontWeight: 800 }}>COINS IN ECONOMY</div>
+            <div style={{ fontSize: 36, fontWeight: 900, color: C.orange }}>{stats.totalCoins}</div>
+          </div>
+        </div>
+
+        {/* Users Table */}
+        <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>👨‍🎓 Registered Students</h2>
+        <div style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+          {students.map((student, i) => (
+            <div key={student.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottom: i === students.length - 1 ? 'none' : `1px solid ${C.border}`, background: i % 2 === 0 ? 'transparent' : C.card2 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 2 }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: C.purple, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 18 }}>{student.name?.charAt(0) || 'U'}</div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 16 }}>{student.name || 'Unknown'} <span style={{ fontSize: 11, background: C.border, padding: '2px 6px', borderRadius: 4, color: C.text, marginLeft: 8 }}>Class {student.current_class || '?'}</span></div>
+                  <div style={{ fontSize: 12, color: C.muted }}>{student.email || 'No email linked'}</div>
+                </div>
               </div>
-            ))}
-            {loading && <div style={{ color: '#06b6d4', fontSize: 14 }}>AI soch raha hai...</div>}
-          </div>
-
-          <div style={{ padding: 15, borderTop: '1px solid #1e2d45', display: 'flex', gap: 10 }}>
-            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendCmd()} placeholder="AI ko command do (e.g. Aaj 50 naye Math games banao)..." style={{ flex: 1, padding: 12, borderRadius: 8, background: '#07090f', border: '1px solid #1e2d45', color: '#fff', outline: 'none' }} />
-            <button onClick={sendCmd} style={{ padding: '0 20px', background: '#06b6d4', color: '#000', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer' }}>Send</button>
-          </div>
+              <div style={{ flex: 1, fontWeight: 800, color: C.green }}>⚡ {student.total_xp || 0} XP</div>
+              <div style={{ flex: 1, fontWeight: 800, color: C.orange }}>🪙 {student.coins || 0} Coins</div>
+              <div style={{ flex: 1, fontWeight: 800, color: C.pink }}>🔥 {student.streak_days || 0} Days</div>
+            </div>
+          ))}
         </div>
+
       </div>
     </div>
-  )
+  );
 }
