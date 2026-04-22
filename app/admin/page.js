@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [students, setStudents] = useState([]);
   const [stats, setStats] = useState({ totalUsers: 0, totalXP: 0, totalCoins: 0 });
+  const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,6 +41,10 @@ export default function AdminDashboard() {
           totalXP: users.reduce((sum, u) => sum + (u.total_xp || 0), 0),
           totalCoins: users.reduce((sum, u) => sum + (u.coins || 0), 0)
         });
+
+        // Fetch Feedbacks
+        const { data: fbData } = await supabase.from('platform_feedback').select('*').order('created_at', { ascending: false });
+        if (fbData) setFeedbacks(fbData);
       } catch (err) {
         console.error(err);
       } finally {
@@ -54,6 +59,11 @@ export default function AdminDashboard() {
     router.push('/signup');
   };
 
+  const updateStatus = async (id, newStatus) => {
+    await supabase.from('platform_feedback').update({ status: newStatus }).eq('id', id);
+    setFeedbacks(feedbacks.map(f => f.id === id ? { ...f, status: newStatus } : f));
+  };
+
   if (loading) return <div style={{ background: C.bg, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.cyan }}>Loading Admin Panel...</div>;
 
   return (
@@ -62,11 +72,16 @@ export default function AdminDashboard() {
         
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, background: C.card, padding: 20, borderRadius: 20, border: `1px solid ${C.border}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: 32 }}>👑</div>
-            <div>
-              <h1 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: C.orange }}>KidAI Control Center</h1>
-              <p style={{ margin: 0, color: C.muted, fontSize: 13 }}>Super Admin Dashboard</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ fontSize: 32 }}>👑</div>
+              <div>
+                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: C.orange }}>KidAI Control Center</h1>
+                <p style={{ margin: 0, color: C.muted, fontSize: 13 }}>Super Admin Dashboard</p>
+              </div>
+            </div>
+            <div style={{ background: `${C.purple}22`, color: C.purple, padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 900 }}>
+              {feedbacks.filter(f => f.status === 'pending_admin').length} Pending Feedbacks
             </div>
           </div>
           <button onClick={logoutAdmin} style={{ background: C.card2, color: C.red, border: `1px solid ${C.red}44`, padding: '8px 16px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>Exit Admin</button>
@@ -107,6 +122,65 @@ export default function AdminDashboard() {
           ))}
         </div>
 
+        {/* Feedbacks & AI Suggestions Section */}
+        <div style={{ marginTop: 40 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>🧠 Parent Feedback & AI Suggestions</h2>
+          
+          {feedbacks.length === 0 ? (
+            <div style={{ background: C.card, padding: 40, textAlign: 'center', borderRadius: 16, border: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>🎉</div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>Koi naya feedback nahi hai!</div>
+              <div style={{ color: C.muted, marginTop: 8 }}>Sab kuch ekdum perfect chal raha hai.</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {feedbacks.map((f) => (
+                <div key={f.id} style={{ 
+                  background: C.card, borderRadius: 16, border: `1px solid ${f.status === 'reviewed' ? C.green : C.border}`, 
+                  padding: 20, position: 'relative', overflow: 'hidden'
+                }}>
+                  
+                  {/* Status Indicator */}
+                  <div style={{ position: 'absolute', top: 0, right: 0, background: f.status === 'reviewed' ? C.green : C.orange, color: '#000', fontSize: 10, fontWeight: 900, padding: '4px 12px', borderBottomLeftRadius: 12 }}>
+                    {f.status === 'reviewed' ? '✅ REVIEWED' : '⚠️ PENDING'}
+                  </div>
+  
+                  <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                    
+                    {/* Parent's Original Message */}
+                    <div style={{ flex: '1 1 300px' }}>
+                      <div style={{ fontSize: 12, color: C.muted, fontWeight: 800, marginBottom: 6 }}>PARENT SAID:</div>
+                      <div style={{ fontSize: 16, fontWeight: 600, background: C.card2, padding: 12, borderRadius: 12, borderLeft: `4px solid ${C.cyan}` }}>
+                        "{f.feedback_text}"
+                      </div>
+                      <div style={{ fontSize: 11, color: C.muted, marginTop: 8 }}>Date: {new Date(f.created_at).toLocaleString()}</div>
+                    </div>
+  
+                    {/* AI Analysis */}
+                    <div style={{ flex: '1 1 300px' }}>
+                      <div style={{ fontSize: 12, color: C.muted, fontWeight: 800, marginBottom: 6 }}>ARYA AI ANALYSIS:</div>
+                      <div style={{ fontSize: 14, background: f.ai_can_fix ? `${C.green}15` : `${C.red}15`, border: `1px solid ${f.ai_can_fix ? C.green : C.red}`, color: C.text, padding: 12, borderRadius: 12 }}>
+                        <span style={{ fontWeight: 800, color: f.ai_can_fix ? C.green : C.orange }}>
+                          {f.ai_can_fix ? "🤖 AI Isko Fix Kar Sakti Hai:" : "🛠️ Developer Ki Zaroorat Hai:"}
+                        </span>
+                        <p style={{ margin: '6px 0 0 0', lineHeight: 1.5, color: C.muted }}>{f.ai_analysis}</p>
+                      </div>
+                    </div>
+                  </div>
+  
+                  {/* Actions */}
+                  {f.status === 'pending_admin' && (
+                    <div style={{ marginTop: 20, display: 'flex', gap: 10, borderTop: `1px solid ${C.border}`, paddingTop: 16 }}>
+                      <button onClick={() => updateStatus(f.id, 'reviewed')} style={{ background: C.green, color: '#000', border: 'none', padding: '8px 16px', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>
+                        Mark as Done / Reviewed ✅
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

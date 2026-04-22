@@ -12,7 +12,7 @@ const C = {
 
 export default function ScannerPage() {
   const router = useRouter();
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
   
@@ -20,43 +20,54 @@ export default function ScannerPage() {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
-  // 📸 Image ko Compress karna (Taaki API jaldi chale aur size bada na ho)
-  const processFile = (file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800; // Image ko max 800px width par set karenge
-        const scaleSize = MAX_WIDTH / img.width;
-        canvas.width = MAX_WIDTH;
-        canvas.height = img.height * scaleSize;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        // Compress karke base64 string banana
-        const base64 = canvas.toDataURL('image/jpeg', 0.8);
-        setImage(base64);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
+  // 📸 Images ko Compress karna (Max 10) aur Automatically AI ko bhejna
+  const processFiles = async (files) => {
+    if (!files || files.length === 0) return;
+    
+    const fileArray = Array.from(files).slice(0, 10); // Max 10 images
+    setLoading(true);
+    setStatus('Photos process ho rahi hain... 📸');
+
+    const promises = fileArray.map(file => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 800;
+            const scaleSize = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scaleSize;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    const base64Images = await Promise.all(promises);
+    setImages(base64Images);
+    
+    // Bina kisi button dabaye sidhe Generate function auto-call ho jayega
+    handleGenerate(base64Images);
   };
 
-  // 🚀 AI se Game Generate karwana
-  const handleGenerate = async () => {
-    if (!image) return;
-    setLoading(true);
+  // 🚀 AI se Game Generate karwana (Auto Call)
+  const handleGenerate = async (base64ImagesArray) => {
     setStatus('AI aapki photo ko padh raha hai... 🕵️‍♀️');
     
     try {
       // Engine se generation start
       setStatus('Naye Games ban rahe hain... 🎮✨');
       
-      // Note: Hum parameters bhej rahe hain (age 10, Mixed subject, etc.)
-      const gameData = await generateGameFromScan(image, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']);
+      // Ab ek image ke jagah array of images ja raha hai
+      const gameData = await generateGameFromScan(base64ImagesArray, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']);
       
       setStatus('Game Ready! Save ho raha hai... 💾');
       
@@ -69,7 +80,7 @@ export default function ScannerPage() {
     } catch (error) {
       console.error("Scanner Error:", error);
       alert("Oops! Game banane me thodi problem aayi. Dusri clear photo try karein! 🔌");
-    } finally {
+      setImages([]); // Retry karne ke liye khali kar do
       setLoading(false);
     }
   };
@@ -90,10 +101,10 @@ export default function ScannerPage() {
           Apni school book, drawing, ya worksheet ki photo dalo aur Arya AI usse mazedar game bana dega.
         </p>
 
-        {!image ? (
+        {images.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} style={{ display: 'none' }} onChange={(e) => processFile(e.target.files[0])} />
-            <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => processFile(e.target.files[0])} />
+            <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} style={{ display: 'none' }} onChange={(e) => processFiles(e.target.files)} />
+            <input type="file" accept="image/*" multiple ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => processFiles(e.target.files)} />
 
             <button onClick={() => cameraInputRef.current.click()} style={{ background: `linear-gradient(135deg, ${C.orange}, ${C.pink})`, color: '#fff', border: 'none', padding: '16px', borderRadius: 16, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 20px ${C.orange}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
               <span style={{ fontSize: 20 }}>📷</span> Camera se Photo Lo
@@ -104,7 +115,11 @@ export default function ScannerPage() {
           </div>
         ) : (
           <div style={{ background: C.card, padding: 16, borderRadius: 20, border: `1px solid ${C.border}`, animation: 'slideUp 0.3s ease' }}>
-            <img src={image} alt="Scanned" style={{ width: '100%', borderRadius: 12, marginBottom: 16, maxHeight: 300, objectFit: 'cover' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: images.length > 1 ? '1fr 1fr' : '1fr', gap: 10, marginBottom: 16 }}>
+              {images.map((img, idx) => (
+                <img key={idx} src={img} alt={`Scanned ${idx}`} style={{ width: '100%', borderRadius: 12, maxHeight: 200, objectFit: 'cover' }} />
+              ))}
+            </div>
             {loading ? (
               <div style={{ padding: '10px 0 20px' }}>
                 <div style={{ fontSize: 40, animation: 'spin 1.5s linear infinite', marginBottom: 12, display: 'inline-block' }}>⚙️</div>
@@ -113,8 +128,7 @@ export default function ScannerPage() {
               </div>
             ) : (
               <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => setImage(null)} style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, borderRadius: 12, fontWeight: 800, cursor: 'pointer', fontSize: 14 }}>❌ Cancel</button>
-                <button onClick={handleGenerate} style={{ flex: 2, padding: '12px', background: C.green, border: 'none', color: '#000', borderRadius: 12, fontWeight: 900, cursor: 'pointer', fontSize: 15 }}>✨ Generate Game</button>
+                <button onClick={() => setImages([])} style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, borderRadius: 12, fontWeight: 800, cursor: 'pointer', fontSize: 14 }}>❌ Cancel</button>
               </div>
             )}
           </div>

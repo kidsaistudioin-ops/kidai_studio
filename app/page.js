@@ -117,6 +117,8 @@ export default function HomePage() {
             { icon: '📸', title: 'Smart Scanner', desc: 'Homework scan', color: C.purple, path: '/scanner' },
             { icon: '🎲', title: 'Multiplayer', desc: 'Ludo, Chess khelo', color: C.green, path: '/play' },
             { icon: '💰', title: 'Earn Mode', desc: 'Jobs & Pocket money', color: C.yellow, path: '/earn' },
+            { icon: '📚', title: 'KidAI Blog', desc: 'Study tips & updates', color: C.orange, path: '/blog' },
+            { icon: '⭐', title: 'Parent Reviews', desc: 'Read what parents say', color: C.pink, path: '/reviews' },
           ].map(f => (
             <div 
               key={f.title} 

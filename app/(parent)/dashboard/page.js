@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
@@ -25,6 +25,12 @@ export default function ParentDashboard() {
   const [focusAreas, setFocusAreas] = useState([]);
   const [toast, setToast] = useState('');
 
+  // Chat UI States
+  const [messages, setMessages] = useState([{ role: 'ai', text: "Namaste! 🙏 Main Arya Manager hoon. Aap manually topics select kar sakte hain, ya seedha yahan mujhe likh kar bata sakte hain." }]);
+  const [input, setInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef(null);
+
   useEffect(() => {
     async function fetchData() {
       const studentId = 'student_123'; // NOTE: Yahan parent ke child ki ID aayegi
@@ -48,6 +54,10 @@ export default function ParentDashboard() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const handleFocusClick = async (topicId) => {
     const studentId = 'student_123';
     const isFocused = focusAreas.includes(topicId);
@@ -60,6 +70,41 @@ export default function ParentDashboard() {
       await supabase.from('student_focus_areas').insert({ student_id: studentId, topic_tag: topicId, priority: 1 });
       setFocusAreas([...focusAreas, topicId]);
       showToast('AI ko naya focus de diya hai!');
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() || chatLoading) return;
+    const userMsg = input.trim();
+    setMessages(prev => [...prev, { role: 'parent', text: userMsg }]);
+    setInput('');
+    setChatLoading(true);
+
+    try {
+      const res = await fetch('/api/ai/parent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: userMsg,
+          parentId: localStorage.getItem('kidai_parent_id') || 'parent_123',
+          studentId: 'student_123'
+        })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setMessages(prev => [...prev, { role: 'ai', text: data.reply, type: data.action_taken }]);
+        if (data.action_taken === 'guidance') {
+          const { data: existingFocus } = await supabase.from('student_focus_areas').select('topic_tag').eq('student_id', 'student_123');
+          if (existingFocus) setFocusAreas(existingFocus.map(f => f.topic_tag));
+        }
+      } else {
+        setMessages(prev => [...prev, { role: 'ai', text: "Maaf kijiye, server se connect nahi ho paya." }]);
+      }
+    } catch (e) {
+      setMessages(prev => [...prev, { role: 'ai', text: "Internet connection check karein." }]);
+    } finally {
+      setChatLoading(false);
     }
   };
 
@@ -104,6 +149,39 @@ export default function ParentDashboard() {
               </div>
             );
           })}
+        </div>
+
+        <h2 style={styles.sectionTitle}>💬 Arya Manager (AI Assistant)</h2>
+        <p style={styles.sectionDescription}>Type karke batayein aap kya chahte hain (e.g. "Math par dhyan do" ya "Naya game add karo").</p>
+
+        <div style={{ background: C.card, borderRadius: 16, border: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', height: 400, overflow: 'hidden', marginTop: 16 }}>
+          <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {messages.map((msg, i) => (
+              <div key={i} style={{ alignSelf: msg.role === 'parent' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                <div style={{ 
+                  background: msg.role === 'parent' ? `linear-gradient(135deg, ${C.cyan}, ${C.purple})` : C.card2, 
+                  color: msg.role === 'parent' ? '#fff' : C.text,
+                  padding: '10px 14px', borderRadius: 12, fontSize: 14, lineHeight: 1.5,
+                  border: msg.role === 'ai' ? `1px solid ${C.border}` : 'none'
+                }}>
+                  {msg.text}
+                </div>
+                {msg.type === 'guidance' && <div style={{ fontSize: 11, color: C.green, marginTop: 4, textAlign: msg.role === 'parent' ? 'right' : 'left' }}>✅ Focus Area Updated</div>}
+                {msg.type === 'suggestion' && <div style={{ fontSize: 11, color: C.orange, marginTop: 4, textAlign: msg.role === 'parent' ? 'right' : 'left' }}>📝 Suggestion Sent to Admin</div>}
+              </div>
+            ))}
+            {chatLoading && <div style={{ color: C.muted, fontSize: 12, fontStyle: 'italic' }}>Arya likh rahi hain... ✍️</div>}
+            <div ref={chatEndRef} />
+          </div>
+          
+          <div style={{ padding: 12, background: C.card2, borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8 }}>
+            <input 
+              value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="Message likhein..." 
+              style={{ flex: 1, padding: '10px 14px', borderRadius: 8, background: C.bg, border: `1px solid ${C.border}`, color: '#fff', outline: 'none', fontSize: 14 }}
+            />
+            <button onClick={sendMessage} style={{ background: C.cyan, color: '#000', border: 'none', padding: '0 16px', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>Send ➔</button>
+          </div>
         </div>
       </main>
     </div>

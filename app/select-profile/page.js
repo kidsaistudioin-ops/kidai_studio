@@ -17,6 +17,19 @@ export default function SelectProfile() {
     localStorage.setItem('kidai_student_id', 'student_123');
     localStorage.setItem('kidai_student_name', 'Arjun');
     localStorage.removeItem('kidai_parent_id');
+    localStorage.removeItem('kidai_is_guest');
+
+    // Referral Logic Check for Registered Users (First time only)
+    if (!localStorage.getItem('kidai_free_plays')) {
+      const hasReferral = window.confirm("🎁 Kya aapke paas kisi dost ka Invite Link/Code hai? (OK dabayein agar hai, Cancel agar nahi)");
+      if (hasReferral) {
+        localStorage.setItem('kidai_free_plays', '10');
+        alert("Badhai ho! 🎉 Aapko 10 Free Games mile hain! Aapke dost ko bhi 5 games mil jayenge.");
+      } else {
+        localStorage.setItem('kidai_free_plays', '5');
+      }
+    }
+
     router.push('/home'); // Bacche ka dashboard
   };
 
@@ -24,7 +37,39 @@ export default function SelectProfile() {
     // Parent ka session set karo aur Bacche ka hata do
     localStorage.setItem('kidai_parent_id', 'parent_123');
     localStorage.removeItem('kidai_student_id');
+    localStorage.removeItem('kidai_is_guest');
     router.push('/parent/dashboard'); // Parent ka dashboard
+  };
+
+  const handleGuestSelect = () => {
+    // Guest ka session set karo (Free Promotional Mode)
+    localStorage.setItem('kidai_is_guest', 'true');
+    localStorage.setItem('kidai_student_name', 'Guest Player');
+    localStorage.removeItem('kidai_student_id');
+    localStorage.removeItem('kidai_parent_id');
+
+    // Referral Logic Check (First time only)
+    if (!localStorage.getItem('kidai_free_plays')) {
+      const hasReferral = window.confirm("🎁 Kya aapke paas kisi dost ka Invite Link/Code hai? (OK dabayein agar hai, Cancel agar nahi)");
+      if (hasReferral) {
+        localStorage.setItem('kidai_free_plays', '10'); // 5 Base + 5 Referral Bonus
+        alert("Badhai ho! 🎉 Aapko 10 Free Games mile hain! Aapke dost ko bhi 5 games mil jayenge.");
+      } else {
+        localStorage.setItem('kidai_free_plays', '5'); // Base 5 Games
+      }
+    }
+
+    router.push('/home'); // Yahan games access honge limited features ke sath
+  };
+
+  const handleLogout = () => {
+    // Puraana session aur data clear karna taaki naye Gmail se login ho sake
+    localStorage.removeItem('kidai_student_id');
+    localStorage.removeItem('kidai_parent_id');
+    localStorage.removeItem('kidai_is_guest');
+    localStorage.removeItem('kidai_free_plays');
+    localStorage.removeItem('kidai_student_name');
+    router.push('/'); // Login/Landing page par wapas bhej do
   };
 
   return (
@@ -84,8 +129,38 @@ export default function SelectProfile() {
           <div style={{ marginTop: 16, fontSize: 18, fontWeight: 800, color: hovered === 'parent' ? '#fff' : C.muted, transition: '0.2s' }}>Parent</div>
         </div>
 
+        {/* Guest Profile (Promotional) */}
+        <div 
+          onClick={handleGuestSelect}
+          onMouseEnter={() => setHovered('guest')}
+          onMouseLeave={() => setHovered(null)}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s' }}
+        >
+          <div style={{ 
+            width: 140, height: 140, borderRadius: 24, 
+            background: `linear-gradient(135deg, ${C.orange}, #fbbf24)`, 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60,
+            border: hovered === 'guest' ? `4px solid #fff` : `4px solid transparent`,
+            boxShadow: hovered === 'guest' ? `0 10px 30px ${C.orange}66` : 'none',
+            transform: hovered === 'guest' ? 'scale(1.05)' : 'scale(1)',
+            transition: 'all 0.2s ease-in-out',
+            position: 'relative'
+          }}>
+            🎮
+            <div style={{ position: 'absolute', top: -10, right: -10, background: '#ef4444', color: '#fff', fontSize: 12, fontWeight: 900, padding: '4px 8px', borderRadius: 12, boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>FREE</div>
+          </div>
+          <div style={{ marginTop: 16, fontSize: 18, fontWeight: 800, color: hovered === 'guest' ? '#fff' : C.muted, transition: '0.2s' }}>Guest Play</div>
+        </div>
+
       </div>
       
+      {/* Logout / Switch Account Button */}
+      <div style={{ marginTop: 60 }}>
+        <button onClick={handleLogout} style={{ background: 'transparent', border: `2px solid ${C.border}`, color: C.muted, padding: '10px 24px', borderRadius: 12, fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 18 }}>🚪</span> Logout / Switch Account
+        </button>
+      </div>
+
     </div>
   );
 }

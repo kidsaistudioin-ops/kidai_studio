@@ -22,7 +22,8 @@ export default function FAQ() {
               { q: "Kya KidAI free hai?", a: "Haan! Basic account bilkul free hai jisme aap daily 3 games khel sakte hain." },
               { q: "Ye kis age ke bacchon ke liye hai?", a: "Ye platform 6 se 18 saal ke bacchon ke liye design kiya gaya hai. Har age group ke liye alag features hain." },
               { q: "Kya yahan bacchon ka data safe hai?", a: "100% safe! Hum koi ads nahi dikhate aur data strictly private rehta hai." },
-              { q: "Earn Mode kya hai?", a: "13+ saal ke bacche verified companies ke liye AI tools use karke real pocket money kama sakte hain." }
+              { q: "Earn Mode kya hai?", a: "13+ saal ke bacche verified companies ke liye AI tools use karke real pocket money kama sakte hain." },
+              { q: "Referral Code se doston ko invite karne par kya milega?", a: "Apne referral code se doston ko sign up karwao aur dono ko 50 XP points milenge! Har 50 XP points par aapko 5 din ka 'Premium Badge' bilkul free milega jisse aap unlimited AI scanner aur games unlock kar sakte hain." }
             ].map((faq, i) => (
               <div key={i} style={{ background: C.card2, borderRadius: 12, padding: 14 }}>
                 <div style={{ fontWeight: 800, fontSize: 14, color: C.text, marginBottom: 6 }}>Q: {faq.q}</div>
