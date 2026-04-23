@@ -26,7 +26,7 @@ export default function ScannerPage() {
     
     const fileArray = Array.from(files).slice(0, 10); // Max 10 images
     setLoading(true);
-    setStatus('Photos process ho rahi hain... 📸');
+    setStatus('✅ Photos platform mein aa gayi hain! Process ho rahi hain... 📸');
 
     const promises = fileArray.map(file => {
       return new Promise((resolve) => {
@@ -60,22 +60,23 @@ export default function ScannerPage() {
 
   // 🚀 AI se Game Generate karwana (Auto Call)
   const handleGenerate = async (base64ImagesArray) => {
-    setStatus('AI aapki photo ko padh raha hai... 🕵️‍♀️');
+    setStatus('AI aapki photo ko padh raha hai... (Isme lagbhag 15-20 second lagenge) 🕵️‍♀️');
     
     try {
       // Engine se generation start
-      setStatus('Naye Games ban rahe hain... 🎮✨');
+      setStatus('Photos se naye Games ban rahe hain... Kripya thoda intezaar karein 🎮✨');
       
       // Ab ek image ke jagah array of images ja raha hai
       const gameData = await generateGameFromScan(base64ImagesArray, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']);
       
-      setStatus('Game Ready! Save ho raha hai... 💾');
+      setStatus('🎉 Game Ready! Platform mein save ho gaya hai. Aapko Seekho page par le ja rahe hain... 💾');
       
       // Game ko local memory me save kar rahe hain taaki "Seekho" page isko padh sake
       localStorage.setItem('kidai_scanned_game', JSON.stringify(gameData));
       
-      // ✅ Seedha Seekho page par redirect
-      router.push('/seekho');
+      setTimeout(() => {
+        router.push('/seekho');
+      }, 2500); // Thoda delay taaki user success message padh sake
       
     } catch (error) {
       console.error("Scanner Error:", error);

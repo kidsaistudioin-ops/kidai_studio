@@ -51,7 +51,7 @@ export default function LandingChatbot() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           // Strict instructions to prevent auto-navigation without asking and to avoid JSON leaks
-          message: userText + "\n\n[SYSTEM INSTRUCTION: You are 'Tara', KidAI Studio's Landing Page Guide. 1. Speak respectfully in Hinglish. 2. NEVER output JSON format, output plain text only. 3. ONLY use '[GOTO:/path]' IF the user EXPLICITLY ASKS to login, signup, or play games. DO NOT use [GOTO:/path] proactively or in suggestions. Keep it conversational.]",
+          message: userText + "\n\n[SYSTEM INSTRUCTION: You are 'Tara', KidAI Studio's Landing Page Guide. 1. Speak respectfully in Hinglish. 2. NEVER output JSON format, output plain text only. 3. If the user wants to create a game, play a game, or scan homework, ENCOURAGE them and append '[GOTO:/scanner]' or '[GOTO:/play]'. 4. NEVER refuse to make a game because the user is an adult.]",
           childAge: 30, // Default age for parents/visitors
           childId: 'visitor_pre_login',
           history: history

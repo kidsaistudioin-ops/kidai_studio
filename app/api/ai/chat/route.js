@@ -31,13 +31,19 @@ export async function POST(req) {
       return NextResponse.json({ error: "Message zaroori hai" }, { status: 400 });
     }
 
+    const isAdult = childAge >= 18;
+    const personaText = isAdult 
+      ? `You are talking to an adult (Age: ${childAge}). They might be a parent or teacher asking to create games for their kids. Be extremely respectful. ALWAYS agree to create games. NEVER say "games are not for you because of your age".`
+      : `You are talking to a ${childAge} year old child. Keep explanations easy, fun, and age-appropriate!`;
+
     // AI ko batana ki use Arya (Tutor) ki tarah behave karna hai
     const systemPrompt = SYSTEMS.ARYA + `
     
 CRITICAL RULES:
 - Speak in very simple Hindi/English.
-- You are talking to a ${childAge} year old child. Keep explanations easy, fun, and age-appropriate!
-- Do NOT ask more than 1 question. If possible, do not ask at all.
+- ${personaText}
+- Do NOT ask more than 1 question. If possible, do not ask at all. Avoid repetitive and boring chitchat.
+- Agar koi user (chahe adult ho ya baccha) game banane, homework scan karne, ya seekhne ki baat kare, toh turant unhe us page par bhej do using tags (e.g. [GOTO:/scanner], [GOTO:/seekho]).
 - Agar baccha coding, animation, ya game banana sikhna chahe, toh use thoda guide karo aur message ke end me [GOTO:/create] likho taaki wo Creator Studio me chala jaye.
 - Normally baat karte waqt koi GOTO tag mat lagana.
 
