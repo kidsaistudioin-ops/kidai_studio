@@ -75,7 +75,7 @@ export default function ScannerPage() {
     setStatus('📸 Photos scan ho rahi hain...');
 
     try {
-      // STEP 1: Fast Library se text nikalna (Browser ke andar)
+       // STEP 1: Fast Library se text nikalna (Browser ke andar)
       const Tesseract = (await import('tesseract.js')).default;
       let combinedText = "";
       for (let i = 0; i < imageList.length; i++) {

@@ -1145,7 +1145,10 @@ function AIGeneratedGame({ gameData, onComplete }) {
     return <div style={{ color: T.text, textAlign: 'center', padding: 20 }}>Game load ho raha hai...</div>;
   }
 
-  const question = gameData.questions[current];
+  const question = gameData.questions[current];  
+  // AI kabhi 'q' bhejta hai aur kabhi 'gameQ', isliye dono check karenge
+  const qText = question.gameQ || question.q || question.question || "Answer this:";
+  const options = question.opts || question.options || [];
 
   const checkAnswer = (idx) => {
     if (idx === question.correct) {
@@ -1170,14 +1173,14 @@ function AIGeneratedGame({ gameData, onComplete }) {
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
       <div style={{ color: T.orange, fontWeight: 800, marginBottom: 10, fontSize: 14 }}>
-        ✨ AI Magic Game: {gameData.title || "Scanned Mission"}
+        ✨ AI Magic Game: {gameData.title || gameData.gameTitle || "Scanned Mission"}
       </div>
       <h2 style={{ color: T.cyan, marginBottom: 15, fontSize: 22, lineHeight: 1.4 }}>
-        {question.q}
+        {qText}
       </h2>
       
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, maxWidth: 400, margin: "20px auto" }}>
-        {question.opts.map((opt, idx) => (
+        {options.map((opt, idx) => (
           <button 
             key={idx}
             onClick={() => checkAnswer(idx)}
@@ -1348,6 +1351,11 @@ export default function SeekhoEnglishPage() {
       padding: 20,
       fontFamily: "system-ui, sans-serif"
     }}>
+      <style>{`
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 8px 30px #ff6b3566; } 50% { transform: scale(1.02); box-shadow: 0 8px 40px #ff6b3599; } 100% { transform: scale(1); box-shadow: 0 8px 30px #ff6b3566; } }
+        @keyframes bounce-sm { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+      `}</style>
+
       {/* Header */}
       <div style={{ 
         textAlign: "center", 
@@ -1383,25 +1391,15 @@ export default function SeekhoEnglishPage() {
       {scannedGame && (
         <div 
           onClick={() => setActiveGame('ai_scanned')}
-          style={{
-            background: `linear-gradient(135deg, ${T.card}, ${T.card2})`,
-            border: `2px dashed ${T.orange}`,
-            borderRadius: 16,
-            padding: 24,
-            maxWidth: 800,
-            margin: "0 auto 30px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 20,
-            boxShadow: `0 8px 30px ${T.orange}22`,
-            animation: "pulse-glow 2s infinite"
-          }}
+          style={{ background: `linear-gradient(135deg, ${T.orange}, ${T.pink})`, borderRadius: 20, padding: 3, maxWidth: 800, margin: "0 auto 30px", cursor: "pointer", boxShadow: `0 8px 30px ${T.orange}66`, animation: "pulse 2s infinite" }}
         >
-          <div style={{ fontSize: 50, animation: "bounce 2s infinite" }}>🎁</div>
-          <div>
-            <h2 style={{ color: T.orange, margin: "0 0 8px" }}>Homework Game Ready!</h2>
-            <p style={{ color: T.muted, margin: 0, fontSize: 14 }}>Aapke scan kiye hue photo se naya game ban gaya hai. <b>Abhi khelo!</b></p>
+          <div style={{ background: T.card, borderRadius: 18, padding: 24, display: "flex", alignItems: "center", gap: 20 }}>
+            <div style={{ fontSize: 50, animation: "bounce-sm 2s infinite" }}>🎁</div>
+            <div>
+              <div style={{ background: T.orange, color: '#fff', fontSize: 11, fontWeight: 900, padding: '4px 8px', borderRadius: 8, display: 'inline-block', marginBottom: 8, letterSpacing: 1 }}>NEW SCAN 📸</div>
+              <h2 style={{ color: T.text, margin: "0 0 8px", fontSize: 22, fontWeight: 900 }}>Aapka Naya AI Game!</h2>
+              <p style={{ color: T.muted, margin: 0, fontSize: 14, lineHeight: 1.5 }}>Jo photo aapne daali thi, Arya ne uska game bana diya hai. <span style={{color: T.orange, fontWeight: 800}}>Tap karke abhi khelo! ▶</span></p>
+            </div>
           </div>
         </div>
       )}
