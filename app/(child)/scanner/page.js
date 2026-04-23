@@ -1,8 +1,9 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateGameFromScan } from '@/lib/arya/arya-engine';
 import Header from '@/components/ui/Header';
+import Tesseract from 'tesseract.js';
 
 const C = {
   bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
@@ -12,21 +13,24 @@ const C = {
 
 export default function ScannerPage() {
   const router = useRouter();
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
+  
+  // Naye Queue aur Counter States
+  const [queue, setQueue] = useState([]); // Jo images line me hain
+  const [totalAdded, setTotalAdded] = useState(0); // Lifetime counter
+  const [completed, setCompleted] = useState(0); // Kitne games ban gaye
+  const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState('');
   
   // Hidden file inputs ke refs
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
-  // 📸 Images ko Compress karna (Max 10) aur Automatically AI ko bhejna
+  // 📸 Images ko Compress karna aur Queue me daalna
   const processFiles = async (files) => {
     if (!files || files.length === 0) return;
     
-    const fileArray = Array.from(files).slice(0, 10); // Max 10 images
-    setLoading(true);
-    setStatus('✅ Photos platform mein aa gayi hain! Process ho rahi hain... 📸');
+    // Ab user kitni bhi files select kar sakta hai
+    const fileArray = Array.from(files);
 
     const promises = fileArray.map(file => {
       return new Promise((resolve) => {
@@ -52,38 +56,71 @@ export default function ScannerPage() {
     });
 
     const base64Images = await Promise.all(promises);
-    setImages(base64Images);
     
-    // Bina kisi button dabaye sidhe Generate function auto-call ho jayega
-    handleGenerate(base64Images);
+    setQueue(prev => [...prev, ...base64Images]);
+    setTotalAdded(prev => prev + base64Images.length);
   };
 
-  // 🚀 AI se Game Generate karwana (Auto Call)
-  const handleGenerate = async (base64ImagesArray) => {
-    setStatus('AI aapki photo ko padh raha hai... (Isme lagbhag 15-20 second lagenge) 🕵️‍♀️');
+  // 🚀 BACKGROUND AUTO-PROCESSOR (Jaise hi queue me photo aayegi, ye chal padega)
+  useEffect(() => {
+    if (queue.length > 0 && !isProcessing) {
+      processNextBatch();
+    }
+  }, [queue, isProcessing]);
+
+  const processNextBatch = async () => {
+    setIsProcessing(true);
     
+    // Server overload se bachne ke liye ek baar mein 3-5 images hi AI ko bhejte hain
+    const batchSize = Math.min(queue.length, 3); 
+    const currentBatch = queue.slice(0, batchSize);
+
     try {
-      // Engine se generation start
-      setStatus('Photos se naye Games ban rahe hain... Kripya thoda intezaar karein 🎮✨');
+      setStatus(`⏳ ${batchSize} Photos padhi ja rahi hain... (AI Vision)`);
       
-      // Ab ek image ke jagah array of images ja raha hai
-      const gameData = await generateGameFromScan(base64ImagesArray, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']);
+      // Try 1: AI Vision Model se generate karna
+      await generateGameFromScan(currentBatch, "", 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']); 
       
-      setStatus('🎉 Game Ready! Platform mein save ho gaya hai. Aapko Seekho page par le ja rahe hain... 💾');
-      
-      // Game ko local memory me save kar rahe hain taaki "Seekho" page isko padh sake
-      localStorage.setItem('kidai_scanned_game', JSON.stringify(gameData));
-      
-      setTimeout(() => {
-        router.push('/seekho');
-      }, 2500); // Thoda delay taaki user success message padh sake
+      // Success: Screen se un photos ko hata do jo process ho chuki hain
+      setQueue(prev => prev.slice(batchSize));
+      setCompleted(prev => prev + batchSize);
+      setStatus(`✅ ${batchSize} Games successfully ban gaye!`);
       
     } catch (error) {
-      console.error("Scanner Error:", error);
-      alert("Oops! Game banane me thodi problem aayi. Dusri clear photo try karein! 🔌");
-      setImages([]); // Retry karne ke liye khali kar do
-      setLoading(false);
+      console.log("AI Vision failed, trying OCR...", error);
+      setStatus(`⚠️ AI Vision overload! Free OCR text nikal rahi hai...`);
+      
+      try {
+        // Try 2: Tesseract Library Fallback (Bina AI ke text extract karna, Zero Cost)
+        let combinedText = "";
+        for (let i = 0; i < currentBatch.length; i++) {
+          const { data } = await Tesseract.recognize(currentBatch[i], 'eng');
+          combinedText += `\n--- Image ${i+1} ---\n${data.text}`;
+        }
+
+        // Tesseract ka text identify karne ke liye label lagaya
+        const fallbackText = `[TESSERACT OCR LIBRARY NE YE TEXT NIKALA HAI]\nNiche diye gaye text se bacche ke liye mazedar game banao:\n${combinedText}`;
+        
+        setStatus(`🧠 OCR ne text nikal liya. Ab games ban rahe hain...`);
+        
+        // Empty array [] bhej rahe hain taaki AI Vision model ki jagah sasta Text model chal jaye
+        await generateGameFromScan([], fallbackText, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']);
+        
+        // Success after Fallback
+        setQueue(prev => prev.slice(batchSize));
+        setCompleted(prev => prev + batchSize);
+        setStatus(`✅ OCR ki madad se games ban gaye!`);
+      } catch (fallbackError) {
+        console.error("Dono methods fail ho gaye", fallbackError);
+        setStatus(`❌ Ek batch fail ho gaya. Skip karke aage badh rahe hain...`);
+        setQueue(prev => prev.slice(batchSize)); // Fail hua batch drop kar do taaki queue block na ho
+      }
     }
+    
+    // Agla batch pick karne ke liye thoda sa delay dete hain
+    setTimeout(() => {
+      setIsProcessing(false);
+    }, 1500);
   };
 
   return (
@@ -104,8 +141,8 @@ export default function ScannerPage() {
 
         {images.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} style={{ display: 'none' }} onChange={(e) => processFiles(e.target.files)} />
-            <input type="file" accept="image/*" multiple ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => processFiles(e.target.files)} />
+            <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
+            <input type="file" accept="image/*" multiple ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
 
             <button onClick={() => cameraInputRef.current.click()} style={{ background: `linear-gradient(135deg, ${C.orange}, ${C.pink})`, color: '#fff', border: 'none', padding: '16px', borderRadius: 16, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 20px ${C.orange}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
               <span style={{ fontSize: 20 }}>📷</span> Camera se Photo Lo
@@ -116,9 +153,17 @@ export default function ScannerPage() {
           </div>
         ) : (
           <div style={{ background: C.card, padding: 16, borderRadius: 20, border: `1px solid ${C.border}`, animation: 'slideUp 0.3s ease' }}>
+            <div style={{ marginBottom: 12, fontWeight: 800, color: C.cyan, fontSize: 18 }}>
+              📸 Aapki Total Photos: {images.length}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: images.length > 1 ? '1fr 1fr' : '1fr', gap: 10, marginBottom: 16 }}>
               {images.map((img, idx) => (
-                <img key={idx} src={img} alt={`Scanned ${idx}`} style={{ width: '100%', borderRadius: 12, maxHeight: 200, objectFit: 'cover' }} />
+                <div key={idx} style={{ position: 'relative' }}>
+                  <img src={img} alt={`Scanned ${idx}`} style={{ width: '100%', borderRadius: 12, maxHeight: 150, objectFit: 'cover', border: `1px solid ${C.border}` }} />
+                  {!loading && (
+                    <button onClick={() => setImages(images.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: 26, height: 26, cursor: 'pointer', fontWeight: 'bold' }}>×</button>
+                  )}
+                </div>
               ))}
             </div>
             {loading ? (
@@ -128,8 +173,19 @@ export default function ScannerPage() {
                 <p style={{ color: C.muted, fontSize: 12, marginTop: 6 }}>Kripya screen band na karein (10-15s)...</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => setImages([])} style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, borderRadius: 12, fontWeight: 800, cursor: 'pointer', fontSize: 14 }}>❌ Cancel</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <button onClick={() => handleGenerate(images)} style={{ background: `linear-gradient(135deg, ${C.green}, ${C.cyan})`, color: '#fff', border: 'none', padding: '16px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 15px ${C.green}44` }}>
+                  ✨ {images.length} Photos ka Game Banao!
+                </button>
+                
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
+                  <input type="file" accept="image/*" multiple ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
+                  
+                  <button onClick={() => cameraInputRef.current.click()} style={{ flex: 1, padding: '10px', background: C.card2, border: `1px solid ${C.border}`, color: C.text, borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>📷 Aur Jodo</button>
+                  <button onClick={() => fileInputRef.current.click()} style={{ flex: 1, padding: '10px', background: C.card2, border: `1px solid ${C.border}`, color: C.text, borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🖼️ Gallery</button>
+                  <button onClick={() => setImages([])} style={{ flex: 1, padding: '10px', background: 'transparent', border: `1px solid #ef444466`, color: '#ef4444', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🗑️ Clear All</button>
+                </div>
               </div>
             )}
           </div>
