@@ -20,6 +20,7 @@ export default function ScannerPage() {
   const [generatedGame, setGeneratedGame] = useState(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [totalAdded, setTotalAdded] = useState(0);
+  const [studentId, setStudentId] = useState(null);
   
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -68,6 +69,11 @@ export default function ScannerPage() {
     setTotalAdded(prev => prev + base64Images.length);
   };
 
+  useEffect(() => {
+    const id = localStorage.getItem('kidai_student_id');
+    if (id) setStudentId(id);
+  }, []);
+
   const handleGenerate = async (imageList) => {
     if (!imageList || imageList.length === 0) return;
 
@@ -91,7 +97,7 @@ export default function ScannerPage() {
       // STEP 2: Sirf Text ko AI ko bhejna (Super Fast)
       setStatus('🤖 AI game bana raha hai (Sirf 3-5 sec)...');
       const result = await generateGameFromScan(
-        [], combinedText, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
+        [], combinedText, studentId, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
       );
       
       if (result && result.error) {

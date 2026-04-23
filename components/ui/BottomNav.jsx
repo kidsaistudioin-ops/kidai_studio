@@ -4,9 +4,9 @@ import { usePathname, useRouter } from 'next/navigation'
 const NAV_ITEMS = [
   { href: '/home',    icon: '🏠', label: 'Home' },
   { href: '/seekho',  icon: '📖', label: 'Seekho' },
-  { href: '/learn',   icon: '📚', label: 'Learn' },
-  { href: '/library', icon: '🕹️', label: 'Games' },
-  { href: '/create',  icon: '🎨', label: 'Creator' },
+  { href: '/scanner', icon: '📸', label: 'Scan' },
+  { href: '/play',    icon: '🎮', label: 'Play' },
+  { href: '/library', icon: '🎒', label: 'Library' },
 ]
 
 export default function BottomNav() {
