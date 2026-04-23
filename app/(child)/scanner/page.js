@@ -3,7 +3,6 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateGameFromScan } from '@/lib/arya/arya-engine';
 import Header from '@/components/ui/Header';
-import Tesseract from 'tesseract.js';
 
 const C = {
   bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
@@ -77,6 +76,7 @@ export default function ScannerPage() {
 
     try {
       // STEP 1: Fast Library se text nikalna (Browser ke andar)
+      const Tesseract = (await import('tesseract.js')).default;
       let combinedText = "";
       for (let i = 0; i < imageList.length; i++) {
         setStatus(`🔍 Fast Library: Photo ${i+1} padh rahi hai...`);
