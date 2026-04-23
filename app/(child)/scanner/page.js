@@ -35,13 +35,13 @@ export default function ScannerPage() {
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800;
+            const MAX_WIDTH = 512; // 🚀 Resolution aur kam kiya taaki server crash na ho
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg', 0.8));
+            resolve(canvas.toDataURL('image/jpeg', 0.5)); // 🚀 Quality 50% kar di (Fast & under 1MB limit)
           };
           img.src = event.target.result;
         };
@@ -67,6 +67,10 @@ export default function ScannerPage() {
         imageList, "", 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
       );
       
+      if (result && result.error) {
+        throw new Error(result.error);
+      }
+      
       setGeneratedGame(result);
       setStatus('✅ Game ban gaya!');
       setCompletedCount(totalAdded);
@@ -78,8 +82,8 @@ export default function ScannerPage() {
       }
 
     } catch (error) {
-      console.error("Game generation failed:", error);
-      setStatus('❌ Kuch gadbad ho gayi. Dobara try karo.');
+      console.error("Game generation failed:", error.message);
+      setStatus(`❌ Error: ${error.message || 'Kuch gadbad ho gayi'}`);
     } finally {
       setLoading(false);
     }
