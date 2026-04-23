@@ -1149,7 +1149,9 @@ function AIGeneratedGame({ gameData, onComplete }) {
   const question = gameData.questions[current];  
   // AI kabhi 'q' bhejta hai aur kabhi 'gameQ', isliye dono check karenge
   const qText = question.gameQ || question.q || question.question || "Answer this:";
+  const qTextHin = question.gameQ_hin || "";
   const options = question.opts || question.options || [];
+  const optionsHin = question.opts_hin || [];
 
   const checkAnswer = (idx) => {
     if (idx === question.correct) {
@@ -1176,9 +1178,14 @@ function AIGeneratedGame({ gameData, onComplete }) {
       <div style={{ color: T.orange, fontWeight: 800, marginBottom: 10, fontSize: 14 }}>
         ✨ AI Magic Game: {gameData.title || gameData.gameTitle || "Scanned Mission"}
       </div>
-      <h2 style={{ color: T.cyan, marginBottom: 15, fontSize: 22, lineHeight: 1.4 }}>
+      <h2 style={{ color: T.cyan, marginBottom: 5, fontSize: 22, lineHeight: 1.4 }}>
         {qText}
       </h2>
+      {qTextHin && (
+        <div style={{ color: T.muted, fontSize: 16, marginBottom: 15, fontStyle: 'italic', fontWeight: 600 }}>
+          ({qTextHin})
+        </div>
+      )}
       
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, maxWidth: 400, margin: "20px auto" }}>
         {options.map((opt, idx) => (
@@ -1190,10 +1197,15 @@ function AIGeneratedGame({ gameData, onComplete }) {
               padding: "16px", 
               fontSize: 16, 
               border: `2px solid ${feedback === "correct" && idx === question.correct ? T.green : feedback === "wrong" && idx !== question.correct ? T.red : T.border}`,
-              background: feedback === "correct" && idx === question.correct ? T.green + '33' : T.card2
+              background: feedback === "correct" && idx === question.correct ? T.green + '33' : T.card2,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 4
             }}
           >
-            {opt}
+            <span style={{ fontWeight: 800 }}>{opt}</span>
+            {optionsHin[idx] && <span style={{ fontSize: 13, color: feedback === "correct" && idx === question.correct ? T.green : T.muted, fontWeight: 600 }}>({optionsHin[idx]})</span>}
           </button>
         ))}
       </div>
