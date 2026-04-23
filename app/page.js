@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LandingChatbot from '@/components/ui/LandingChatbot';
@@ -10,7 +10,8 @@ import MainFooter from '@/components/ui/MainFooter';
 const C = {
   bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
   orange: '#ff6b35', purple: '#7c3aed', cyan: '#06b6d4', green: '#10b981',
-  yellow: '#f59e0b', pink: '#ec4899', text: '#f1f5f9', muted: '#64748b'
+  yellow: '#f59e0b', pink: '#ec4899', text: '#f1f5f9', muted: '#64748b',
+  red: '#ef4444'
 };
 
 const GUEST_QUIZ = [
@@ -55,7 +56,24 @@ export default function HomePage() {
   const [gamesPlayed, setGamesPlayed] = useState(0);
   const [activeGame, setActiveGame] = useState(null);
   const [toastMsg, setToastMsg] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const MAX_FREE = 3;
+
+  useEffect(() => {
+    if (localStorage.getItem('kidai_student_id') || localStorage.getItem('kidai_admin')) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('kidai_student_id');
+    localStorage.removeItem('kidai_student_name');
+    localStorage.removeItem('kidai_student_avatar');
+    localStorage.removeItem('kidai_is_guest');
+    localStorage.removeItem('kidai_admin');
+    setIsLoggedIn(false);
+    showToast('👋 Successfully Logged Out!');
+  };
 
   const showToast = (msg) => {
     setToastMsg(msg);
@@ -106,7 +124,14 @@ export default function HomePage() {
           </h1>
           <p style={{ color: C.muted, fontSize: 14, maxWidth: 320, margin: '0 auto 20px', lineHeight: 1.6 }}>6-18 saal ke bacho ke liye — AI seekho, games banao, homework fun banao!</p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button style={btnStyle(C.orange)} onClick={() => router.push('/signup')}>✅ Free Mein Shuru Karo</button>
+            {isLoggedIn ? (
+              <>
+                <button style={btnStyle(C.green)} onClick={() => router.push('/select-profile')}>🏠 Dashboard Kholo</button>
+                <button style={btnStyle(C.red, false, true)} onClick={handleLogout}>🚪 Logout</button>
+              </>
+            ) : (
+              <button style={btnStyle(C.orange)} onClick={() => router.push('/signup')}>✅ Free Mein Shuru Karo</button>
+            )}
           </div>
         </div>
 
@@ -151,9 +176,13 @@ export default function HomePage() {
             <div style={{ background: `linear-gradient(135deg, ${C.green}22, ${C.cyan}11)`, border: `1px solid ${C.green}44`, borderRadius: 14, padding: 16, textAlign: 'center' }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>🔓</div>
               <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>3 Games Try Kar Liye!</div>
-              <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>Free account se unlimited access — 30 seconds mein!</div>
-              <button style={btnStyle(C.green, true)} onClick={() => router.push('/signup')}>✅ Free Account Banao</button>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 8 }}>No credit card • No spam</div>
+              <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>{isLoggedIn ? 'Aapka premium account active hai!' : 'Free account se unlimited access — 30 seconds mein!'}</div>
+              {isLoggedIn ? (
+                <button style={btnStyle(C.green, true)} onClick={() => router.push('/select-profile')}>🏠 Dashboard Kholo</button>
+              ) : (
+                <button style={btnStyle(C.green, true)} onClick={() => router.push('/signup')}>✅ Free Account Banao</button>
+              )}
+              {!isLoggedIn && <div style={{ fontSize: 11, color: C.muted, marginTop: 8 }}>No credit card • No spam</div>}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -212,7 +241,11 @@ export default function HomePage() {
           ))}
         </div>
 
-        <button style={btnStyle(C.orange, true)} onClick={() => router.push('/signup')}>🚀 Abhi Shuru Karo — Free!</button>
+        {isLoggedIn ? (
+          <button style={btnStyle(C.red, true)} onClick={handleLogout}>🚪 Logout Karo</button>
+        ) : (
+          <button style={btnStyle(C.orange, true)} onClick={() => router.push('/signup')}>🚀 Abhi Shuru Karo — Free!</button>
+        )}
       </div>
 
       {/* Naya API Connected Chatbot */}

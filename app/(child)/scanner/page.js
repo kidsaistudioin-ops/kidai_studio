@@ -1,35 +1,31 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateGameFromScan } from '@/lib/arya/arya-engine';
 import Header from '@/components/ui/Header';
-import Tesseract from 'tesseract.js';
 
 const C = {
   bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
   orange: '#ff6b35', purple: '#7c3aed', cyan: '#06b6d4', green: '#10b981',
-  text: '#f1f5f9', muted: '#64748b'
+  text: '#f1f5f9', muted: '#64748b', pink: '#ec4899'
 };
 
 export default function ScannerPage() {
   const router = useRouter();
   
-  // Naye Queue aur Counter States
-  const [queue, setQueue] = useState([]); // Jo images line me hain
-  const [totalAdded, setTotalAdded] = useState(0); // Lifetime counter
-  const [completed, setCompleted] = useState(0); // Kitne games ban gaye
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Sahi state variables
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
+  const [generatedGame, setGeneratedGame] = useState(null);
+  const [completedCount, setCompletedCount] = useState(0);
+  const [totalAdded, setTotalAdded] = useState(0);
   
-  // Hidden file inputs ke refs
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
-  // 📸 Images ko Compress karna aur Queue me daalna
   const processFiles = async (files) => {
     if (!files || files.length === 0) return;
-    
-    // Ab user kitni bhi files select kar sakta hai
     const fileArray = Array.from(files);
 
     const promises = fileArray.map(file => {
@@ -43,10 +39,8 @@ export default function ScannerPage() {
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
-            
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
             resolve(canvas.toDataURL('image/jpeg', 0.8));
           };
           img.src = event.target.result;
@@ -56,71 +50,39 @@ export default function ScannerPage() {
     });
 
     const base64Images = await Promise.all(promises);
-    
-    setQueue(prev => [...prev, ...base64Images]);
+    setImages(prev => [...prev, ...base64Images]);
     setTotalAdded(prev => prev + base64Images.length);
   };
 
-  // 🚀 BACKGROUND AUTO-PROCESSOR (Jaise hi queue me photo aayegi, ye chal padega)
-  useEffect(() => {
-    if (queue.length > 0 && !isProcessing) {
-      processNextBatch();
-    }
-  }, [queue, isProcessing]);
+  const handleGenerate = async (imageList) => {
+    if (!imageList || imageList.length === 0) return;
 
-  const processNextBatch = async () => {
-    setIsProcessing(true);
-    
-    // Server overload se bachne ke liye ek baar mein 3-5 images hi AI ko bhejte hain
-    const batchSize = Math.min(queue.length, 3); 
-    const currentBatch = queue.slice(0, batchSize);
+    setLoading(true);
+    setStatus('📸 Photos scan ho rahi hain...');
 
     try {
-      setStatus(`⏳ ${batchSize} Photos padhi ja rahi hain... (AI Vision)`);
+      setStatus('🤖 AI game bana raha hai (15-20 sec)...');
       
-      // Try 1: AI Vision Model se generate karna
-      await generateGameFromScan(currentBatch, "", 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']); 
+      const result = await generateGameFromScan(
+        imageList, "", 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
+      );
       
-      // Success: Screen se un photos ko hata do jo process ho chuki hain
-      setQueue(prev => prev.slice(batchSize));
-      setCompleted(prev => prev + batchSize);
-      setStatus(`✅ ${batchSize} Games successfully ban gaye!`);
+      setGeneratedGame(result);
+      setStatus('✅ Game ban gaya!');
+      setCompletedCount(totalAdded);
+      setImages([]); // Queue clear karo
       
-    } catch (error) {
-      console.log("AI Vision failed, trying OCR...", error);
-      setStatus(`⚠️ AI Vision overload! Free OCR text nikal rahi hai...`);
-      
-      try {
-        // Try 2: Tesseract Library Fallback (Bina AI ke text extract karna, Zero Cost)
-        let combinedText = "";
-        for (let i = 0; i < currentBatch.length; i++) {
-          const { data } = await Tesseract.recognize(currentBatch[i], 'eng');
-          combinedText += `\n--- Image ${i+1} ---\n${data.text}`;
-        }
-
-        // Tesseract ka text identify karne ke liye label lagaya
-        const fallbackText = `[TESSERACT OCR LIBRARY NE YE TEXT NIKALA HAI]\nNiche diye gaye text se bacche ke liye mazedar game banao:\n${combinedText}`;
-        
-        setStatus(`🧠 OCR ne text nikal liya. Ab games ban rahe hain...`);
-        
-        // Empty array [] bhej rahe hain taaki AI Vision model ki jagah sasta Text model chal jaye
-        await generateGameFromScan([], fallbackText, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']);
-        
-        // Success after Fallback
-        setQueue(prev => prev.slice(batchSize));
-        setCompleted(prev => prev + batchSize);
-        setStatus(`✅ OCR ki madad se games ban gaye!`);
-      } catch (fallbackError) {
-        console.error("Dono methods fail ho gaye", fallbackError);
-        setStatus(`❌ Ek batch fail ho gaya. Skip karke aage badh rahe hain...`);
-        setQueue(prev => prev.slice(batchSize)); // Fail hua batch drop kar do taaki queue block na ho
+      // Save game for seekho page
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('kidai_scanned_game', JSON.stringify(result));
       }
+
+    } catch (error) {
+      console.error("Game generation failed:", error);
+      setStatus('❌ Kuch gadbad ho gayi. Dobara try karo.');
+    } finally {
+      setLoading(false);
     }
-    
-    // Agla batch pick karne ke liye thoda sa delay dete hain
-    setTimeout(() => {
-      setIsProcessing(false);
-    }, 1500);
   };
 
   return (
@@ -128,6 +90,7 @@ export default function ScannerPage() {
       <style>{`
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes bounce-sm { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
       
       <Header title="Smart Scanner 📸" />
@@ -139,55 +102,164 @@ export default function ScannerPage() {
           Apni school book, drawing, ya worksheet ki photo dalo aur Arya AI usse mazedar game bana dega.
         </p>
 
-        {queue.length === 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
-            <input type="file" accept="image/*" multiple ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
+        <input
+          type="file" accept="image/*" capture="environment"
+          ref={cameraInputRef} style={{ display: 'none' }}
+          onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }}
+        />
+        <input
+          type="file" accept="image/*" multiple
+          ref={fileInputRef} style={{ display: 'none' }}
+          onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }}
+        />
 
-            <button onClick={() => cameraInputRef.current.click()} style={{ background: `linear-gradient(135deg, ${C.orange}, ${C.pink})`, color: '#fff', border: 'none', padding: '16px', borderRadius: 16, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 20px ${C.orange}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+        {totalAdded === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <button
+              onClick={() => cameraInputRef.current.click()}
+              style={{
+                background: `linear-gradient(135deg, ${C.orange}, ${C.pink})`,
+                color: '#fff', border: 'none', padding: '16px', borderRadius: 16,
+                fontSize: 16, fontWeight: 800, cursor: 'pointer',
+                boxShadow: `0 4px 20px ${C.orange}44`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10
+              }}>
               <span style={{ fontSize: 20 }}>📷</span> Camera se Photo Lo
             </button>
-            <button onClick={() => fileInputRef.current.click()} style={{ background: C.card2, color: C.text, border: `2px solid ${C.border}`, padding: '16px', borderRadius: 16, fontSize: 15, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+            <button
+              onClick={() => fileInputRef.current.click()}
+              style={{
+                background: C.card2, color: C.text, border: `2px solid ${C.border}`,
+                padding: '16px', borderRadius: 16, fontSize: 15, fontWeight: 800,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10
+              }}>
               <span style={{ fontSize: 20 }}>🖼️</span> Gallery se Select Karo
             </button>
           </div>
         ) : (
-          <div style={{ background: C.card, padding: 16, borderRadius: 20, border: `1px solid ${C.border}`, animation: 'slideUp 0.3s ease' }}>
-            <div style={{ marginBottom: 12, fontWeight: 800, color: C.cyan, fontSize: 18 }}>
-              📸 Aapki Total Photos: {queue.length}
+          <div style={{
+            background: C.card, padding: 16, borderRadius: 20,
+            border: `1px solid ${C.border}`, animation: 'slideUp 0.3s ease'
+          }}>
+            {/* Progress Counters */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
+              <div style={{ background: C.card2, padding: '12px 8px', borderRadius: 12, border: `1px solid ${C.border}` }}>
+                <div style={{ fontSize: 24, fontWeight: 900, color: C.orange }}>{totalAdded}</div>
+                <div style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>📸 Total</div>
+              </div>
+              <div style={{ background: C.card2, padding: '12px 8px', borderRadius: 12, border: `1px solid ${C.border}` }}>
+                <div style={{ fontSize: 24, fontWeight: 900, color: C.cyan }}>{images.length}</div>
+                <div style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>⏳ Queue Mein</div>
+              </div>
+              <div style={{ background: C.card2, padding: '12px 8px', borderRadius: 12, border: `1px solid ${C.border}` }}>
+                <div style={{ fontSize: 24, fontWeight: 900, color: C.green }}>{completedCount}</div>
+                <div style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>✅ Bane</div>
+              </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: queue.length > 1 ? '1fr 1fr' : '1fr', gap: 10, marginBottom: 16 }}>
-              {queue.map((img, idx) => (
-                <div key={idx} style={{ position: 'relative' }}>
-                  <img src={img} alt={`Scanned ${idx}`} style={{ width: '100%', borderRadius: 12, maxHeight: 150, objectFit: 'cover', border: `1px solid ${C.border}` }} />
-                  {!isProcessing && (
-                    <button onClick={() => setQueue(queue.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: 26, height: 26, cursor: 'pointer', fontWeight: 'bold' }}>×</button>
-                  )}
-                </div>
-              ))}
-            </div>
-            {isProcessing ? (
+
+            {images.length > 0 && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: images.length > 1 ? '1fr 1fr' : '1fr',
+                gap: 10, marginBottom: 16
+              }}>
+                {images.map((img, idx) => (
+                  <div key={idx} style={{ position: 'relative' }}>
+                    <img
+                      src={img} alt={`Scanned ${idx}`}
+                      style={{ width: '100%', borderRadius: 12, maxHeight: 150, objectFit: 'cover', border: `1px solid ${C.border}` }}
+                    />
+                    {!loading && (
+                      <button
+                        onClick={() => {
+                          setImages(images.filter((_, i) => i !== idx));
+                          setTotalAdded(prev => prev - 1);
+                        }}
+                        style={{
+                          position: 'absolute', top: -5, right: -5,
+                          background: '#ef4444', color: '#fff', border: 'none',
+                          borderRadius: '50%', width: 26, height: 26,
+                          cursor: 'pointer', fontWeight: 'bold', fontSize: 14
+                        }}>×</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {loading ? (
               <div style={{ padding: '10px 0 20px' }}>
                 <div style={{ fontSize: 40, animation: 'spin 1.5s linear infinite', marginBottom: 12, display: 'inline-block' }}>⚙️</div>
                 <div style={{ color: C.cyan, fontWeight: 800, fontSize: 15 }}>{status}</div>
-                <p style={{ color: C.muted, fontSize: 12, marginTop: 6 }}>Kripya screen band na karein (10-15s)...</p>
+                <p style={{ color: C.muted, fontSize: 12, marginTop: 6 }}>
+                  Kripya screen band na karein (15-20s)...
+                </p>
               </div>
-            ) : (
+            ) : completedCount > 0 ? (
+              <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
+                <div style={{ color: C.green, fontWeight: 800, fontSize: 18, marginBottom: 16 }}>
+                  Game ban gaya!
+                </div>
+                <button
+                  onClick={() => router.push('/seekho')}
+                  style={{
+                    background: `linear-gradient(135deg, ${C.green}, ${C.cyan})`,
+                    color: '#fff', border: 'none', padding: '14px 24px',
+                    borderRadius: 12, fontSize: 15, fontWeight: 800,
+                    cursor: 'pointer', width: '100%', marginBottom: 10
+                  }}>
+                  🎮 Ab Game Khelo!
+                </button>
+                <button
+                  onClick={() => { setImages([]); setGeneratedGame(null); setStatus(''); setTotalAdded(0); setCompletedCount(0); }}
+                  style={{
+                    background: 'transparent', color: C.muted,
+                    border: `1px solid ${C.border}`, padding: '10px',
+                    borderRadius: 8, cursor: 'pointer', width: '100%', fontSize: 13
+                  }}>
+                  🔄 Naya Scan Karo
+                </button>
+              </div>
+            ) : images.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <button onClick={() => processNextBatch()} style={{ background: `linear-gradient(135deg, ${C.green}, ${C.cyan})`, color: '#fff', border: 'none', padding: '16px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 15px ${C.green}44` }}>
-                  ✨ {queue.length} Photos ka Game Banao!
+                <button
+                  onClick={() => handleGenerate(images)}
+                  style={{
+                    background: `linear-gradient(135deg, ${C.green}, ${C.cyan})`,
+                    color: '#fff', border: 'none', padding: '16px',
+                    borderRadius: 12, fontSize: 16, fontWeight: 800,
+                    cursor: 'pointer', boxShadow: `0 4px 15px ${C.green}44`
+                  }}>
+                  ✨ {images.length} Photos ka Game Banao!
                 </button>
                 
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
-                  <input type="file" accept="image/*" multiple ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
-                  
-                  <button onClick={() => cameraInputRef.current.click()} style={{ flex: 1, padding: '10px', background: C.card2, border: `1px solid ${C.border}`, color: C.text, borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>📷 Aur Jodo</button>
-                  <button onClick={() => fileInputRef.current.click()} style={{ flex: 1, padding: '10px', background: C.card2, border: `1px solid ${C.border}`, color: C.text, borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🖼️ Gallery</button>
-                  <button onClick={() => setQueue([])} style={{ flex: 1, padding: '10px', background: 'transparent', border: `1px solid #ef444466`, color: '#ef4444', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🗑️ Clear All</button>
+                  <button
+                    onClick={() => cameraInputRef.current.click()}
+                    style={{
+                      flex: 1, padding: '10px', background: C.card2,
+                      border: `1px solid ${C.border}`, color: C.text,
+                      borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13
+                    }}>📷 Aur Jodo</button>
+                  <button
+                    onClick={() => fileInputRef.current.click()}
+                    style={{
+                      flex: 1, padding: '10px', background: C.card2,
+                      border: `1px solid ${C.border}`, color: C.text,
+                      borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13
+                    }}>🖼️ Gallery</button>
+                  <button
+                    onClick={() => { setImages([]); setTotalAdded(0); setCompletedCount(0); }}
+                    style={{
+                      flex: 1, padding: '10px', background: 'transparent',
+                      border: `1px solid #ef444466`, color: '#ef4444',
+                      borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13
+                    }}>🗑️ Clear</button>
                 </div>
               </div>
-            )}
+            ) : null
+            }
           </div>
         )}
       </div>
