@@ -1140,6 +1140,7 @@ function AIGeneratedGame({ gameData, onComplete }) {
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState(null);
+  const [showExplain, setShowExplain] = useState(false);
 
   if (!gameData || !gameData.questions || gameData.questions.length === 0) {
     return <div style={{ color: T.text, textAlign: 'center', padding: 20 }}>Game load ho raha hai...</div>;
@@ -1196,6 +1197,14 @@ function AIGeneratedGame({ gameData, onComplete }) {
           </button>
         ))}
       </div>
+
+      {showExplain && (
+        <div style={{ background: T.card2, padding: 15, borderRadius: 12, marginTop: 15, border: `1px solid ${feedback === 'correct' ? T.green : T.red}` }}>
+          <div style={{ fontSize: 18, marginBottom: 8 }}>{feedback === 'correct' ? '✅ Sahi Jawab!' : '❌ Galat Jawab!'}</div>
+          <div style={{ color: T.muted, fontSize: 14, marginBottom: 15 }}>💡 <b>Seekho:</b> {question.explain || "Agli baar dhyan se sochna!"}</div>
+          <button onClick={nextQuestion} style={{ ...btnStyle(T.cyan), padding: "10px 20px" }}>Aage Badhein ➔</button>
+        </div>
+      )}
 
       <div style={{ marginTop: 20, color: T.yellow, fontWeight: 700 }}>
         Score: {score} | Q: {current + 1} / {gameData.questions.length}

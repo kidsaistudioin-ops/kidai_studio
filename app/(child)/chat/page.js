@@ -28,6 +28,7 @@ export default function ChatPage() {
   const [xp, setXp] = useState(120)
   const [toast, setToast] = useState({ visible: false, msg: '' })
   const [voiceEnabled, setVoiceEnabled] = useState(false) // Default aawaz band rahegi
+  const [studentId, setStudentId] = useState(null)
 
   const showToast = (msg) => {
     setToast({ visible: true, msg })
@@ -36,6 +37,9 @@ export default function ChatPage() {
 
   // Load Chat History from LocalStorage (3 Days Expiry)
   useEffect(() => {
+    const sId = localStorage.getItem('kidai_student_id');
+    if (sId) setStudentId(sId);
+
     const saved = localStorage.getItem('kidai_chat_history');
     if (saved) {
       try {
@@ -80,7 +84,7 @@ export default function ChatPage() {
         body: JSON.stringify({ 
           message: text, 
           childAge: parseInt(age.split('-')[0]),
-          childId: 'student_123',
+          childId: studentId,
           history: recentHistory // Yahan hum memory bhej rahe hain
         }),
       })
