@@ -139,7 +139,7 @@ export default function ScannerPage() {
           Apni school book, drawing, ya worksheet ki photo dalo aur Arya AI usse mazedar game bana dega.
         </p>
 
-        {images.length === 0 ? (
+        {queue.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
             <input type="file" accept="image/*" multiple ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }} />
@@ -154,19 +154,19 @@ export default function ScannerPage() {
         ) : (
           <div style={{ background: C.card, padding: 16, borderRadius: 20, border: `1px solid ${C.border}`, animation: 'slideUp 0.3s ease' }}>
             <div style={{ marginBottom: 12, fontWeight: 800, color: C.cyan, fontSize: 18 }}>
-              📸 Aapki Total Photos: {images.length}
+              📸 Aapki Total Photos: {queue.length}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: images.length > 1 ? '1fr 1fr' : '1fr', gap: 10, marginBottom: 16 }}>
-              {images.map((img, idx) => (
+            <div style={{ display: 'grid', gridTemplateColumns: queue.length > 1 ? '1fr 1fr' : '1fr', gap: 10, marginBottom: 16 }}>
+              {queue.map((img, idx) => (
                 <div key={idx} style={{ position: 'relative' }}>
                   <img src={img} alt={`Scanned ${idx}`} style={{ width: '100%', borderRadius: 12, maxHeight: 150, objectFit: 'cover', border: `1px solid ${C.border}` }} />
-                  {!loading && (
-                    <button onClick={() => setImages(images.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: 26, height: 26, cursor: 'pointer', fontWeight: 'bold' }}>×</button>
+                  {!isProcessing && (
+                    <button onClick={() => setQueue(queue.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: 26, height: 26, cursor: 'pointer', fontWeight: 'bold' }}>×</button>
                   )}
                 </div>
               ))}
             </div>
-            {loading ? (
+            {isProcessing ? (
               <div style={{ padding: '10px 0 20px' }}>
                 <div style={{ fontSize: 40, animation: 'spin 1.5s linear infinite', marginBottom: 12, display: 'inline-block' }}>⚙️</div>
                 <div style={{ color: C.cyan, fontWeight: 800, fontSize: 15 }}>{status}</div>
@@ -174,8 +174,8 @@ export default function ScannerPage() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <button onClick={() => handleGenerate(images)} style={{ background: `linear-gradient(135deg, ${C.green}, ${C.cyan})`, color: '#fff', border: 'none', padding: '16px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 15px ${C.green}44` }}>
-                  ✨ {images.length} Photos ka Game Banao!
+                <button onClick={() => processNextBatch()} style={{ background: `linear-gradient(135deg, ${C.green}, ${C.cyan})`, color: '#fff', border: 'none', padding: '16px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: `0 4px 15px ${C.green}44` }}>
+                  ✨ {queue.length} Photos ka Game Banao!
                 </button>
                 
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -184,7 +184,7 @@ export default function ScannerPage() {
                   
                   <button onClick={() => cameraInputRef.current.click()} style={{ flex: 1, padding: '10px', background: C.card2, border: `1px solid ${C.border}`, color: C.text, borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>📷 Aur Jodo</button>
                   <button onClick={() => fileInputRef.current.click()} style={{ flex: 1, padding: '10px', background: C.card2, border: `1px solid ${C.border}`, color: C.text, borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🖼️ Gallery</button>
-                  <button onClick={() => setImages([])} style={{ flex: 1, padding: '10px', background: 'transparent', border: `1px solid #ef444466`, color: '#ef4444', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🗑️ Clear All</button>
+                  <button onClick={() => setQueue([])} style={{ flex: 1, padding: '10px', background: 'transparent', border: `1px solid #ef444466`, color: '#ef4444', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}>🗑️ Clear All</button>
                 </div>
               </div>
             )}
