@@ -35,13 +35,27 @@ export default function ScannerPage() {
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 512; // 🚀 Resolution aur kam kiya taaki server crash na ho
-            const scaleSize = MAX_WIDTH / img.width;
-            canvas.width = MAX_WIDTH;
-            canvas.height = img.height * scaleSize;
+            
+            // 🚀 SMART COMPRESSION: Width aur Height dono ko control karo
+            const MAX_DIMENSION = 800; 
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height && width > MAX_DIMENSION) {
+              height *= MAX_DIMENSION / width;
+              width = MAX_DIMENSION;
+            } else if (height > MAX_DIMENSION) {
+              width *= MAX_DIMENSION / height;
+              height = MAX_DIMENSION;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg', 0.5)); // 🚀 Quality 50% kar di (Fast & under 1MB limit)
+            
+            // 🚀 WEBP format use karo (JPEG se bahut chota aur fast hota hai)
+            resolve(canvas.toDataURL('image/webp', 0.6)); 
           };
           img.src = event.target.result;
         };
