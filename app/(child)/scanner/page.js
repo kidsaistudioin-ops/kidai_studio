@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateGameFromScan } from '@/lib/arya/arya-engine';
 import Header from '@/components/ui/Header';
+import Tesseract from 'tesseract.js';
 
 const C = {
   bg: '#07090f', card: '#0f1520', card2: '#161e30', border: '#1e2d45',
@@ -75,10 +76,22 @@ export default function ScannerPage() {
     setStatus('📸 Photos scan ho rahi hain...');
 
     try {
-      setStatus('🤖 AI game bana raha hai (15-20 sec)...');
+      // STEP 1: Fast Library se text nikalna (Browser ke andar)
+      let combinedText = "";
+      for (let i = 0; i < imageList.length; i++) {
+        setStatus(`🔍 Fast Library: Photo ${i+1} padh rahi hai...`);
+        const { data: { text } } = await Tesseract.recognize(imageList[i], 'eng');
+        combinedText += `\n--- Photo ${i+1} ---\n${text}`;
+      }
       
+      if (!combinedText.trim()) {
+        throw new Error("Photo mein koi text nahi mila! Kripya saaf photo khinche.");
+      }
+
+      // STEP 2: Sirf Text ko AI ko bhejna (Super Fast)
+      setStatus('🤖 AI game bana raha hai (Sirf 3-5 sec)...');
       const result = await generateGameFromScan(
-        imageList, "", 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
+        [], combinedText, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
       );
       
       if (result && result.error) {
