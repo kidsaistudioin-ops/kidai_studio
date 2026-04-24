@@ -25,7 +25,7 @@ export default function ChatPage() {
     { ai: true, text: "Heyy! Main Arya hoon 🤖\n\nMujhse kuch bhi poochho — Math, Science, English, ya AI ke baare mein! Hinglish mein baat karo — main samjhunga! 😊" }
   ])
   const [loading, setLoading] = useState(false)
-  const [xp, setXp] = useState(120)
+  const [xp, setXp] = useState(0)
   const [toast, setToast] = useState({ visible: false, msg: '' })
   const [voiceEnabled, setVoiceEnabled] = useState(false) // Default aawaz band rahegi
   const [studentId, setStudentId] = useState(null)
@@ -39,6 +39,10 @@ export default function ChatPage() {
   useEffect(() => {
     const sId = localStorage.getItem('kidai_student_id');
     if (sId) setStudentId(sId);
+
+    // Load XP from localStorage
+    const savedXp = localStorage.getItem('kidai_xp');
+    if (savedXp) setXp(parseInt(savedXp, 10));
 
     const saved = localStorage.getItem('kidai_chat_history');
     if (saved) {
@@ -60,6 +64,11 @@ export default function ChatPage() {
       localStorage.setItem('kidai_chat_history', JSON.stringify({ timestamp: Date.now(), data: messages }));
     }
   }, [messages]);
+
+  // Save XP whenever it changes
+  useEffect(() => {
+    localStorage.setItem('kidai_xp', xp.toString());
+  }, [xp]);
 
   // Jab page chhodein toh aawaz band ho jaye
   useEffect(() => {
@@ -116,8 +125,8 @@ export default function ChatPage() {
           // Game ko memory me daalo taaki Seekho page ise padh sake
           localStorage.setItem('kidai_scanned_game', JSON.stringify(data.rawData.newGameData));
         }
-        showToast('🎮 Naya Game ban gaya! Chalo khelte hain...');
-        setTimeout(() => router.push('/seekho'), 3500); // Redirect to Play
+        showToast(`🎮 Scan Complete! '${data.rawData.newGameData?.title || 'Naya Game'}' ban gaya!`);
+        setTimeout(() => router.push('/seekho'), 4500); // Thoda zyada time diya taaki AI ka message padh sake
       } else if (redirectPath) {
         // Agar AI ne Coding/Studio seekhne ke liye bheja hai
         showToast(`🚀 Chalo kuch naya banate hain...`);
