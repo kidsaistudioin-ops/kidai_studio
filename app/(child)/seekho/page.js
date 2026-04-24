@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { speak } from "@/lib/voice";
+import { supabase } from "@/lib/supabase";
+import ReportButton from "@/components/ui/ReportButton";
 
 const T = {
   bg: "#07090f",
@@ -249,7 +251,8 @@ function TablesGame({ onComplete }) {
   const [score, setScore] = useState(0);
   const [showTable, setShowTable] = useState(false);
 
-  const tables = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  // 🚀 UPDATE: 1 se lekar 20 tak ke pahade (Tables)
+  const tables = Array.from({ length: 20 }, (_, i) => i + 1);
 
   const checkAnswer = () => {
     const correctAnswer = tableOf * current;
@@ -1136,7 +1139,7 @@ function ListenTypeGame({ onComplete }) {
 // ==========================================
 // AI SCANNED GAME (HOMEWORK TO GAME)
 // ==========================================
-function AIGeneratedGame({ gameData, onComplete }) {
+function AIGeneratedGame({ gameData, gameId, studentId, onComplete, onReported }) {
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -1218,6 +1221,19 @@ function AIGeneratedGame({ gameData, onComplete }) {
         </div>
       )}
 
+      {/* Report Button */}
+      <div style={{ marginTop: 20 }}>
+        <ReportButton gameId={gameId} studentId={studentId} onReported={onReported} />
+      </div>
+
+      {/* Reference Image */}
+      {gameData.sourceImage && (
+        <div style={{ marginTop: 30, padding: 15, background: T.card2, borderRadius: 12, border: `1px dashed ${T.border}` }}>
+          <div style={{ fontSize: 12, color: T.muted, marginBottom: 10, fontWeight: 800 }}>📷 SCANNED SOURCE</div>
+          <img src={gameData.sourceImage} alt="Source" style={{ maxWidth: '100%', maxHeight: 120, borderRadius: 8, objectFit: 'contain' }} />
+        </div>
+      )}
+
       <div style={{ marginTop: 20, color: T.yellow, fontWeight: 700 }}>
         Score: {score} | Q: {current + 1} / {gameData.questions.length}
       </div>
@@ -1281,16 +1297,24 @@ export default function SeekhoEnglishPage() {
   const [activeGame, setActiveGame] = useState(null);
   const [xp, setXp] = useState(0);
   const [completedGames, setCompletedGames] = useState([]);
-  const [scannedGame, setScannedGame] = useState(null);
+  const [dbGames, setDbGames] = useState([]);
+  const [activeDbGame, setActiveDbGame] = useState(null);
+  const [studentId, setStudentId] = useState("student_123");
 
-  // Check agar Scanner ne koi game banakar bheja hai
   useEffect(() => {
-    const saved = localStorage.getItem('kidai_scanned_game');
-    if (saved) {
-      try {
-        setScannedGame(JSON.parse(saved));
-      } catch(e) {}
+    const sId = localStorage.getItem('kidai_student_id') || 'student_123';
+    setStudentId(sId);
+
+    async function fetchLibrary() {
+      const { data } = await supabase
+        .from('library')
+        .select('*')
+        .eq('is_active', true) // Sirf active/non-reported games uthayega
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (data) setDbGames(data);
     }
+    fetchLibrary();
   }, []);
 
   const handleGameComplete = (gameId) => {
@@ -1298,28 +1322,45 @@ export default function SeekhoEnglishPage() {
     setCompletedGames([...completedGames, gameId]);
     speak("Great job! You earned 15 XP!");
     setActiveGame(null);
-    
-    // Agar scanned game khatam ho gaya, toh memory se hata do
-    if (gameId === 'ai_scanned') {
-      localStorage.removeItem('kidai_scanned_game');
-      setScannedGame(null);
+  };
+
+  // 🎲 Surprise Game Logic
+  const playSurpriseGame = () => {
+    if (dbGames.length > 0 && Math.random() > 0.4) {
+      const randomDb = dbGames[Math.floor(Math.random() * dbGames.length)];
+      setActiveDbGame(randomDb);
+      setActiveGame('db_game');
+    } else {
+      const randomBasic = ENGLISH_GAMES[Math.floor(Math.random() * ENGLISH_GAMES.length)];
+      setActiveGame(randomBasic.id);
     }
+    speak("Surprise! Let's play this magic game!");
   };
 
   const GameComponent = activeGame ? GAME_COMPONENTS[activeGame] : null;
 
-  if (activeGame === 'ai_scanned' && scannedGame) {
+  if (activeGame === 'db_game' && activeDbGame) {
     return (
       <div style={{ minHeight: "100vh", background: T.bg, padding: 20, fontFamily: "system-ui, sans-serif" }}>
-        <button onClick={() => setActiveGame(null)} style={{ background: T.card2, color: T.text, border: "none", borderRadius: 10, padding: "10px 20px", cursor: "pointer", marginBottom: 20 }}>← Back</button>
+        <button onClick={() => { setActiveGame(null); setActiveDbGame(null); }} style={{ background: T.card2, color: T.text, border: "none", borderRadius: 10, padding: "10px 20px", cursor: "pointer", marginBottom: 20 }}>← Back</button>
         <div style={{ background: T.card, borderRadius: 20, padding: 30, maxWidth: 600, margin: "0 auto", border: `2px solid ${T.orange}`, boxShadow: `0 0 30px ${T.orange}33` }}>
-          <AIGeneratedGame gameData={scannedGame} onComplete={() => handleGameComplete('ai_scanned')} />
+          <AIGeneratedGame 
+            gameData={activeDbGame.content} 
+            gameId={activeDbGame.id}
+            studentId={studentId}
+            onComplete={() => handleGameComplete(activeDbGame.id)} 
+            onReported={(id) => {
+              setDbGames(dbGames.filter(g => g.id !== id));
+              setActiveGame(null);
+              setActiveDbGame(null);
+            }}
+          />
         </div>
       </div>
     );
   }
 
-  if (GameComponent && activeGame !== 'ai_scanned') {
+  if (GameComponent && activeGame !== 'db_game') {
     return (
       <div style={{ 
         minHeight: "100vh", 
@@ -1386,10 +1427,10 @@ export default function SeekhoEnglishPage() {
         borderRadius: 20
       }}>
         <h1 style={{ color: "#fff", fontSize: 32, marginBottom: 10 }}>
-          📚 Seekho - English Learning
+          📚 Seekho - AI Learning Hub
         </h1>
         <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 16 }}>
-          English sikhna ab maze mein!
+          Maths, English aur Community Games!
         </p>
         <div style={{ 
           marginTop: 15, 
@@ -1408,24 +1449,54 @@ export default function SeekhoEnglishPage() {
         </div>
       </div>
 
-      {/* AI Scanned Game Banner - Tab dikhega jab user scan karke aayega */}
-      {scannedGame && (
-        <div 
-          onClick={() => setActiveGame('ai_scanned')}
-          style={{ background: `linear-gradient(135deg, ${T.orange}, ${T.pink})`, borderRadius: 20, padding: 3, maxWidth: 800, margin: "0 auto 30px", cursor: "pointer", boxShadow: `0 8px 30px ${T.orange}66`, animation: "pulse 2s infinite" }}
-        >
-          <div style={{ background: T.card, borderRadius: 18, padding: 24, display: "flex", alignItems: "center", gap: 20 }}>
-            <div style={{ fontSize: 50, animation: "bounce-sm 2s infinite" }}>🎁</div>
-            <div>
-              <div style={{ background: T.orange, color: '#fff', fontSize: 11, fontWeight: 900, padding: '4px 8px', borderRadius: 8, display: 'inline-block', marginBottom: 8, letterSpacing: 1 }}>NEW SCAN 📸</div>
-              <h2 style={{ color: T.text, margin: "0 0 8px", fontSize: 22, fontWeight: 900 }}>Aapka Naya AI Game!</h2>
-              <p style={{ color: T.muted, margin: 0, fontSize: 14, lineHeight: 1.5 }}>Jo photo aapne daali thi, Arya ne uska game bana diya hai. <span style={{color: T.orange, fontWeight: 800}}>Tap karke abhi khelo! ▶</span></p>
-            </div>
+      {/* Surprise Me Button */}
+      <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <button 
+          onClick={playSurpriseGame}
+          style={{
+            background: `linear-gradient(135deg, ${T.pink}, ${T.orange})`,
+            color: '#fff', border: 'none', padding: '16px 32px', borderRadius: 50,
+            fontSize: 20, fontWeight: 900, cursor: 'pointer', boxShadow: `0 8px 25px ${T.pink}66`,
+            animation: "pulse 2s infinite"
+          }}>
+          🎲 Surprise Magic Game!
+        </button>
+      </div>
+
+      {/* Community Scanned Games */}
+      {dbGames.length > 0 && (
+        <div style={{ maxWidth: 800, margin: "0 auto 40px" }}>
+          <h2 style={{ color: T.text, marginBottom: 8 }}>🌍 Community Scans</h2>
+          <p style={{ color: T.muted, fontSize: 14, marginBottom: 20 }}>Bacchon dwara scan kiye hue nayi games. Khelo aur seekho!</p>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 15 }}>
+            {dbGames.map((game) => (
+              <button
+                key={game.id}
+                onClick={() => { setActiveDbGame(game); setActiveGame('db_game'); }}
+                style={{
+                  background: T.card,
+                  border: `2px solid ${T.orange}`,
+                  borderRadius: 16,
+                  padding: "20px 15px",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "transform 0.2s"
+                }}
+              >
+                <div style={{ fontSize: 36, marginBottom: 10 }}>📖</div>
+                <div style={{ color: T.text, fontWeight: 700, fontSize: 14, marginBottom: 8, lineHeight: 1.3 }}>{game.title}</div>
+                <div style={{ background: T.orange + '22', color: T.orange, padding: '4px 8px', borderRadius: 8, fontSize: 11, fontWeight: 800, display: 'inline-block' }}>
+                  {game.subject?.toUpperCase() || 'MIXED'}
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Games Grid */}
+      {/* Standard Basic AI Games Grid */}
+      <h2 style={{ color: T.text, marginBottom: 15, maxWidth: 800, margin: "0 auto 15px" }}>🧠 Basic Brain Games</h2>
       <div style={{ 
         display: "grid", 
         gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", 

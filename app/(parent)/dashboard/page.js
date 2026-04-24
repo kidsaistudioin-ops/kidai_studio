@@ -23,6 +23,10 @@ export default function ParentDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [focusAreas, setFocusAreas] = useState([]);
+  const [libraryGames, setLibraryGames] = useState([]);
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [pin, setPin] = useState('');
   const [toast, setToast] = useState('');
 
   // Chat UI States
@@ -46,6 +50,10 @@ export default function ParentDashboard() {
       };
       setStats(realStats);
 
+      // Fetch child's scanned games for Library Manager
+      const { data: libData } = await supabase.from('library').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
+      if (libData) setLibraryGames(libData);
+
       const { data: existingFocus } = await supabase.from('student_focus_areas').select('topic_tag').eq('student_id', studentId);
       if (existingFocus) setFocusAreas(existingFocus.map(f => f.topic_tag));
 
@@ -57,6 +65,25 @@ export default function ParentDashboard() {
   useEffect(() => {
     if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handlePinSubmit = (e) => {
+    e.preventDefault();
+    if (pin === '1234') setIsAuthenticated(true);
+    else { alert('❌ Galat PIN! Kripya "1234" try karein.'); setPin(''); }
+  };
+
+  const toggleVisibility = async (id, currentStatus) => {
+    const newStatus = !currentStatus;
+    const { error } = await supabase.from('library').update({ is_active: newStatus }).eq('id', id);
+    if (!error) setLibraryGames(libraryGames.map(g => g.id === id ? { ...g, is_active: newStatus } : g));
+  };
+
+  const deleteGame = async (id) => {
+    if (window.confirm('⚠️ Kya aap sach mein is game ko hamesha ke liye delete karna chahte hain?')) {
+      const { error } = await supabase.from('library').delete().eq('id', id);
+      if (!error) setLibraryGames(libraryGames.filter(g => g.id !== id));
+    }
+  };
 
   const handleFocusClick = async (topicId) => {
     const studentId = 'student_123';
@@ -115,6 +142,29 @@ export default function ParentDashboard() {
 
   if (loading) return <div style={{...styles.container, justifyContent: 'center', alignItems: 'center', display: 'flex'}}>Loading Dashboard...</div>;
 
+  if (!isAuthenticated) {
+    return (
+      <div style={{...styles.container, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <form onSubmit={handlePinSubmit} style={{ background: C.card, padding: 40, borderRadius: 24, textAlign: 'center', border: `1px solid ${C.border}`, maxWidth: 400, width: '90%' }}>
+          <div style={{ fontSize: 60, marginBottom: 20 }}>🔒</div>
+          <h2 style={{ marginBottom: 10, fontSize: 24, fontWeight: 900 }}>Parent Dashboard</h2>
+          <p style={{ color: C.muted, marginBottom: 30, fontSize: 14 }}>Enter your 4-digit PIN (Default: 1234)</p>
+          
+          <input 
+            type="password" maxLength="4" value={pin} onChange={(e) => setPin(e.target.value)}
+            placeholder="****" style={{ fontSize: 32, letterSpacing: 8, textAlign: 'center', padding: 15, borderRadius: 12, border: `2px solid ${C.border}`, background: C.card2, color: C.text, width: '100%', marginBottom: 20, outline: 'none' }}
+            autoFocus
+          />
+          
+          <button type="submit" style={{ background: `linear-gradient(135deg, ${C.purple}, ${C.cyan})`, color: '#fff', border: 'none', padding: '16px', width: '100%', borderRadius: 12, fontSize: 18, fontWeight: 800, cursor: 'pointer' }}>
+            Unlock Dashboard
+          </button>
+          <button type="button" onClick={() => router.push('/select-profile')} style={{ background: 'transparent', color: C.muted, border: 'none', marginTop: 15, cursor: 'pointer', textDecoration: 'underline' }}>Back to Profiles</button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.container}>
       {toast && <div style={styles.toast}>{toast}</div>}
@@ -150,6 +200,43 @@ export default function ParentDashboard() {
             );
           })}
         </div>
+
+        <h2 style={styles.sectionTitle}>🗂️ Scanned Games Manager</h2>
+        <p style={styles.sectionDescription}>Bacche ke scan kiye hue games check karein, hide karein ya delete karein.</p>
+        
+        {libraryGames.length === 0 ? (
+          <div style={{ background: C.card2, padding: 30, borderRadius: 16, textAlign: 'center', color: C.muted, border: `1px dashed ${C.border}` }}>Abhi koi game scan nahi kiya gaya hai.</div>
+        ) : (
+          <div style={{ background: C.card, borderRadius: 16, border: `1px solid ${C.border}`, overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ background: C.card2, color: C.muted, fontSize: 13 }}>
+                  <th style={{ padding: '15px 20px', borderBottom: `1px solid ${C.border}` }}>GAME TITLE</th>
+                  <th style={{ padding: '15px 20px', borderBottom: `1px solid ${C.border}` }}>SUBJECT</th>
+                  <th style={{ padding: '15px 20px', borderBottom: `1px solid ${C.border}` }}>STATUS</th>
+                  <th style={{ padding: '15px 20px', borderBottom: `1px solid ${C.border}`, textAlign: 'right' }}>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {libraryGames.map(game => (
+                  <tr key={game.id} style={{ borderBottom: `1px solid ${C.border}`, background: !game.is_active ? '#ef444411' : 'transparent' }}>
+                    <td style={{ padding: '15px 20px', fontWeight: 'bold' }}>{game.title}</td>
+                    <td style={{ padding: '15px 20px' }}><span style={{ background: C.card2, padding: '4px 8px', borderRadius: 6, fontSize: 12, color: C.cyan }}>{game.subject?.toUpperCase() || 'MIXED'}</span></td>
+                    <td style={{ padding: '15px 20px' }}>{game.is_active ? <span style={{ color: C.green, fontSize: 13, fontWeight: 'bold' }}>✅ Active</span> : <span style={{ color: C.red, fontSize: 13, fontWeight: 'bold' }}>🚫 Hidden</span>}</td>
+                    <td style={{ padding: '15px 20px', textAlign: 'right' }}>
+                      <button onClick={() => toggleVisibility(game.id, game.is_active)} style={{ background: game.is_active ? C.card2 : C.green+'33', color: game.is_active ? C.text : C.green, border: `1px solid ${game.is_active ? C.border : C.green}`, padding: '6px 10px', borderRadius: 8, cursor: 'pointer', marginRight: 8, fontSize: 12, fontWeight: 'bold' }}>
+                        {game.is_active ? '👁️ Hide' : '👁️‍🗨️ Show'}
+                      </button>
+                      <button onClick={() => deleteGame(game.id)} style={{ background: '#ef444422', color: C.red, border: '1px solid #ef444455', padding: '6px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 'bold' }}>
+                        🗑️ Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <h2 style={styles.sectionTitle}>💬 Arya Manager (AI Assistant)</h2>
         <p style={styles.sectionDescription}>Type karke batayein aap kya chahte hain (e.g. "Math par dhyan do" ya "Naya game add karo").</p>

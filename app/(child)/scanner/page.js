@@ -27,7 +27,14 @@ export default function ScannerPage() {
 
   const processFiles = async (files) => {
     if (!files || files.length === 0) return;
-    const fileArray = Array.from(files);
+    let fileArray = Array.from(files);
+
+    // 🚀 FOCUS LIMIT: Ek baar mein max 3 photos hi allow karenge
+    if (totalAdded + fileArray.length > 3) {
+      alert('Pura focus rakhne ke liye, aap ek baar mein maximum 3 pages hi scan kar sakte hain! 📚');
+      fileArray = fileArray.slice(0, Math.max(0, 3 - totalAdded));
+      if (fileArray.length === 0) return;
+    }
 
     const promises = fileArray.map(file => {
       return new Promise((resolve) => {
@@ -97,7 +104,7 @@ export default function ScannerPage() {
       // STEP 2: Sirf Text ko AI ko bhejna (Super Fast)
       setStatus('🤖 AI game bana raha hai (Sirf 3-5 sec)...');
       const result = await generateGameFromScan(
-        [], combinedText, studentId, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
+        imageList, combinedText, studentId, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
       );
       
       if (result && result.error) {
@@ -105,7 +112,13 @@ export default function ScannerPage() {
       }
       
       setGeneratedGame(result);
-      setStatus('✅ Game ban gaya!');
+      
+      // 🚀 Reward XP: Har scanned page par 5 XP milenge
+      const earnedXp = imageList.length * 5;
+      const currentXp = parseInt(localStorage.getItem('kidai_xp') || '0');
+      localStorage.setItem('kidai_xp', (currentXp + earnedXp).toString());
+      
+      setStatus(`✅ Game ban gaya! +${earnedXp} XP 🌟`);
       setCompletedCount(totalAdded);
       setImages([]); // Queue clear karo
       
@@ -239,14 +252,14 @@ export default function ScannerPage() {
                   Game ban gaya!
                 </div>
                 <button
-                  onClick={() => router.push('/seekho')}
+                onClick={() => router.push('/library')}
                   style={{
                     background: `linear-gradient(135deg, ${C.green}, ${C.cyan})`,
                     color: '#fff', border: 'none', padding: '14px 24px',
                     borderRadius: 12, fontSize: 15, fontWeight: 800,
                     cursor: 'pointer', width: '100%', marginBottom: 10
                   }}>
-                  🎮 Ab Game Khelo!
+                📚 Library Mein Jao
                 </button>
                 <button
                   onClick={() => { setImages([]); setGeneratedGame(null); setStatus(''); setTotalAdded(0); setCompletedCount(0); }}
