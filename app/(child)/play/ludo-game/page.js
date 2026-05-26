@@ -244,6 +244,13 @@ export default function LudoGame() {
       if (finishedCount === 4) {
         setWinner(currentTurn);
         addLog(`🎉🏆 ${getPlayerName(currentTurn)} WINS THE GAME! 🏆🎉`);
+        
+        // Agar baccha (Red) jeetta hai, toh XP reward do!
+        if (currentTurn.toLowerCase() === 'red') {
+          const currentXp = parseInt(localStorage.getItem('kidai_xp') || '0');
+          localStorage.setItem('kidai_xp', (currentXp + 50).toString());
+          addLog(`🌟 Badhai ho! Jeetne par aapko mile +50 XP!`);
+        }
         isWin = true;
       }
 

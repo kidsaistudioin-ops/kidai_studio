@@ -149,7 +149,7 @@ export default function MagicScannerPage() {
                     ⬇️ Download
                   </button>
                 </div>
-                <button onClick={() => alert('Saved to Library!')} style={{ width: '100%', marginTop: 10, padding: '12px', background: C.green + '22', border: `1px solid ${C.green}`, color: C.green, borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>
+                <button onClick={() => router.push('/library')} style={{ width: '100%', marginTop: 10, padding: '12px', background: C.green + '22', border: `1px solid ${C.green}`, color: C.green, borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>
                   💾 Save to Library
                 </button>
               </div>

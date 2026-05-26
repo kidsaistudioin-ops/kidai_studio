@@ -20,8 +20,13 @@ const Token = ({ token, style, onClick, isMovable }) => {
       }} 
     >
       <img
-        src="/characters/player.svg"
+        src={`/ludo/${token.color}-token.gif`}
         alt="player token"
+        onError={(e) => {
+          e.target.onerror = null;
+          const cHex = token.color === 'red' ? '%23ef4444' : token.color === 'green' ? '%2322c55e' : token.color === 'yellow' ? '%23eab308' : '%233b82f6';
+          e.target.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="${cHex}" stroke="%23ffffff" stroke-width="8"/><circle cx="50" cy="30" r="15" fill="%23ffffff" opacity="0.5"/></svg>`;
+        }}
         style={{
           width: '160%',
           height: '160%',

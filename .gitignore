@@ -7,3 +7,5 @@ script/
 .brain/
 002_kidai_schema.sql
 001_kidai_schema.sql
+find-404.js
+check-assets.js

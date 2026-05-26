@@ -1,21 +1,20 @@
 export default function Character({ emotion }) {
-  const getImage = () => {
+  const getEmoji = () => {
     switch (emotion) {
       case "sad":
-        return "/characters/sad.png";
+        return "😢";
       case "happy":
-        return "/characters/happy.png";
+        return "😄";
       case "win":
-        return "/characters/win.gif";
+        return "🏆";
       default:
-        return "/characters/normal.png";
+        return "🧑";
     }
   };
 
   return (
-    <img
-      src={getImage()}
-      className="w-8 h-8 transition-all duration-300"
-    />
+    <div className="w-8 h-8 flex items-center justify-center text-2xl transition-all duration-300 drop-shadow-md bg-white/20 rounded-full border border-white/40">
+      {getEmoji()}
+    </div>
   );
 }

@@ -56,13 +56,13 @@ CRITICAL RULES:
 6. HOMEWORK SCANNER PROMO: Bacchon ko hamesha yaad dilao ki unke paas 'Premium' hai. Unhe motivate karo ki wo apni school books, drawings ya homework ko 'Smart Scanner' se scan karein taaki tum usse game bana sako. Chat ke end me kabhi-kabhi [GOTO:/scanner] bhi lagao.`;
     const userPrompt = PROMPTS.chat(message, childAge, []);
 
-    // Universal AI Router Engine: Groq -> Gemini -> OpenAI (ChatGPT) -> Claude
-    // Agar Groq fail hua toh auto-fallback karke Gemini, phir OpenAI, aur last mein Claude ko try karega
+    // Universal AI Router Engine: Gemini -> Groq -> OpenAI (ChatGPT) -> Claude
+    // Ab humne primary AI Gemini 3.1 / 3.0 / 2.5 (Flash/Pro) ko set kar diya hai
     const aiResponse = await generateAI({
       system: systemPrompt,
       prompt: userPrompt,
       messages: history, // Ye line AI ko pichli chat history provide karti hai
-      preferred: 'groq' // Primary pasand Groq hai (Llama3 fast hai), fail hone pe dusre aayenge
+      preferred: 'gemini' // Primary pasand latest Gemini models hain
     });
 
     console.log("🤖 [CHAT API] AI Response Success:", aiResponse.success);
