@@ -20,6 +20,20 @@ const GUEST_QUIZ = [
   { id: 'english', name: 'Word Hunt', emoji: '🔤', color: C.green, subject: 'English', question: "'Enormous' ka matlab kya hai?", opts: ['Chota', 'Bahut bada', 'Tez', 'Thaka'], correct: 1 }
 ];
 
+const quickLinkStyle = {
+  textDecoration: 'none',
+  background: 'rgba(15, 21, 32, 0.95)',
+  color: '#f1f5f9',
+  border: '1px solid #1e2d45',
+  borderRadius: 999,
+  padding: '8px 12px',
+  fontWeight: 800,
+  fontSize: 13,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+};
+
 // Reusable Button Style
 const btnStyle = (color, full = false, ghost = false) => ({
   padding: '12px 20px', borderRadius: 13, border: ghost ? `1.5px solid ${color}` : 'none',
@@ -246,6 +260,75 @@ export default function HomePage() {
         ) : (
           <button style={btnStyle(C.orange, true)} onClick={() => router.push('/signup')}>🚀 Abhi Shuru Karo — Free!</button>
         )}
+
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginTop: 16 }}>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10 }}>🔗 Explore All Pages</div>
+
+          <div style={{ display: 'grid', gap: 12 }}>
+            <div>
+              <div style={{ fontWeight: 800, color: C.cyan, marginBottom: 8 }}>Learning & Creation</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <Link href="/learn" style={quickLinkStyle}>Learn</Link>
+                <Link href="/create" style={quickLinkStyle}>Create</Link>
+                <Link href="/code-magic" style={quickLinkStyle}>Code Magic</Link>
+                <Link href="/story" style={quickLinkStyle}>Story</Link>
+                <Link href="/games" style={quickLinkStyle}>Games</Link>
+                <Link href="/profile" style={quickLinkStyle}>Profile</Link>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, color: C.orange, marginBottom: 8 }}>Play Modes</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <Link href="/play" style={quickLinkStyle}>Play</Link>
+                <Link href="/play/chess" style={quickLinkStyle}>Chess</Link>
+                <Link href="/play/ludo-game" style={quickLinkStyle}>Ludo</Link>
+                <Link href="/play/car-race-game" style={quickLinkStyle}>Car Race</Link>
+                <Link href="/play/snakes-ladders" style={quickLinkStyle}>Snakes</Link>
+                <Link href="/play/math-racing" style={quickLinkStyle}>Math Racing</Link>
+                <Link href="/play/memory-match" style={quickLinkStyle}>Memory Match</Link>
+                <Link href="/play/tic-tac-toe" style={quickLinkStyle}>Tic Tac Toe</Link>
+                <Link href="/play/typing-ninja" style={quickLinkStyle}>Typing Ninja</Link>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, color: C.purple, marginBottom: 8 }}>Studio Tools</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <Link href="/studio" style={quickLinkStyle}>Studio</Link>
+                <Link href="/studio/2d-animation" style={quickLinkStyle}>2D Animation</Link>
+                <Link href="/studio/brand-promo" style={quickLinkStyle}>Brand Promo</Link>
+                <Link href="/studio/coloring-book" style={quickLinkStyle}>Coloring Book</Link>
+                <Link href="/studio/comic-maker" style={quickLinkStyle}>Comic Maker</Link>
+                <Link href="/studio/logo-maker" style={quickLinkStyle}>Logo Maker</Link>
+                <Link href="/studio/magic-scanner" style={quickLinkStyle}>Magic Scanner</Link>
+                <Link href="/studio/story-video" style={quickLinkStyle}>Story Video</Link>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, color: C.green, marginBottom: 8 }}>Support & Reports</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <Link href="/help" style={quickLinkStyle}>Help</Link>
+                <Link href="/reviews" style={quickLinkStyle}>Reviews</Link>
+                <Link href="/faq" style={quickLinkStyle}>FAQ</Link>
+                <Link href="/reports" style={quickLinkStyle}>Reports</Link>
+                <Link href="/about" style={quickLinkStyle}>About</Link>
+                <Link href="/pricing" style={quickLinkStyle}>Pricing</Link>
+                <Link href="/contact" style={quickLinkStyle}>Contact</Link>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 800, color: C.muted, marginBottom: 8 }}>Admin Tools</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <Link href="/admin" style={quickLinkStyle}>Admin</Link>
+                <Link href="/admin/blog" style={quickLinkStyle}>Admin Blog</Link>
+                <Link href="/admin/scanner" style={quickLinkStyle}>Admin Scanner</Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Naya API Connected Chatbot */}

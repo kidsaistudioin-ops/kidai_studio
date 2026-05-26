@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
@@ -100,6 +101,14 @@ export default function AdminDashboard() {
           <div style={{ background: `linear-gradient(135deg, ${C.card}, ${C.card2})`, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20 }}>
             <div style={{ color: C.muted, fontSize: 13, fontWeight: 800 }}>COINS IN ECONOMY</div>
             <div style={{ fontSize: 36, fontWeight: 900, color: C.orange }}>{stats.totalCoins}</div>
+          </div>
+        </div>
+
+        <div style={{ background: C.card, borderRadius: 16, border: `1px solid ${C.border}`, padding: 20, marginBottom: 30 }}>
+          <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>🔗 Admin Tools</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Link href="/admin/blog" style={{ textDecoration: 'none', background: `${C.cyan}22`, color: C.cyan, border: `1px solid ${C.cyan}44`, borderRadius: 999, padding: '8px 12px', fontWeight: 800, fontSize: 13 }}>Admin Blog</Link>
+            <Link href="/admin/scanner" style={{ textDecoration: 'none', background: `${C.orange}22`, color: C.orange, border: `1px solid ${C.orange}44`, borderRadius: 999, padding: '8px 12px', fontWeight: 800, fontSize: 13 }}>Admin Scanner</Link>
           </div>
         </div>
 

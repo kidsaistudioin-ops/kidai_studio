@@ -5,7 +5,7 @@ export default function ReportsPage() {
   return (
     <div style={{ padding: 16, background: '#07090f', minHeight: '100vh', color: '#f1f5f9' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <Link href="/parent/dashboard" style={{ color: '#64748b', textDecoration: 'none', fontSize: 20 }}>←</Link>
+        <Link href="/dashboard" style={{ color: '#64748b', textDecoration: 'none', fontSize: 20 }}>←</Link>
         <h1 style={{ fontSize: 20, fontWeight: 800 }}>Detailed <span style={{ color: '#06b6d4' }}>Reports</span> 📊</h1>
       </div>
       

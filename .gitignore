@@ -5,3 +5,5 @@ find-unused.js
 script/
 .next/
 .brain/
+002_kidai_schema.sql
+001_kidai_schema.sql

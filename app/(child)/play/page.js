@@ -15,8 +15,13 @@ const GAMES = [
   { id: 'chess', title: 'Chess (Chase)', emoji: '♟️', path: '/play/chess', color: C.cyan, desc: 'Play with Arya AI or pass & play!' },
   { id: 'ludo', title: 'Ludo Race', emoji: '🎲', path: '/play/ludo-game', color: C.orange, desc: '4-Player classic racing game.' },
   { id: 'carrace', title: 'Car Race', emoji: '🏎️', path: '/play/car-race-game', color: C.green, desc: 'Dodge the rocks & survive!' },
-  { id: 'snakes', title: 'Snakes & Ladders', emoji: '🐍', path: '/play/snake-ladder', color: C.purple, desc: 'Climb up, but watch out for snakes!' },
-  { id: 'quiz', title: 'Smart Quiz', emoji: '🧠', path: '/play/quiz', color: C.orange, desc: 'Test your knowledge with Arya!' }
+  { id: 'snakes', title: 'Snakes & Ladders', emoji: '🐍', path: '/play/snakes-ladders', color: C.purple, desc: 'Climb up, but watch out for snakes!' },
+  { id: 'chessanim', title: '3D Chess', emoji: '⚔️', path: '/play-animation/chess', color: C.cyan, desc: 'Animated 3D Chess game!' },
+  { id: 'snakesanim', title: '3D Snake Ladder', emoji: '🐍', path: '/play-animation/snakes-ladder', color: C.green, desc: 'Animated snake bite effects!' },
+  { id: 'mathracing', title: 'Math Racing', emoji: '🏁', path: '/play/math-racing', color: C.cyan, desc: 'Solve math to speed up!' },
+  { id: 'memory', title: 'Memory Match', emoji: '🎴', path: '/play/memory-match', color: C.purple, desc: 'Train your brain memory!' },
+  { id: 'tictactoe', title: 'Tic Tac Toe', emoji: '❌', path: '/play/tic-tac-toe', color: C.green, desc: 'Classic zero-kata game!' },
+  { id: 'typing', title: 'Typing Ninja', emoji: '🥷', path: '/play/typing-ninja', color: C.orange, desc: 'Type fast to slash words!' }
 ];
 
 export default function PlayDashboard() {
@@ -55,6 +60,12 @@ export default function PlayDashboard() {
 
   const handlePlayGame = async (path) => {
     if (loading) return;
+
+    // ============================================
+    // TEMPORARY BYPASS: Abhi ke liye saari restrictions hata di hain!
+    router.push(path);
+    return;
+    // ============================================
 
     // Sabse pehle Free Plays check karo (Guest ho ya Signed Up)
     if (freePlays > 0) {

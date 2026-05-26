@@ -35,7 +35,7 @@ export default function MainHeader() {
 
       {/* Navigation Links */}
       <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-        <Link href="/parent/dashboard" style={{ textDecoration: 'none', color: C.muted, fontWeight: 700, fontSize: 15, transition: 'color 0.2s', padding: '10px 0' }}>
+        <Link href="/dashboard" style={{ textDecoration: 'none', color: C.muted, fontWeight: 700, fontSize: 15, transition: 'color 0.2s', padding: '10px 0' }}>
           For Parents
         </Link>
         <Link href="/login" style={{ textDecoration: 'none', background: `linear-gradient(135deg, ${C.cyan}, ${C.purple})`, color: '#fff', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, fontSize: 15, boxShadow: `0 4px 15px ${C.purple}44` }}>

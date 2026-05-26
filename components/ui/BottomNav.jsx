@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: '/scanner', icon: '📸', label: 'Scan' },
   { href: '/play',    icon: '🎮', label: 'Play' },
   { href: '/library', icon: '🎒', label: 'Library' },
+  { href: '/profile', icon: '👤', label: 'Profile' },
 ]
 
 export default function BottomNav() {

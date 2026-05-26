@@ -410,3 +410,34 @@ CREATE TABLE admin_scan_logs (
   generated_game JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS library (
+  id TEXT PRIMARY KEY,
+  child_id UUID,
+  title TEXT NOT NULL,
+  subject TEXT DEFAULT 'general',
+  type TEXT DEFAULT 'ai_generated',
+  content JSONB NOT NULL,
+  source TEXT DEFAULT 'ai_chat',
+  revision_count INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'new',
+  last_revision TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+-- Library table ko drop karke naye structure se banayein
+DROP TABLE IF EXISTS library;
+CREATE TABLE library (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id uuid REFERENCES students(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  subject TEXT DEFAULT 'general',
+  type TEXT DEFAULT 'ai_generated',
+  content JSONB NOT NULL,
+  source TEXT DEFAULT 'ai_chat',
+  revision_count INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'new',
+  last_revision TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+
+

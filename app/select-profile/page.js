@@ -46,7 +46,7 @@ export default function SelectProfile() {
     localStorage.setItem('kidai_parent_id', 'parent_123');
     localStorage.removeItem('kidai_student_id');
     localStorage.removeItem('kidai_is_guest');
-    router.push('/parent/dashboard'); // Parent ka dashboard
+    router.push('/dashboard'); // Parent ka dashboard (Next.js route group fix)
   };
 
   const handleGuestSelect = () => {
