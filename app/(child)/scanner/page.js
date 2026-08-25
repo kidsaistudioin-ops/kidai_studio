@@ -21,6 +21,10 @@ export default function ScannerPage() {
   const [completedCount, setCompletedCount] = useState(0);
   const [totalAdded, setTotalAdded] = useState(0);
   const [studentId, setStudentId] = useState(null);
+  const [studentClass, setStudentClass] = useState(5);
+  const [studentAge, setStudentAge] = useState(10);
+  const [studentBoard, setStudentBoard] = useState('CBSE');
+  const [studentMedium, setStudentMedium] = useState('English');
   
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -79,13 +83,25 @@ export default function ScannerPage() {
   useEffect(() => {
     const id = localStorage.getItem('kidai_student_id');
     if (id) setStudentId(id);
+
+    const storedClass = localStorage.getItem('kidai_student_class');
+    if (storedClass) setStudentClass(parseInt(storedClass));
+
+    const storedAge = localStorage.getItem('kidai_child_age');
+    if (storedAge) setStudentAge(parseInt(storedAge));
+
+    const storedBoard = localStorage.getItem('kidai_student_board');
+    if (storedBoard) setStudentBoard(storedBoard);
+
+    const storedMedium = localStorage.getItem('kidai_student_medium');
+    if (storedMedium) setStudentMedium(storedMedium);
   }, []);
 
   const handleGenerate = async (imageList) => {
     if (!imageList || imageList.length === 0) return;
 
     setLoading(true);
-    setStatus('📸 Photos scan ho rahi hain...');
+    setStatus(`📸 Class ${studentClass}th (${studentBoard}) ke hisaab se photos scan ho rahi hain...`);
 
     try {
        // STEP 1: Fast Library se text nikalna (Browser ke andar)
@@ -102,13 +118,13 @@ export default function ScannerPage() {
       }
 
       // STEP 2: Sirf Text ko AI ko bhejna (Super Fast)
-      setStatus('🤖 AI game bana raha hai (Sirf 3-5 sec)...');
+      setStatus(`🤖 AI Class ${studentClass}th CBSE game bana raha hai...`);
       const result = await generateGameFromScan(
-        imageList, combinedText, studentId, 10, 'English', 'Mixed', [], 'quiz', ['quiz', 'truefalse']
+        imageList, combinedText, studentId, studentAge, studentMedium, 'Mixed', [], 'quiz', ['quiz', 'truefalse'], studentClass, studentBoard
       );
       
-      if (result && result.error) {
-        throw new Error(result.error);
+      if (result && (result.error || result.isReadable === false)) {
+        throw new Error(result.error || "Photo dhoondhli ya unreadable hai. Kripya roshni mein saaf photo khinchein.");
       }
       
       setGeneratedGame(result);
@@ -118,7 +134,7 @@ export default function ScannerPage() {
       const currentXp = parseInt(localStorage.getItem('kidai_xp') || '0');
       localStorage.setItem('kidai_xp', (currentXp + earnedXp).toString());
       
-      setStatus(`✅ Game ban gaya! +${earnedXp} XP 🌟`);
+      setStatus(`✅ Game ban gaya aur Parent Review ke liye chala gaya! +${earnedXp} XP 🌟`);
       setCompletedCount(totalAdded);
       setImages([]); // Queue clear karo
       
@@ -248,18 +264,21 @@ export default function ScannerPage() {
             ) : completedCount > 0 ? (
               <div style={{ textAlign: 'center', padding: '10px 0' }}>
                 <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
-                <div style={{ color: C.green, fontWeight: 800, fontSize: 18, marginBottom: 16 }}>
-                  Game ban gaya!
+                <div style={{ color: C.green, fontWeight: 800, fontSize: 18, marginBottom: 6 }}>
+                  Game Safaltapoorvak Ban Gaya!
                 </div>
+                <p style={{ color: C.muted, fontSize: 13, marginBottom: 16, lineHeight: 1.5 }}>
+                  🛡️ Suraksha ke liye, ye game pehle <strong>Parent Dashboard</strong> me review ke liye gaya hai. Parents ke approve karte hi library me live ho jayega!
+                </p>
                 <button
                 onClick={() => router.push('/library')}
                   style={{
                     background: `linear-gradient(135deg, ${C.green}, ${C.cyan})`,
-                    color: '#fff', border: 'none', padding: '14px 24px',
+                    color: '#000', border: 'none', padding: '14px 24px',
                     borderRadius: 12, fontSize: 15, fontWeight: 800,
                     cursor: 'pointer', width: '100%', marginBottom: 10
                   }}>
-                📚 Library Mein Jao
+                📚 Library Dekho
                 </button>
                 <button
                   onClick={() => { setImages([]); setGeneratedGame(null); setStatus(''); setTotalAdded(0); setCompletedCount(0); }}

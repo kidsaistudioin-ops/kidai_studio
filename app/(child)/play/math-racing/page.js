@@ -12,21 +12,29 @@ const C = {
 
 const generateQuestion = (score) => {
   const isAdd = Math.random() > 0.5;
-  const maxNum = 10 + Math.floor(score / 50); // Score badhne par difficult math aayega
+  const maxNum = 8 + Math.floor(score / 40);
   const a = Math.floor(Math.random() * maxNum) + 1;
   const b = Math.floor(Math.random() * maxNum) + 1;
-  const correct = isAdd ? a + b : Math.abs(a - b);
-  const q = isAdd ? `${a} + ` : `${Math.max(a, b)} - ${Math.min(a, b)}`;
+  const num1 = Math.max(a, b);
+  const num2 = Math.min(a, b);
+  const correct = isAdd ? a + b : num1 - num2;
+  const q = isAdd ? `${a} + ${b} = ?` : `${num1} - ${num2} = ?`;
   
   const ansLane = Math.floor(Math.random() * 3);
   const opts = [0, 0, 0];
   opts[ansLane] = correct;
   
-  // Fill wrong options
+  // Fill distinct wrong options
+  const used = new Set([correct]);
   for(let i=0; i<3; i++) {
     if(i !== ansLane) {
-      let wrong = correct + Math.floor(Math.random() * 5) + 1 - 2;
-      if (wrong === correct) wrong += 1;
+      let offset = 1;
+      let wrong = correct + (Math.random() > 0.5 ? offset : -offset);
+      while(used.has(wrong) || wrong < 0) {
+        offset++;
+        wrong = correct + (Math.random() > 0.5 ? offset : -offset);
+      }
+      used.add(wrong);
       opts[i] = wrong;
     }
   }

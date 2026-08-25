@@ -165,52 +165,54 @@ export default function ChildDashboard() {
 
       {/* My Progress / Journey Section */}
       <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 16 }}>📈 Meri Journey</h2>
-      <div style={{ display: 'flex', overflowX: 'auto', gap: 12, paddingBottom: 10, marginBottom: 20, scrollbarWidth: 'none' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
         {/* Metric 1 */}
-        <div onClick={() => router.push('/history')} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, minWidth: 140, cursor: 'pointer', transition: 'transform 0.2s' }}>
-          <div style={{ fontSize: 24, marginBottom: 8 }}>🎮</div>
-          <div style={{ fontSize: 20, fontWeight: 900 }}>{loadingStats ? '...' : realStats.played}</div>
-          <div style={{ fontSize: 12, color: C.muted, fontWeight: 700 }}>Games Khele</div>
+        <div onClick={() => router.push('/history')} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 18, cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>🎮</div>
+          <div style={{ fontSize: 24, fontWeight: 900 }}>{loadingStats ? '...' : realStats.played}</div>
+          <div style={{ fontSize: 13, color: C.muted, fontWeight: 700, marginTop: 4 }}>Games Khele</div>
         </div>
         {/* Metric 2 */}
-        <div onClick={() => router.push('/history')} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, minWidth: 140, cursor: 'pointer', transition: 'transform 0.2s' }}>
-          <div style={{ fontSize: 24, marginBottom: 8 }}>🏆</div>
-          <div style={{ fontSize: 20, fontWeight: 900 }}>{loadingStats ? '...' : realStats.won}</div>
-          <div style={{ fontSize: 12, color: C.muted, fontWeight: 700 }}>Challenges Jeete</div>
+        <div onClick={() => router.push('/history')} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 18, cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>🏆</div>
+          <div style={{ fontSize: 24, fontWeight: 900 }}>{loadingStats ? '...' : realStats.won}</div>
+          <div style={{ fontSize: 13, color: C.muted, fontWeight: 700, marginTop: 4 }}>Challenges Jeete</div>
         </div>
         {/* Improvement */}
-        <div onClick={() => router.push('/history')} style={{ background: `linear-gradient(135deg, ${C.green}22, transparent)`, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 16, minWidth: 160, cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 13, color: C.green, fontWeight: 800, marginBottom: 4 }}>💪 Super Growth!</div>
-          {loadingStats ? <div style={{ fontSize: 12, color: C.muted }}>Loading...</div> : growth ? (
-            <div style={{ fontSize: 12, color: '#e2e8f0' }}>Pehle <strong>{growth.subject}</strong> me score <span style={{ color: C.pink }}>{growth.old}%</span> tha, ab <span style={{ color: C.green, fontWeight: 900 }}>{growth.new}%</span> ho gaya hai!</div>
-          ) : (
-            <div style={{ fontSize: 12, color: '#e2e8f0', marginBottom: 6 }}>Khelte raho aur apna result yahan dekho! 🚀</div>
-          )}
-          <div style={{ fontSize: 12, color: C.green, fontWeight: 900, marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>▶ Growth Dekho</div>
+        <div onClick={() => router.push('/history')} style={{ background: `linear-gradient(135deg, ${C.green}22, transparent)`, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 18, cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(16,185,129,0.1)' }}>
+          <div>
+            <div style={{ fontSize: 14, color: C.green, fontWeight: 800, marginBottom: 6 }}>💪 Super Growth!</div>
+            {loadingStats ? <div style={{ fontSize: 13, color: C.muted }}>Loading...</div> : growth ? (
+              <div style={{ fontSize: 13, color: '#e2e8f0' }}>Pehle <strong>{growth.subject}</strong> me score <span style={{ color: C.pink }}>{growth.old}%</span> tha, ab <span style={{ color: C.green, fontWeight: 900 }}>{growth.new}%</span> ho gaya hai!</div>
+            ) : (
+              <div style={{ fontSize: 13, color: '#e2e8f0' }}>Khelte raho aur apna result yahan dekho! 🚀</div>
+            )}
+          </div>
+          <div style={{ fontSize: 13, color: C.green, fontWeight: 900, marginTop: 12, display: 'flex', alignItems: 'center', gap: 4 }}>▶ Growth Dekho</div>
         </div>
       </div>
 
       {/* Weaknesses Turned to Strengths */}
       {!loadingStats ? (
-        <div onClick={() => router.push('/history')} style={{ background: C.card2, borderRadius: 16, padding: 16, marginBottom: 30, display: 'flex', alignItems: 'center', gap: 12, borderLeft: `4px solid ${C.cyan}`, cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}>
-           <div style={{ fontSize: 24 }}>🧠</div>
+        <div onClick={() => router.push('/history')} style={{ background: C.card2, borderRadius: 16, padding: 18, marginBottom: 30, display: 'flex', alignItems: 'center', gap: 14, borderLeft: `4px solid ${C.cyan}`, cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.2)' }}>
+           <div style={{ fontSize: 28 }}>🧠</div>
            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: C.text }}>Weakness Turned to Strength!</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.text }}>Weakness Turned to Strength!</div>
               {growth ? (
-                <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>'{growth.subject}' pehle mushkil lagta tha, ab score badhkar {growth.new}% ho gaya hai. You mastered it!</div>
+                <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>'{growth.subject}' pehle mushkil lagta tha, ab score badhkar {growth.new}% ho gaya hai. You mastered it!</div>
               ) : (
-                <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>AI abhi tumhari kamzoriyan track kar raha hai. Daily games khelo aur apni taqat badhao!</div>
+                <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>AI abhi tumhari kamzoriyan track kar raha hai. Daily games khelo aur apni taqat badhao!</div>
               )}
            </div>
-           <div style={{ fontSize: 12, color: C.cyan, fontWeight: 900, padding: '6px 12px', background: C.cyan+'22', borderRadius: 8 }}>View ▶</div>
+           <div style={{ fontSize: 13, color: C.cyan, fontWeight: 900, padding: '8px 14px', background: C.cyan+'22', borderRadius: 8 }}>View ▶</div>
         </div>
       ) : null}
 
       <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 16 }}>🎮 Today's Quests</h2>
-      <div style={{ display: 'grid', gap: 16, marginBottom: 30 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 30 }}>
         {/* Quest 1 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 60, height: 60, background: C.orange+'22', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>⚔️</div>
+        <div onClick={() => router.push('/play')} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}>
+          <div style={{ width: 60, height: 60, background: C.orange+'22', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>⚔️</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: 16 }}>Games Arena</div>
             <div style={{ color: C.muted, fontSize: 13 }}>Ludo, Chess & More</div>
@@ -218,7 +220,6 @@ export default function ChildDashboard() {
               <div style={{ width: '40%', height: '100%', background: C.orange, borderRadius: 10 }}></div>
             </div>
           </div>
-          <button onClick={() => router.push('/play')} style={{ background: C.orange, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}>Play</button>
         </div>
 
         {/* Quest 2 */}

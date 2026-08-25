@@ -88,10 +88,21 @@ export default function TypingNinjaGame() {
         
         newWords = newWords.filter(w => w.y <= 90); // Zameen se upar wale
         
-        // Random word spawn
-        if (Math.random() < 0.01 + (score * 0.0005) && newWords.length < 5) {
-          const randomWord = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
-          newWords.push({ id: Date.now(), text: randomWord, x: Math.random() * 70 + 10, y: 0 });
+        // Clean Anti-Overlap Word Spawner
+        const topWords = newWords.filter(w => w.y < 20);
+        if (Math.random() < 0.018 && newWords.length < 4 && topWords.length === 0) {
+          const unusedWords = WORD_LIST.filter(w => !newWords.some(existing => existing.text === w));
+          const pool = unusedWords.length > 0 ? unusedWords : WORD_LIST;
+          const randomWord = pool[Math.floor(Math.random() * pool.length)];
+          
+          // 3 Distinct safe lanes (12%, 40%, 68%) to prevent overlap
+          const lanes = [12, 40, 68];
+          const availableLanes = lanes.filter(laneX => !newWords.some(w => Math.abs(w.x - laneX) < 20 && w.y < 30));
+          const chosenX = availableLanes.length > 0 
+            ? availableLanes[Math.floor(Math.random() * availableLanes.length)]
+            : lanes[Math.floor(Math.random() * lanes.length)];
+
+          newWords.push({ id: Date.now() + Math.random(), text: randomWord, x: chosenX, y: -6 });
         }
         return newWords;
       });

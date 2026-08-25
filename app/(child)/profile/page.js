@@ -28,23 +28,44 @@ function SkillBar({ name, pct, color }) {
 }
 
 export default function ProfilePage() {
-  const [currentAge, setCurrentAge] = useState("10-13");
-  const xp = 150;
-
   const [name, setName] = useState("Arjun");
+  const [currentAge, setCurrentAge] = useState("10");
+  const [currentClass, setCurrentClass] = useState(5);
+  const [currentBoard, setCurrentBoard] = useState("CBSE");
+  const [currentMedium, setCurrentMedium] = useState("English");
+
   const [avatar, setAvatar] = useState("😊");
   const [customPhoto, setCustomPhoto] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef(null);
   const AVATARS = ["😊", "😎", "🤓", "🚀", "🦄", "🦁", "🤖", "🌟"];
+
+  // Load from localStorage on mount
+  useState(() => {
+    if (typeof window !== "undefined") {
+      const storedName = localStorage.getItem("kidai_student_name");
+      const storedAge = localStorage.getItem("kidai_child_age");
+      const storedClass = localStorage.getItem("kidai_student_class");
+      const storedBoard = localStorage.getItem("kidai_student_board");
+      const storedMedium = localStorage.getItem("kidai_student_medium");
+
+      if (storedName) setName(storedName);
+      if (storedAge) setCurrentAge(storedAge);
+      if (storedClass) setCurrentClass(parseInt(storedClass));
+      if (storedBoard) setCurrentBoard(storedBoard);
+      if (storedMedium) setCurrentMedium(storedMedium);
+    }
+  });
+
+  const xp = 150;
   
   // Mock data based on behavior tracking
   const behavior = {
     timeSpent: { games: 45, chat: 20 },
     mistakes: { "math-match": 2 }
   };
-  const savedGames = [1, 2]; // 2 saved games mock
+  const savedGames = [1, 2];
 
   const skills = [
     { name: "🔢 Mathematics", pct: 75, color: T.cyan },
@@ -54,7 +75,7 @@ export default function ProfilePage() {
   ];
 
   const getInsight = () => {
-    return `Tum <b style="color:${T.cyan}">Maths</b> mein bahut interest rakhte ho! <b style="color:${T.pink}">Word Hunt</b> mein thodi aur practice karo.`;
+    return `Tum <b style="color:${T.cyan}">Class ${currentClass}th (${currentBoard})</b> ke syllabus mein bahut achha kar rahe ho! Maths aur Science ke games regular khelo.`;
   };
 
   const handlePhotoUpload = (e) => {
@@ -62,11 +83,10 @@ export default function ProfilePage() {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setCustomPhoto(imageUrl);
-      setAvatar(null); // Clear emoji avatar
+      setAvatar(null);
     }
   };
 
-  // Profile save karne ka function (Baad mein isme Auth API call lagegi)
   const handleSave = async () => {
     if (!isEditing) {
       setIsEditing(true);
@@ -75,8 +95,14 @@ export default function ProfilePage() {
     
     setIsSaving(true);
     try {
-      // Yahan api/auth ya api/profile/update API call aayegi future mein
-      await new Promise(r => setTimeout(r, 600)); // Simulating network request
+      if (typeof window !== "undefined") {
+        localStorage.setItem("kidai_student_name", name);
+        localStorage.setItem("kidai_child_age", currentAge.toString());
+        localStorage.setItem("kidai_student_class", currentClass.toString());
+        localStorage.setItem("kidai_student_board", currentBoard);
+        localStorage.setItem("kidai_student_medium", currentMedium);
+      }
+      await new Promise(r => setTimeout(r, 400));
       setIsEditing(false);
     } catch (error) {
       console.error("Save failed", error);
@@ -91,6 +117,7 @@ export default function ProfilePage() {
       <div style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(7,9,15,.97)", backdropFilter: "blur(16px)", borderBottom: `1px solid ${T.border}`, padding: "0 14px", height: 52, display: "flex", alignItems: "center", gap: 10 }}>
         <Link href="/home" style={{ background: "none", border: "none", color: T.muted, fontSize: 20, cursor: "pointer", textDecoration: "none" }}>←</Link>
         <span style={{ fontWeight: 800, fontSize: 16 }}>My <span style={{color: T.orange}}>Profile</span></span>
+        <span style={{ marginLeft: "auto", fontSize: 11, background: T.cyan + "22", color: T.cyan, padding: "3px 8px", borderRadius: 6, fontWeight: 800 }}>Class {currentClass}th</span>
       </div>
 
       <div style={{ padding: 16, animation: "slideIn .3s ease" }}>
@@ -110,16 +137,76 @@ export default function ProfilePage() {
             ) : (
               <div style={{ fontWeight: 800, fontSize: 18 }}>{name}</div>
             )}
-            <div style={{ fontSize: 12, color: T.muted }}>{currentAge} Saal</div>
+            <div style={{ fontSize: 12, color: T.muted }}>
+              {currentAge} Saal • <strong>Class {currentClass}th</strong> ({currentBoard})
+            </div>
             <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-              <span style={{ background: T.green + "22", color: T.green, fontSize: 11, padding: "3px 10px", borderRadius: 99, fontWeight: 700 }}>Math Genius 🔢</span>
-              <span style={{ background: T.orange + "22", color: T.orange, fontSize: 11, padding: "3px 10px", borderRadius: 99, fontWeight: 700 }}>Game Creator 🎮</span>
+              <span style={{ background: T.green + "22", color: T.green, fontSize: 11, padding: "3px 10px", borderRadius: 99, fontWeight: 700 }}>🇮🇳 {currentBoard} Board</span>
+              <span style={{ background: T.purple + "22", color: T.purple, fontSize: 11, padding: "3px 10px", borderRadius: 99, fontWeight: 700 }}>{currentMedium} Medium</span>
             </div>
           </div>
           <button onClick={handleSave} disabled={isSaving} style={{ background: T.card2, border: `1px solid ${T.border}`, color: T.text, padding: "8px 12px", borderRadius: 10, cursor: isSaving ? "not-allowed" : "pointer", fontWeight: 800, fontSize: 12, opacity: isSaving ? 0.7 : 1 }}>
             {isSaving ? "⏳ Saving..." : isEditing ? "💾 Save" : "✏️ Edit"}
           </button>
         </div>
+
+        {/* Edit Class / Board / Age Card (When editing) */}
+        {isEditing && (
+          <Card style={{ marginBottom: 16 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 12, color: T.cyan }}>🏫 Class & Board Settings:</div>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+              <div>
+                <label style={{ fontSize: 11, color: T.muted, fontWeight: 700 }}>Class / Grade:</label>
+                <select 
+                  value={currentClass} 
+                  onChange={(e) => setCurrentClass(parseInt(e.target.value))}
+                  style={{ width: "100%", padding: "8px", borderRadius: 8, background: T.card2, border: `1px solid ${T.border}`, color: T.text, fontSize: 13, fontWeight: 800, marginTop: 4 }}
+                >
+                  {[1,2,3,4,5,6,7,8,9,10].map(c => (
+                    <option key={c} value={c}>Class {c}th</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: 11, color: T.muted, fontWeight: 700 }}>Age (Years):</label>
+                <input 
+                  type="number" value={currentAge} onChange={(e) => setCurrentAge(e.target.value)}
+                  style={{ width: "100%", padding: "8px", borderRadius: 8, background: T.card2, border: `1px solid ${T.border}`, color: T.text, fontSize: 13, fontWeight: 800, marginTop: 4 }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div>
+                <label style={{ fontSize: 11, color: T.muted, fontWeight: 700 }}>Board:</label>
+                <select 
+                  value={currentBoard} 
+                  onChange={(e) => setCurrentBoard(e.target.value)}
+                  style={{ width: "100%", padding: "8px", borderRadius: 8, background: T.card2, border: `1px solid ${T.border}`, color: T.text, fontSize: 13, fontWeight: 800, marginTop: 4 }}
+                >
+                  <option value="CBSE">CBSE (NCERT)</option>
+                  <option value="ICSE">ICSE</option>
+                  <option value="State">State Board</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: 11, color: T.muted, fontWeight: 700 }}>Medium:</label>
+                <select 
+                  value={currentMedium} 
+                  onChange={(e) => setCurrentMedium(e.target.value)}
+                  style={{ width: "100%", padding: "8px", borderRadius: 8, background: T.card2, border: `1px solid ${T.border}`, color: T.text, fontSize: 13, fontWeight: 800, marginTop: 4 }}
+                >
+                  <option value="English">English</option>
+                  <option value="Hindi">Hindi</option>
+                  <option value="Hinglish">Hinglish</option>
+                </select>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Avatar Picker (only shows when editing) */}
         {isEditing && (
@@ -143,7 +230,7 @@ export default function ProfilePage() {
         )}
 
         {/* AI Insight */}
-        <div style={{ background: `linear-gradient(135deg,#1a1f3a,#111827)`, border: `1px solid ${T.purple}`, borderRadius: 16, padding: 14, marginBottom: 14 }}>
+        <div style={{ background: `linear-gradient(135deg,#1a1f3a,#111827)`, border: `1px solid ${T.purple}`, borderRadius: 16, padding: 14, marginBottom: 14, marginTop: 14 }}>
           <div style={{ fontSize: 11, fontWeight: 800, color: T.purple, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>🤖 Arya Ka Observation</div>
           <div style={{ fontSize: 13, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: getInsight() }} />
         </div>

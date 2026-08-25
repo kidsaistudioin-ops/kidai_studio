@@ -1,23 +1,15 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import ChessPiece3D from './ChessPiece3D';
+import { 
+  playMovePieceSound, playCorrectSound, playWrongSound, 
+  playWinFanfare, playDefeatSound, playTieSound 
+} from '@/lib/audio/sound-engine';
 
-// Realistic Chess symbols
-const SYMBOLS = { R: '♜', N: '♞', B: '♝', Q: '♛', K: '♚', P: '♟' }; 
-
-// 🎨 REAL 3D ANIMATED CHARACTERS ENGINE
-// Jab aapke paas asli character images/GIFs aa jayein, toh isko `true` kar dena!
-const USE_REAL_IMAGES = true;
-
+// 🎨 REAL 3D VECTOR PIECES ENGINE
 const renderPiece = (type, color) => {
-  if (USE_REAL_IMAGES) {
-    // Ye public/chess-pieces/ folder se aapki real images uthayega
-    // Files ke naam aise rakhne honge: white-N.gif, black-K.png, white-P.webp aadi.
-    const imgName = `${color}-${type}.gif`; // Agar PNG use karein toh .png kar dena
-    return <img src={`/chess-pieces/${imgName}`} alt={`${color} ${type}`} style={{ width: '90%', height: '90%', objectFit: 'contain', filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.5))' }} draggable="false" />;
-  }
-  // Agar false hai, toh normal emoji dikhayega
-  return SYMBOLS[type];
+  return <ChessPiece3D type={type} color={color} />;
 };
 
 // Initial Board Setup Helper
@@ -252,8 +244,9 @@ export default function ChessBoard() {
 
   // 🎯 CORE MOVE EXECUTION LOGIC (Used by Tap, DragDrop, and AI)
   const executeMove = (pId, activePiece, r, c, targetPiece) => {
+    const isPawnPromotion = activePiece.type === 'P' && ((activePiece.color === 'white' && r === 0) || (activePiece.color === 'black' && r === 7));
     const newPieces = pieces.map(p => {
-      if (p.id === pId) return { ...p, r: r, c: c };
+      if (p.id === pId) return { ...p, r: r, c: c, type: isPawnPromotion ? 'Q' : p.type };
       if (p.id === targetPiece?.id) return { ...p, r: -1, c: -1, captured: true };
       return p;
     });
@@ -266,7 +259,12 @@ export default function ChessBoard() {
 
     // Animate capture
     if (targetPiece) {
-      playSound('capture');
+      if (targetPiece.type === 'K') {
+        if (activePiece.color === 'white') playSound('win');
+        else playSound('lose');
+      } else {
+        playSound('capture');
+      }
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 300);
       setAnimatingCaptures(prev => [...prev, targetPiece]);
@@ -342,16 +340,24 @@ export default function ChessBoard() {
     }
   };
 
-  // Simple Sound Effects
+  // Synthesized Sound Effects (0-latency Web Audio)
   const playSound = (type) => {
-    // Jab aap public/sounds/ me 'move.mp3', 'capture.mp3', 'check.mp3' daal denge, tab ye chalega.
-    // Abhi ke liye sounds mute hain taaki 404 error na aaye.
-    return;
-    /* eslint-disable no-unreachable */
-      try {
-        const audio = new Audio(`/sounds/${type}.mp3`);
-        audio.play().catch(() => {});
-      } catch(e) {}
+    try {
+      if (type === 'move' || type === 'select') {
+        playMovePieceSound();
+      } else if (type === 'capture') {
+        playMovePieceSound();
+        playCorrectSound();
+      } else if (type === 'check') {
+        playWrongSound();
+      } else if (type === 'win') {
+        playWinFanfare();
+      } else if (type === 'lose') {
+        playDefeatSound();
+      }
+    } catch(e) {
+      console.warn('Audio play failed:', e);
+    }
   };
 
   // 🚀 SEPARATED MULTIPLAYER SETUP
@@ -741,11 +747,6 @@ export default function ChessBoard() {
       {/* White Captured Pieces */}
       <div style={{ minHeight: 30, display: 'flex', gap: 4, marginTop: 8, padding: '0 8px' }}>
         {captured.black.map((p, i) => <span key={i} style={{ display: 'inline-block', width: 24, height: 24, fontSize: 20, color: '#fff', filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.8))' }}>{renderPiece(p.type, p.color)}</span>)}
-      </div>
-
-      <div style={{ marginTop: 20, padding: 16, background: '#1e293b', borderRadius: 12, border: '1px solid #334155', color: '#cbd5e1', fontSize: 13, textAlign: 'left', lineHeight: 1.6 }}>
-        <div style={{ fontWeight: 800, color: '#38bdf8', marginBottom: 6 }}>💡 Smart Chess Engine Active:</div>
-        Game mein original chess ke saare basic rules lage hue hain. Ghoda (Knight) uchal ke chalega! Apni baari par goti tap karein aur sahi jagah par chal kar dushman ko harayein.
       </div>
     </div>
   );

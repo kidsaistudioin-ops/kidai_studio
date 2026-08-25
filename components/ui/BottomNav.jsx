@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { href: '/home',    icon: '🏠', label: 'Home' },
   { href: '/seekho',  icon: '📖', label: 'Seekho' },
   { href: '/scanner', icon: '📸', label: 'Scan' },
+  { href: '/studio',  icon: '🎨', label: 'Studio' },
   { href: '/play',    icon: '🎮', label: 'Play' },
   { href: '/library', icon: '🎒', label: 'Library' },
   { href: '/profile', icon: '👤', label: 'Profile' },

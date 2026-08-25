@@ -26,21 +26,19 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body style={{ 
-        background: '#000', 
+        background: '#07090f', 
         color: '#f1f5f9', 
         margin: 0, 
-        display: 'flex', 
-        justifyContent: 'center',
-        minHeight: '100vh'
+        padding: 0,
+        width: '100%',
+        minHeight: '100vh',
+        fontFamily: "'Nunito', sans-serif"
       }}>
         <div style={{
           width: '100%',
-          maxWidth: '480px', /* Mobile UI Enforcer */
-          background: '#07090f',
           minHeight: '100vh',
-          position: 'relative',
-          boxShadow: '0 0 50px rgba(124, 58, 237, 0.1)',
-          overflowX: 'hidden'
+          background: '#07090f',
+          position: 'relative'
         }}>
           {children}
         </div>

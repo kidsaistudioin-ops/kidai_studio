@@ -129,140 +129,194 @@ export default function HomePage() {
       {/* Naya Clean Header */}
       <MainHeader />
 
-      <div style={{ padding: '0 16px 32px', maxWidth: 600, margin: '0 auto' }}>
-        {/* Hero */}
-        <div style={{ textAlign: 'center', padding: '28px 0 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 10, display: 'inline-block', animation: 'bounce 3s ease infinite' }}>🤖</div>
-          <h1 style={{ fontFamily: "'Baloo 2', cursive", fontSize: 30, fontWeight: 800, lineHeight: 1.1, marginBottom: 8 }}>
-            Bacchon Ka<br /><span style={{ background: `linear-gradient(90deg, ${C.orange}, ${C.yellow}, ${C.pink})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200%', animation: 'shimmer 3s linear infinite' }}>AI School</span>
+      <div style={{ padding: '0 24px 60px', maxWidth: 1200, margin: '0 auto' }}>
+        <style>{`
+          .landing-desktop-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+          @media (min-width: 900px) {
+            .landing-desktop-grid {
+              grid-template-columns: 1.1fr 1fr;
+              gap: 36px;
+              align-items: start;
+            }
+          }
+        `}</style>
+
+        {/* Hero Section */}
+        <div style={{ textAlign: 'center', padding: '36px 0 28px' }}>
+          <div style={{ fontSize: 64, marginBottom: 12, display: 'inline-block', animation: 'bounce 3s ease infinite' }}>🤖</div>
+          <h1 style={{ fontFamily: "'Baloo 2', cursive", fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 800, lineHeight: 1.15, marginBottom: 12 }}>
+            Bacchon Ka <span style={{ background: `linear-gradient(90deg, ${C.orange}, ${C.yellow}, ${C.pink})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200%', animation: 'shimmer 3s linear infinite' }}>AI School & Game Arena</span> 🚀
           </h1>
-          <p style={{ color: C.muted, fontSize: 14, maxWidth: 320, margin: '0 auto 20px', lineHeight: 1.6 }}>6-18 saal ke bacho ke liye — AI seekho, games banao, homework fun banao!</p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <p style={{ color: C.muted, fontSize: 16, maxWidth: 540, margin: '0 auto 24px', lineHeight: 1.6 }}>6-18 saal ke bacho ke liye — School homework scan karo, 3D Games khelo, aur AI seekho!</p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             {isLoggedIn ? (
               <>
-                <button style={btnStyle(C.green)} onClick={() => router.push('/select-profile')}>🏠 Dashboard Kholo</button>
+                <button style={btnStyle(C.green)} onClick={() => router.push('/home')}>🏠 Dashboard Kholo</button>
                 <button style={btnStyle(C.red, false, true)} onClick={handleLogout}>🚪 Logout</button>
               </>
             ) : (
-              <button style={btnStyle(C.orange)} onClick={() => router.push('/signup')}>✅ Free Mein Shuru Karo</button>
+              <>
+                <button style={btnStyle(C.orange)} onClick={() => router.push('/play')}>🎮 Free Games Khelo</button>
+                <button style={btnStyle(C.cyan, false, true)} onClick={() => router.push('/signup')}>✅ Free Account Banao</button>
+              </>
             )}
           </div>
         </div>
 
-        {/* Top 4 Buttons (2x2 Grid) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-          {[
-            { icon: '🤖', title: 'Arya AI Tutor', desc: 'AI Chat se baat karo', color: C.cyan, path: '/chat' },
-            { icon: '📸', title: 'Smart Scanner', desc: 'Homework scan', color: C.purple, path: '/scanner' },
-            { icon: '🎲', title: 'Multiplayer', desc: 'Ludo, Chess khelo', color: C.green, path: '/play' },
-            { icon: '💰', title: 'Earn Mode', desc: 'Jobs & Pocket money', color: C.yellow, path: '/earn' },
-            { icon: '📚', title: 'KidAI Blog', desc: 'Study tips & updates', color: C.orange, path: '/blog' },
-            { icon: '⭐', title: 'Parent Reviews', desc: 'Read what parents say', color: C.pink, path: '/reviews' },
-          ].map(f => (
-            <div 
-              key={f.title} 
-              onClick={() => router.push(f.path)} 
-              style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: '16px 12px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: `0 4px 14px rgba(0,0,0,0.2)` }}
-            >
-              <div style={{ fontSize: 28, marginBottom: 8 }}>{f.icon}</div>
-              <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4, color: f.color }}>{f.title}</div>
-              <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.3 }}>{f.desc}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
-          {[['6-18', 'Saal', C.orange], ['50+', 'AI Skills', C.cyan], ['∞', 'Games', C.green]].map(([n, l, c]) => (
-            <div key={l} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: '12px 8px', textAlign: 'center' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: c, fontFamily: "'Baloo 2', cursive" }}>{n}</div>
-              <div style={{ fontSize: 11, color: C.muted }}>{l}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Free Games */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 16 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>🎮 Free Games — Abhi Khelo!</div>
-          <div style={{ fontSize: 12, color: C.muted, marginBottom: 14 }}>{gamesPlayed < MAX_FREE ? `${MAX_FREE - gamesPlayed} games bache — koi login nahi!` : 'Account banao — unlimited games!'}</div>
+        {/* ── RESPONSIVE DUAL-COLUMN DESKTOP GRID ── */}
+        <div className="landing-desktop-grid">
           
-          {activeGame ? <GuestGame game={activeGame} onDone={gameDone} /> : gamesPlayed >= MAX_FREE ? (
-            <div style={{ background: `linear-gradient(135deg, ${C.green}22, ${C.cyan}11)`, border: `1px solid ${C.green}44`, borderRadius: 14, padding: 16, textAlign: 'center' }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🔓</div>
-              <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>3 Games Try Kar Liye!</div>
-              <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>{isLoggedIn ? 'Aapka premium account active hai!' : 'Free account se unlimited access — 30 seconds mein!'}</div>
-              {isLoggedIn ? (
-                <button style={btnStyle(C.green, true)} onClick={() => router.push('/select-profile')}>🏠 Dashboard Kholo</button>
-              ) : (
-                <button style={btnStyle(C.green, true)} onClick={() => router.push('/signup')}>✅ Free Account Banao</button>
-              )}
-              {!isLoggedIn && <div style={{ fontSize: 11, color: C.muted, marginTop: 8 }}>No credit card • No spam</div>}
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {GUEST_QUIZ.map((game) => (
-                <div key={game.id} onClick={() => startGame(game)} style={{ display: 'flex', alignItems: 'center', gap: 14, background: `linear-gradient(135deg, ${game.color}15, ${C.card})`, border: `1px solid ${game.color}33`, borderRadius: 14, padding: 14, cursor: 'pointer' }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 14, background: game.color + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>{game.emoji}</div>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: 14 }}>{game.name}</div>
-                    <div style={{ fontSize: 12, color: C.muted }}>{game.subject}</div>
-                  </div>
-                  <div style={{ marginLeft: 'auto', fontSize: 18, color: game.color }}>▶</div>
+          {/* LEFT COLUMN: QUICK ACCESS CARDS & HOW IT WORKS */}
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 24 }}>
+              {[
+                { icon: '🤖', title: 'Arya AI Tutor', desc: 'AI Chat se doubt pucho', color: C.cyan, path: '/chat' },
+                { icon: '📸', title: 'Smart Scanner', desc: 'Homework scan karo', color: C.purple, path: '/scanner' },
+                { icon: '🎲', title: '3D Multiplayer', desc: 'Ludo, Chess, Snakes', color: C.green, path: '/play' },
+                { icon: '📖', title: 'Seekho Lessons', desc: 'Alphabet, Tables, Words', color: C.orange, path: '/seekho' },
+                { icon: '💰', title: 'Earn Mode', desc: 'Coins & Pocket money', color: C.yellow, path: '/earn' },
+                { icon: '⭐', title: 'Parent Reviews', desc: 'Parents feedback', color: C.pink, path: '/reviews' },
+              ].map(f => (
+                <div 
+                  key={f.title} 
+                  onClick={() => router.push(f.path)} 
+                  style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: '18px 14px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: `0 4px 14px rgba(0,0,0,0.2)` }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = f.color; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.transform = 'translateY(0)'; }}
+                >
+                  <div style={{ fontSize: 32, marginBottom: 8 }}>{f.icon}</div>
+                  <div style={{ fontWeight: 900, fontSize: 15, marginBottom: 4, color: f.color }}>{f.title}</div>
+                  <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.3 }}>{f.desc}</div>
                 </div>
               ))}
-              {/* Naye users ko signup ke liye bhejein taki 404 na aaye */}
-              <button style={{...btnStyle(C.purple, true), marginTop: 4}} onClick={() => router.push('/signup')}>🌟 View 50+ Games Library</button>
             </div>
-          )}
-        </div>
 
-        {/* HOW IT WORKS Section */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: '24px 16px', marginBottom: 16, marginTop: 24 }}>
-          <h2 style={{ textAlign: 'center', fontWeight: 800, fontSize: 18, marginBottom: 20 }}>🎮 Aise Kaam Karta Hai! 🕹️</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: C.card2, padding: 12, borderRadius: 12, borderLeft: `4px solid ${C.green}` }}>
-              <div style={{ fontSize: 28 }}>📚</div>
-              <div>
-                <div style={{ fontWeight: 800, color: C.green }}>1. Padhai Karo (Seekho)</div>
-                <div style={{ fontSize: 12, color: C.muted }}>Maths, English ke games khelo aur har sahi jawab par <b>+1 Coin</b> kamao.</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: C.card2, padding: 12, borderRadius: 12, borderLeft: `4px solid ${C.yellow}` }}>
-              <div style={{ fontSize: 28 }}>🪙</div>
-              <div>
-                <div style={{ fontWeight: 800, color: C.yellow }}>2. Coins Jama Karo</div>
-                <div style={{ fontSize: 12, color: C.muted }}>Galat jawab par <b>-1 Coin</b> katega. Apne coins dashboard me dekho.</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: C.card2, padding: 12, borderRadius: 12, borderLeft: `4px solid ${C.purple}` }}>
-              <div style={{ fontSize: 28 }}>🎲</div>
-              <div>
-                <div style={{ fontWeight: 800, color: C.purple }}>3. Games Khelo (Play)</div>
-                <div style={{ fontSize: 12, color: C.muted }}>Ludo, Chess jaise games khelne ke liye <b>-10 Coins</b> kharch karo.</div>
+            {/* HOW IT WORKS Section */}
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: '24px 20px', marginBottom: 24 }}>
+              <h2 style={{ textAlign: 'center', fontWeight: 900, fontSize: 20, marginBottom: 20 }}>🎮 Aise Kaam Karta Hai! 🕹️</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: C.card2, padding: 14, borderRadius: 14, borderLeft: `4px solid ${C.green}` }}>
+                  <div style={{ fontSize: 30 }}>📚</div>
+                  <div>
+                    <div style={{ fontWeight: 800, color: C.green, fontSize: 15 }}>1. Padhai Karo (Seekho)</div>
+                    <div style={{ fontSize: 13, color: C.muted, marginTop: 2 }}>Maths, English ke games khelo aur har sahi jawab par <b>+1 Coin</b> kamao.</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: C.card2, padding: 14, borderRadius: 14, borderLeft: `4px solid ${C.yellow}` }}>
+                  <div style={{ fontSize: 30 }}>🪙</div>
+                  <div>
+                    <div style={{ fontWeight: 800, color: C.yellow, fontSize: 15 }}>2. Coins Jama Karo</div>
+                    <div style={{ fontSize: 13, color: C.muted, marginTop: 2 }}>Galat jawab par <b>-1 Coin</b> katega. Apne coins dashboard me dekho.</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: C.card2, padding: 14, borderRadius: 14, borderLeft: `4px solid ${C.purple}` }}>
+                  <div style={{ fontSize: 30 }}>🎲</div>
+                  <div>
+                    <div style={{ fontWeight: 800, color: C.purple, fontSize: 15 }}>3. Games Khelo (Play)</div>
+                    <div style={{ fontSize: 13, color: C.muted, marginTop: 2 }}>Ludo, Chess, Snakes & Ladders khelne ke liye <b>-10 Coins</b> use karo.</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Age Sections */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 16 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 12 }}>👦👧 Umar Ke Hisab Se</div>
-          {[['9-12', '🌱', C.green, 'Games + Fun Learning', 'Drag & drop, animated math, homework scanner'], ['12-15', '🔧', C.cyan, 'Creator Mode', 'Game builder, story engine, AI tools sikhna'], ['15-18', '🚀', C.orange, 'Earn Mode', 'Real projects, company work, paise kamao']].map(([age, icon, color, title, desc]) => (
-            <div key={age} style={{ background: C.card2, borderRadius: 14, padding: 12, marginBottom: 8, borderLeft: `4px solid ${color}` }}>
-              <div style={{ fontWeight: 800, fontSize: 13, color }}>{icon} {age} Saal — {title}</div>
-              <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>{desc}</div>
+          {/* RIGHT COLUMN: 50+ GAMES HUB & AGE SECTIONS */}
+          <div>
+            {/* Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
+              {[
+                { n: '6-18', l: 'Saal', c: C.orange, path: '/play' },
+                { n: '50+', l: 'Games & Skills', c: C.cyan, path: '/play' },
+                { n: '3D', l: 'Arcade Arena', c: C.green, path: '/play' }
+              ].map((item) => (
+                <div key={item.l} onClick={() => router.push(item.path)} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: '14px 8px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = item.c}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = C.border}
+                >
+                  <div style={{ fontSize: 26, fontWeight: 900, color: item.c, fontFamily: "'Baloo 2', cursive" }}>{item.n}</div>
+                  <div style={{ fontSize: 12, color: C.muted, fontWeight: 700 }}>{item.l}</div>
+                </div>
+              ))}
             </div>
-          ))}
+
+            {/* Free Games Card */}
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 20, marginBottom: 20, boxShadow: '0 6px 20px rgba(0,0,0,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div>
+                  <div style={{ fontWeight: 900, fontSize: 17, color: '#fff' }}>🎮 Free Games — Abhi Khelo!</div>
+                  <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>Direct click karke game shuru karein</div>
+                </div>
+                <button onClick={() => router.push('/play')} style={{ background: C.purple+'22', color: C.purple, border: `1px solid ${C.purple}55`, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>View All 50+ ▶</button>
+              </div>
+
+              {activeGame ? <GuestGame game={activeGame} onDone={gameDone} /> : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {GUEST_QUIZ.map((game) => (
+                    <div key={game.id} onClick={() => startGame(game)} style={{ display: 'flex', alignItems: 'center', gap: 14, background: `linear-gradient(135deg, ${game.color}15, ${C.card})`, border: `1px solid ${game.color}33`, borderRadius: 14, padding: 14, cursor: 'pointer', transition: 'all 0.2s' }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(4px)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+                    >
+                      <div style={{ width: 48, height: 48, borderRadius: 14, background: game.color + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>{game.emoji}</div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 15 }}>{game.name}</div>
+                        <div style={{ fontSize: 12, color: C.muted }}>{game.subject}</div>
+                      </div>
+                      <div style={{ marginLeft: 'auto', fontSize: 18, color: game.color }}>▶</div>
+                    </div>
+                  ))}
+                  
+                  {/* DIRECT ACCESS TO 50+ GAMES ARCADE */}
+                  <button style={{ ...btnStyle(C.purple, true), marginTop: 8 }} onClick={() => router.push('/play')}>
+                    🌟 Open 50+ Games Arcade (Ludo, Chess, Snakes & More)
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Clickable Age Category Cards */}
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 20, marginBottom: 20 }}>
+              <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 14 }}>👦👧 Umar Ke Hisab Se (Click to Open)</div>
+              {[
+                { age: '6-10', icon: '🌱', color: C.green, title: 'Games + Seekho Fun', desc: 'Alphabet, Tables, 3D Ludo, Snakes & Ladders', path: '/seekho' },
+                { age: '10-14', icon: '🔧', color: C.cyan, title: 'Creator Studio & Coding', desc: 'Game builder, Comic maker, Smart scanner', path: '/studio' },
+                { age: '14-18', icon: '🚀', color: C.orange, title: 'Earn Mode & Skills', desc: 'Real projects, Challenges, Rewards', path: '/earn' }
+              ].map((item) => (
+                <div 
+                  key={item.age} 
+                  onClick={() => router.push(item.path)}
+                  style={{ background: C.card2, borderRadius: 14, padding: 14, marginBottom: 10, borderLeft: `4px solid ${item.color}`, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = C.card2; e.currentTarget.style.transform = 'translateX(0)'; }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: item.color }}>{item.icon} {item.age} Saal — {item.title}</div>
+                    <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>{item.desc}</div>
+                  </div>
+                  <div style={{ color: item.color, fontWeight: 900, fontSize: 16 }}>▶</div>
+                </div>
+              ))}
+            </div>
+
+          </div>
+
         </div>
 
         {isLoggedIn ? (
-          <button style={btnStyle(C.red, true)} onClick={handleLogout}>🚪 Logout Karo</button>
+          <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <button style={{ ...btnStyle(C.red, false, true), maxWidth: 300, margin: '0 auto' }} onClick={handleLogout}>🚪 Logout Karo</button>
+          </div>
         ) : (
-          <button style={btnStyle(C.orange, true)} onClick={() => router.push('/signup')}>🚀 Abhi Shuru Karo — Free!</button>
+          <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <button style={{ ...btnStyle(C.orange, true), maxWidth: 360, margin: '0 auto' }} onClick={() => router.push('/signup')}>🚀 Abhi Shuru Karo — Free!</button>
+          </div>
         )}
 
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginTop: 16 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10 }}>🔗 Explore All Pages</div>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 24, marginTop: 24 }}>
+          <div style={{ fontWeight: 900, fontSize: 18, marginBottom: 16 }}>🔗 Explore All 50+ Modules & Tools</div>
 
           <div style={{ display: 'grid', gap: 12 }}>
             <div>

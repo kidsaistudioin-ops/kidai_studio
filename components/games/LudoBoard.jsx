@@ -63,6 +63,71 @@ const getCellColor = (r, c) => {
   return C.path;
 };
 
+// ── REALISTIC 3D GLOSSY PAWN COMPONENT ──
+const Pawn3D = ({ color, isGlowing, canMove }) => {
+  const configs = {
+    red: { base: '#dc2626', light: '#fca5a5', mid: '#ef4444', dark: '#7f1d1d', ring: '#fef08a' },
+    green: { base: '#16a34a', light: '#86efac', mid: '#22c55e', dark: '#14532d', ring: '#fef08a' },
+    yellow: { base: '#d97706', light: '#fef08a', mid: '#eab308', dark: '#78350f', ring: '#ffffff' },
+    blue: { base: '#2563eb', light: '#93c5fd', mid: '#3b82f6', dark: '#1e3a8a', ring: '#fef08a' },
+  };
+  const c = configs[color] || configs.red;
+
+  return (
+    <svg 
+      viewBox="0 0 100 120" 
+      style={{ 
+        width: '160%', height: '160%', 
+        filter: isGlowing ? `drop-shadow(0 0 12px ${c.mid}) drop-shadow(0 8px 12px rgba(0,0,0,0.6))` : 'drop-shadow(0 8px 12px rgba(0,0,0,0.5))',
+        transform: canMove ? 'translateY(-22%) scale(1.15)' : 'translateY(-12%) scale(1)', 
+        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' 
+      }}
+    >
+      <defs>
+        <radialGradient id={`headGrad_${color}`} cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor={c.light} />
+          <stop offset="40%" stopColor={c.mid} />
+          <stop offset="85%" stopColor={c.base} />
+          <stop offset="100%" stopColor={c.dark} />
+        </radialGradient>
+        <linearGradient id={`bodyGrad_${color}`} x1="20%" y1="0%" x2="80%" y2="100%">
+          <stop offset="0%" stopColor={c.light} />
+          <stop offset="35%" stopColor={c.mid} />
+          <stop offset="80%" stopColor={c.base} />
+          <stop offset="100%" stopColor={c.dark} />
+        </linearGradient>
+        <linearGradient id={`baseGrad_${color}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={c.mid} />
+          <stop offset="50%" stopColor={c.base} />
+          <stop offset="100%" stopColor={c.dark} />
+        </linearGradient>
+      </defs>
+
+      {/* 3D Contact Shadow on Board */}
+      <ellipse cx="50" cy="112" rx="36" ry="7" fill="rgba(0,0,0,0.45)" />
+
+      {/* Base Ring & Platform */}
+      <ellipse cx="50" cy="104" rx="34" ry="10" fill={`url(#baseGrad_${color})`} stroke={c.dark} strokeWidth="1.5" />
+      <ellipse cx="50" cy="100" rx="30" ry="7" fill={`url(#baseGrad_${color})`} />
+      
+      {/* Conical Body */}
+      <path d="M 32 98 C 34 75, 40 55, 43 45 L 57 45 C 60 55, 66 75, 68 98 Z" fill={`url(#bodyGrad_${color})`} />
+      
+      {/* Gold/Metallic Neck Ring Collar */}
+      <ellipse cx="50" cy="46" rx="14" ry="4" fill={c.ring} stroke="#b45309" strokeWidth="1" />
+      
+      {/* Glossy Head Sphere */}
+      <circle cx="50" cy="28" r="18" fill={`url(#headGrad_${color})`} />
+      
+      {/* Specular White Highlight Dot */}
+      <ellipse cx="44" cy="22" rx="5" ry="3" fill="#ffffff" opacity="0.85" transform="rotate(-20 44 22)" />
+      
+      {/* Center Emblem / Dot */}
+      <circle cx="50" cy="74" r="5" fill="#ffffff" opacity="0.7" />
+    </svg>
+  );
+};
+
 // 3D Moving Tokens (Characters) Component
 const Token = ({ token, turn, onClick, allTokens, validTokenIds, glowingTokens = [] }) => {
   const color = token.color ? token.color.toLowerCase() : '';
@@ -72,21 +137,19 @@ const Token = ({ token, turn, onClick, allTokens, validTokenIds, glowingTokens =
   
   // Positioning Logic
   if (state === 'home') {
-    // ID se sahi number nikalna taaki 4 gotiyan 4 alag kono me dikhein
     const numMatch = token.id.match(/\d+/);
     const idx = numMatch ? parseInt(numMatch[0]) % 4 : 0;
     pos = HOME_POS[color] ? HOME_POS[color][idx] : {r:8, c:8};
   } else if (state === 'finished') {
     pos = { r: 8, c: 8 }; // Winner Area
   } else {
-    // Page.js ke HOME_START values se match karne ke liye
     let hStartVal = 51; // red
     if (color === 'green') hStartVal = 57;
     if (color === 'yellow') hStartVal = 63;
     if (color === 'blue') hStartVal = 69;
 
     if (state === 'active') {
-      const safePos = (Number(token.pos) % 52 + 52) % 52; // Circular safety
+      const safePos = (Number(token.pos) % 52 + 52) % 52;
       pos = PATH[safePos] || {r:8, c:8};
     } else if (state === 'homing') {
       let idx = Number(token.pos) - hStartVal - 1; 
@@ -97,10 +160,8 @@ const Token = ({ token, turn, onClick, allTokens, validTokenIds, glowingTokens =
 
   if (!pos) return null;
 
-  // Sirf wahi goti chamkegi jo us dice number par chal sakti hai
   const canMove = validTokenIds && validTokenIds.includes(token.id);
   
-  // Smart Overlapping (Multiple tokens in one box)
   const overlapping = allTokens.filter(ot => ot.pos === token.pos && ot.state === token.state && ot.state !== 'home' && ot.state !== 'finished');
   const isMultiple = overlapping.length > 1;
   const overlapIdx = overlapping.findIndex(ot => ot.id === token.id);
@@ -118,38 +179,12 @@ const Token = ({ token, turn, onClick, allTokens, validTokenIds, glowingTokens =
         height: '6.666%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         cursor: canMove ? 'pointer' : 'default',
-        zIndex: canMove ? 20 : (state === 'home' ? 5 : 10),
+        zIndex: canMove ? 25 : (state === 'home' ? 5 : 10),
         transition: 'all 0.4s ease-in-out',
         transform: `translate(${offsetX}%, ${offsetY}%) scale(${isMultiple ? 0.75 : 1})`,
       }}
     >
-      <img
-        src={`/ludo/${color}-token.gif`}
-        alt="player token"
-        onError={(e) => {
-          e.target.onerror = null;
-          // 3D Fallback Gotiyan (Agar GIF public folder me nahi hai toh ye chamakti hui goti dikhegi)
-          const cHex = color === 'red' ? '%23ef4444' : color === 'green' ? '%2322c55e' : color === 'yellow' ? '%23eab308' : '%233b82f6';
-          e.target.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="${cHex}" stroke="%23ffffff" stroke-width="8"/><circle cx="50" cy="30" r="15" fill="%23ffffff" opacity="0.5"/></svg>`;
-        }}
-        style={{
-          width: '160%',
-          height: '160%',
-          objectFit: 'contain',
-          transform: canMove ? 'translateY(-25%) scale(1.15)' : 'translateY(-15%) scale(1)',
-          filter: `drop-shadow(0 5px 8px rgba(0,0,0,0.5)) ${
-            color === 'red' ? 'hue-rotate(320deg) saturate(1.5)' :
-            color === 'green' ? 'hue-rotate(80deg) saturate(1.5)' :
-            color === 'yellow' ? 'hue-rotate(30deg) saturate(2)' :
-            color === 'blue' ? 'hue-rotate(180deg) saturate(2)' : ''
-          }`,
-          animation: isGlowing 
-            ? 'token-glow-pulse 0.8s ease-in-out infinite' 
-            : canMove 
-              ? 'pulse-green 1s infinite' 
-              : 'none'
-        }}
-      />
+      <Pawn3D color={color} isGlowing={isGlowing} canMove={canMove} />
     </div>
   );
 };

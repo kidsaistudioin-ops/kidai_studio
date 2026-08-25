@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Player from './Player';
 import Dice from './Dice';
+import playSound from './SoundManager';
 import { supabase } from '@/lib/supabase';
 
 const LADDERS = { 4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81, 71: 91 };
@@ -14,14 +15,6 @@ const getCoordinates = (cellNum) => {
   const colIndex = rowIndex % 2 === 0 ? (cellNum - 1) % 10 : 9 - ((cellNum - 1) % 10);
   const rowFromTop = 9 - rowIndex;
   return { x: colIndex * 10 + 5, y: rowFromTop * 10 + 5 }; // 10% blocks ke center (5%)
-};
-
-// Sound play karne ka function
-const playSound = (fileName) => {
-  try {
-    const audio = new Audio(`/sounds/${fileName}`);
-    audio.play().catch(e => console.log("Audio block (Browser policy):", e));
-  } catch (e) {}
 };
 
 export default function GameBoard({ onGameEnd }) {
@@ -135,6 +128,7 @@ export default function GameBoard({ onGameEnd }) {
 
     if (isRolling || currentPlayer.pos >= 100) return;
     setIsRolling(true);
+    playSound('dice');
     
     let currentStep = currentPlayer.pos;
     let targetPos = currentPlayer.pos + val;
@@ -161,13 +155,14 @@ export default function GameBoard({ onGameEnd }) {
     const moveInterval = setInterval(() => {
       currentStep++;
       updatePlayer(turn, { pos: currentStep });
+      playSound('step');
 
       if (currentStep >= targetPos) {
         clearInterval(moveInterval);
         
         setTimeout(() => {
           if (LADDERS[targetPos]) {
-            playSound('ladder.mp3'); // 🔊 Ladder Sound
+            playSound('ladder'); // 🔊 Ladder Sound
             setMessage(`YAY! Player ${turn + 1} ko Seedhi mil gayi! 🪜`);
             updatePlayer(turn, { emotion: "ladder" });
             setTimeout(() => {
@@ -175,7 +170,7 @@ export default function GameBoard({ onGameEnd }) {
               finishRoll(LADDERS[targetPos]);
             }, 1000);
           } else if (SNAKES[targetPos]) {
-            playSound('snake.mp3'); // 🔊 Snake Sound
+            playSound('snake'); // 🔊 Snake Sound
             setMessage(`OH NO! Player ${turn + 1} ko Saanp ne kaat liya! 🐍`);
             updatePlayer(turn, { emotion: "snake" });
             setTimeout(() => {
@@ -195,7 +190,7 @@ export default function GameBoard({ onGameEnd }) {
     setTimeout(() => {
       updatePlayer(turn, { emotion: "normal" });
       if (finalPos === 100) {
-        playSound('win.mp3'); // 🔊 Win Sound
+        playSound('win'); // 🔊 Win Sound
         updatePlayer(turn, { emotion: "win" });
         setMessage(`Player ${turn + 1} Jeet Gaya! 🎉🏆`);
         setIsRolling(false);
@@ -277,16 +272,31 @@ export default function GameBoard({ onGameEnd }) {
   });
 
   return (
-    <div style={{ maxWidth: 400, margin: '0 auto', textAlign: 'center' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: '#10b981' }}>🐍 Snake & Ladder 🪜</h2>
-        <button onClick={() => { setGameState('menu'); setShowSetup(true); }} style={{ background: '#334155', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 'bold', cursor: 'pointer' }}>⚙️ Setup</button>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%', padding: '8px 0' }}>
+      <style>{`
+        .snakes-desktop-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          align-items: start;
+        }
+        @media (min-width: 850px) {
+          .snakes-desktop-grid {
+            grid-template-columns: minmax(400px, 1fr) 360px;
+            gap: 28px;
+          }
+        }
+      `}</style>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 900, margin: 0, color: '#10b981' }}>🐍 Snake & Ladder <span style={{ color: '#f59e0b' }}>3D</span> 🪜</h2>
+        <button onClick={() => { setGameState('menu'); setShowSetup(true); }} style={{ background: '#1e2d45', border: '1px solid #334155', color: '#fff', padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 'bold', cursor: 'pointer' }}>⚙️ Setup & Mode</button>
       </div>
 
       {/* SETUP MODAL (POPUP) */}
       {showSetup && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ maxWidth: 400, width: '100%', background: '#1e2d45', padding: 24, borderRadius: 16, border: '2px solid #334155', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ maxWidth: 450, width: '100%', background: '#1e2d45', padding: 24, borderRadius: 20, border: '2px solid #334155', position: 'relative', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.8)' }}>
             <button onClick={() => { setShowSetup(false); setGameState('playing'); }} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', color: '#94a3b8', fontSize: 24, cursor: 'pointer' }}>✖</button>
             
             {gameState === 'menu' ? (
@@ -365,115 +375,118 @@ export default function GameBoard({ onGameEnd }) {
         </div>
       )}
       
-      <div style={{ marginBottom: 16, background: '#1e2d45', padding: 16, borderRadius: 12, border: `2px solid ${turn === 0 ? '#3b82f6' : turn === 1 ? '#ec4899' : turn === 2 ? '#eab308' : '#10b981'}`, transition: 'all 0.3s' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
-          {players.map((p, i) => (
-            <div key={p.id} style={{ padding: '4px 8px', borderRadius: 6, background: turn === i ? '#334155' : 'transparent', border: `1px solid ${turn === i ? '#94a3b8' : 'transparent'}`, opacity: turn === i ? 1 : 0.5, fontSize: 12, fontWeight: 'bold' }}>
-              P{i + 1} ({p.char})
-            </div>
-          ))}
-        </div>
-        <h3 style={{ margin: '0 0 12px 0', color: '#f1f5f9', fontSize: 15 }}>{message}</h3>
-        {players.every(p => p.pos < 100) && <Dice onRoll={(val) => handleRoll(val, false)} disabled={isRolling || !isMyTurn} />}
-      </div>
-
-      {/* Dice History Log Panel */}
-      <div style={{ marginBottom: 16, background: '#1e2d45', padding: '12px 16px', borderRadius: 12, border: '1px solid #334155', maxHeight: 110, overflowY: 'auto', textAlign: 'left' }}>
-        <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8, fontWeight: 700 }}>📜 Dice History (Rolls)</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {historyLog.length === 0 && <div style={{ color: '#64748b', fontSize: 11 }}>Abhi tak koi roll nahi hua...</div>}
-          {historyLog.map((log, i) => (
-            <div key={i} style={{ fontSize: 12, color: '#cbd5e1', background: '#0f172a', padding: '6px 10px', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: i === 0 ? 1 : 0.7 }}>
-              <span><strong style={{ color: log.p === 1 ? '#3b82f6' : log.p === 2 ? '#ec4899' : log.p === 3 ? '#eab308' : '#10b981' }}>P{log.p}</strong> ({log.c})</span>
-              <span>{log.status === 'miss' ? '🚫 Missed' : '🎲 Rolled'} <strong style={{ color: '#fff', fontSize: 14 }}>{log.v}</strong></span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ position: 'relative', background: '#1e2d45', borderRadius: 12, border: '4px solid #334155', overflow: 'hidden' }}>
-        <div style={{ position: 'relative' }}>
+      {/* ── RESPONSIVE DUAL-COLUMN DESKTOP GRID ── */}
+      <div className="snakes-desktop-grid">
         
-        {/* Asli Snakes aur Ladders (SVG Overlay) */}
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5 }}>
-          <style>{`
-            @keyframes snakeHead { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(1px, -2px); } }
-            @keyframes ladderPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; filter: drop-shadow(0 0 4px #d97706); } }
-          `}</style>
-          {Object.entries(LADDERS).map(([s, e]) => {
-            const start = getCoordinates(parseInt(s));
-            const end = getCoordinates(parseInt(e));
-            
-            const dx = end.x - start.x;
-            const dy = end.y - start.y;
-            const length = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-            
-            return (
-              <g key={`l-${s}`} transform={`translate(${start.x}, ${start.y}) rotate(${angle})`}>
-                <g style={{ animation: 'ladderPulse 2s infinite' }}>
-                  {/* Seedhi ki do side lines (Thinner) */}
-                  <line x1="0" y1="-2" x2={length} y2="-2" stroke="#d97706" strokeWidth="1.5" />
-                  <line x1="0" y1="2" x2={length} y2="2" stroke="#d97706" strokeWidth="1.5" />
-                  {/* Seedhi ke steps (Paiydan) */}
-                  {Array.from({ length: Math.max(3, Math.floor(length / 8)) }).map((_, i, arr) => {
-                    const stepX = (length / (arr.length + 1)) * (i + 1);
-                    return <line key={i} x1={stepX} y1="-2" x2={stepX} y2="2" stroke="#d97706" strokeWidth="1" />;
-                  })}
-                </g>
-              </g>
-            )
-          })}
-          {Object.entries(SNAKES).map(([s, e], index) => {
-            const head = getCoordinates(parseInt(s));
-            const tail = getCoordinates(parseInt(e));
-            const snakeColor = SNAKE_COLORS[index % SNAKE_COLORS.length]; // Har saanp ka naya rang
-            
-            const dx = tail.x - head.x;
-            const dy = tail.y - head.y;
-            const length = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-            
-            {/* Saanp ke body ke liye wavy curve (Thinner & less wide) */}
-            const wave = `M 0 0 Q ${length*0.25} 8, ${length*0.5} 0 T ${length} 0`;
-            
-            return (
-              <g key={`s-${s}`} transform={`translate(${head.x}, ${head.y}) rotate(${angle})`}>
-                <g style={{ animation: 'snakeHead 1.5s infinite alternate ease-in-out' }}>
-                  {/* Wavy Saanp (Body) */}
-                  <path d={wave} stroke={snakeColor} strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                  {/* Saanp ka Head & Eyes */}
-                  <circle cx="0" cy="0" r="3" fill={snakeColor} />
-                  <circle cx="-1" cy="-1" r="0.8" fill="#fff" />
-                  <circle cx="-1" cy="1" r="0.8" fill="#fff" />
-                  {/* Pupils */}
-                  <circle cx="-1.2" cy="-1" r="0.3" fill="#000" />
-                  <circle cx="-1.2" cy="1" r="0.3" fill="#000" />
-                  {/* Tongue */}
-                  <path d="M -2.5 0 L -4 -0.5 M -2.5 0 L -4 0.5" stroke="#ef4444" strokeWidth="0.5" fill="none" />
-                </g>
-              </g>
-            )
-          })}
-        </svg>
-
-        {/* Grid Cells & Player */}
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', position: 'relative', zIndex: 1 }}>
-          {cells.map((num) => (
-        <div key={num} style={{ aspectRatio: '1', background: num % 2 === 0 ? '#0f1520' : '#161e30', border: '1px solid #1e2d45', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, position: 'relative', zIndex: players.some(p => p.pos === num) ? 10 : 1 }}>
-              <span style={{ position: 'absolute', top: 2, left: 2, fontSize: 8, opacity: 0.6 }}>{num}</span>
+        {/* LEFT COLUMN: BIG 10x10 BOARD */}
+        <div style={{ position: 'relative', background: '#1e2d45', borderRadius: 16, border: '4px solid #334155', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+          {/* Asli Snakes aur Ladders (SVG Overlay) */}
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5 }}>
+            <style>{`
+              @keyframes snakeHead { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(1px, -2px); } }
+              @keyframes ladderPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; filter: drop-shadow(0 0 4px #d97706); } }
+            `}</style>
+            {Object.entries(LADDERS).map(([s, e]) => {
+              const start = getCoordinates(parseInt(s));
+              const end = getCoordinates(parseInt(e));
               
-              <div style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-                {players.map((p) => p.pos === num && (
-                  <div key={p.id} style={{ width: players.length > 1 ? '45%' : '80%', height: players.length > 1 ? '45%' : '80%', margin: '1%' }}>
-                    <Player emotion={p.emotion} type={p.char} />
-                  </div>
-                ))}
+              const dx = end.x - start.x;
+              const dy = end.y - start.y;
+              const length = Math.sqrt(dx * dx + dy * dy);
+              const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+              
+              return (
+                <g key={`l-${s}`} transform={`translate(${start.x}, ${start.y}) rotate(${angle})`}>
+                  <g style={{ animation: 'ladderPulse 2s infinite' }}>
+                    <line x1="0" y1="-2" x2={length} y2="-2" stroke="#d97706" strokeWidth="1.5" />
+                    <line x1="0" y1="2" x2={length} y2="2" stroke="#d97706" strokeWidth="1.5" />
+                    {Array.from({ length: Math.max(3, Math.floor(length / 8)) }).map((_, i, arr) => {
+                      const stepX = (length / (arr.length + 1)) * (i + 1);
+                      return <line key={i} x1={stepX} y1="-2" x2={stepX} y2="2" stroke="#d97706" strokeWidth="1" />;
+                    })}
+                  </g>
+                </g>
+              )
+            })}
+            {Object.entries(SNAKES).map(([s, e], index) => {
+              const head = getCoordinates(parseInt(s));
+              const tail = getCoordinates(parseInt(e));
+              const snakeColor = SNAKE_COLORS[index % SNAKE_COLORS.length];
+              
+              const dx = tail.x - head.x;
+              const dy = tail.y - head.y;
+              const length = Math.sqrt(dx * dx + dy * dy);
+              const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+              const wave = `M 0 0 Q ${length*0.25} 8, ${length*0.5} 0 T ${length} 0`;
+              
+              return (
+                <g key={`s-${s}`} transform={`translate(${head.x}, ${head.y}) rotate(${angle})`}>
+                  <g style={{ animation: 'snakeHead 1.5s infinite alternate ease-in-out' }}>
+                    <path d={wave} stroke={snakeColor} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                    <circle cx="0" cy="0" r="3" fill={snakeColor} />
+                    <circle cx="-1" cy="-1" r="0.8" fill="#fff" />
+                    <circle cx="-1" cy="1" r="0.8" fill="#fff" />
+                    <circle cx="-1.2" cy="-1" r="0.3" fill="#000" />
+                    <circle cx="-1.2" cy="1" r="0.3" fill="#000" />
+                    <path d="M -2.5 0 L -4 -0.5 M -2.5 0 L -4 0.5" stroke="#ef4444" strokeWidth="0.5" fill="none" />
+                  </g>
+                </g>
+              )
+            })}
+          </svg>
+
+          {/* Grid Cells & 3D Avatar Players */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', position: 'relative', zIndex: 1 }}>
+            {cells.map((num) => (
+              <div key={num} style={{ aspectRatio: '1', background: num % 2 === 0 ? '#0f1520' : '#161e30', border: '1px solid #1e2d45', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, position: 'relative', zIndex: players.some(p => p.pos === num) ? 10 : 1 }}>
+                <span style={{ position: 'absolute', top: 2, left: 3, fontSize: 9, opacity: 0.6 }}>{num}</span>
+                
+                <div style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+                  {players.map((p) => p.pos === num && (
+                    <div key={p.id} style={{ width: players.length > 1 ? '45%' : '80%', height: players.length > 1 ? '45%' : '80%', margin: '1%' }}>
+                      <Player emotion={p.emotion} type={p.char} />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-    </div>
+
+        {/* RIGHT COLUMN: DICE CONTROLLER, PLAYER TURN & DICE HISTORY */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          
+          {/* Turn & Big Dice Card */}
+          <div style={{ background: '#161e30', padding: 20, borderRadius: 16, border: `2px solid ${turn === 0 ? '#3b82f6' : turn === 1 ? '#ec4899' : turn === 2 ? '#eab308' : '#10b981'}`, textAlign: 'center', boxShadow: '0 6px 20px rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+              {players.map((p, i) => (
+                <div key={p.id} style={{ padding: '6px 12px', borderRadius: 8, background: turn === i ? '#334155' : '#0f172a', border: `1px solid ${turn === i ? '#38bdf8' : '#1e2d45'}`, opacity: turn === i ? 1 : 0.6, fontSize: 13, fontWeight: 'bold', color: turn === i ? '#fff' : '#94a3b8' }}>
+                  P{i + 1} ({p.char})
+                </div>
+              ))}
+            </div>
+            <h3 style={{ margin: '0 0 16px 0', color: '#f1f5f9', fontSize: 16, fontWeight: 800 }}>{message}</h3>
+            {players.every(p => p.pos < 100) && (
+              <Dice onRoll={(val) => handleRoll(val, false)} disabled={isRolling || !isMyTurn} />
+            )}
+          </div>
+
+          {/* Dice History Log Panel */}
+          <div style={{ background: '#161e30', padding: '16px', borderRadius: 16, border: '1px solid #1e2d45', maxHeight: 220, overflowY: 'auto', textAlign: 'left' }}>
+            <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 10, fontWeight: 800 }}>📜 Dice History (Rolls)</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {historyLog.length === 0 && <div style={{ color: '#64748b', fontSize: 12 }}>Abhi tak koi roll nahi hua... Dice roll karein!</div>}
+              {historyLog.map((log, i) => (
+                <div key={i} style={{ fontSize: 13, color: '#cbd5e1', background: '#0f172a', padding: '8px 12px', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: i === 0 ? 1 : 0.7 }}>
+                  <span><strong style={{ color: log.p === 1 ? '#3b82f6' : log.p === 2 ? '#ec4899' : log.p === 3 ? '#eab308' : '#10b981' }}>P{log.p}</strong> ({log.c})</span>
+                  <span>{log.status === 'miss' ? '🚫 Missed' : '🎲 Rolled'} <strong style={{ color: '#fff', fontSize: 15 }}>{log.v}</strong></span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
   );

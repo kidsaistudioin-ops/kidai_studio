@@ -2,11 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ChessPiece3D from '@/components/games-animation/chessAnimated/ChessPiece3D';
+import { playMovePieceSound, playWinFanfare, playDefeatSound } from '@/lib/audio/sound-engine';
 
 const C = {
   bg: '#07090f', card: '#0f1520', border: '#1e2d45',
   orange: '#ff6b35', purple: '#7c3aed', text: '#f1f5f9', muted: '#64748b',
   whiteSquare: '#e2e8f0', blackSquare: '#475569'
+};
+
+const SYMBOL_MAP = {
+  '♙': { type: 'P', color: 'white' },
+  '♖': { type: 'R', color: 'white' },
+  '♘': { type: 'N', color: 'white' },
+  '♗': { type: 'B', color: 'white' },
+  '♕': { type: 'Q', color: 'white' },
+  '♔': { type: 'K', color: 'white' },
+  '♟': { type: 'P', color: 'black' },
+  '♜': { type: 'R', color: 'black' },
+  '♞': { type: 'N', color: 'black' },
+  '♝': { type: 'B', color: 'black' },
+  '♛': { type: 'Q', color: 'black' },
+  '♚': { type: 'K', color: 'black' },
 };
 
 const INITIAL_BOARD = [
@@ -80,6 +97,7 @@ export default function ChessGame() {
   const [board, setBoard] = useState(INITIAL_BOARD);
   const [selected, setSelected] = useState(null);
   const [turn, setTurn] = useState('white');
+  const [difficulty, setDifficulty] = useState('medium'); // 'easy' | 'medium' | 'master'
   const [logs, setLogs] = useState(["Game Start! You are White."]);
 
   const addLog = (msg) => setLogs(prev => [msg, ...prev].slice(0, 3));
@@ -87,16 +105,16 @@ export default function ChessGame() {
   const handleSquareClick = (r, c) => {
     if (turn !== 'white') return; // AI is thinking
 
-    const piece = board[r][c];
+    const targetPiece = board[r][c];
 
     // Select piece
     if (!selected) {
-      if (piece && isWhite(piece)) setSelected({ r, c });
+      if (targetPiece && isWhite(targetPiece)) setSelected({ r, c });
       return;
     }
 
-    // Change selection
-    if (piece && isWhite(piece)) {
+    // Change selection to another friendly piece
+    if (targetPiece && isWhite(targetPiece)) {
       setSelected({ r, c });
       return;
     }
@@ -105,30 +123,100 @@ export default function ChessGame() {
     const selectedPiece = board[selected.r][selected.c];
     if (isValidMove(board, selected, { r, c }, selectedPiece)) {
       const newBoard = board.map(row => [...row]);
-      newBoard[r][c] = selectedPiece;
+      
+      // Check for White Pawn Promotion
+      let finalPiece = selectedPiece;
+      if (selectedPiece === '♙' && r === 0) {
+        finalPiece = '♕'; // Promoted to Queen!
+        addLog("👑 Pawn promoted to Queen!");
+      }
+
+      const isCapture = isBlack(targetPiece);
+      newBoard[r][c] = finalPiece;
       newBoard[selected.r][selected.c] = '';
       setBoard(newBoard);
       setSelected(null);
+      
+      if (isCapture) {
+        playMovePieceSound();
+        if (targetPiece === '♚') {
+          playWinFanfare();
+          addLog("🏆 Raja Capture! You WON!");
+          setTurn('game_over_white');
+          return;
+        }
+      } else {
+        playMovePieceSound();
+      }
+
       setTurn('black');
-      addLog(`You moved ${selectedPiece}`);
+      addLog(`You moved to ${String.fromCharCode(65 + c)}${8 - r}`);
     } else {
       setSelected(null);
     }
   };
 
-  // Arya (AI) Random Valid Move Logic
+  // Smart Tactical Chess AI Engine
   useEffect(() => {
     if (turn === 'black') {
       const timer = setTimeout(() => {
-        let moves = [];
-        // Find all possible valid moves for AI
+        let allMoves = [];
+        
+        // Find all possible valid moves for Black pieces
         for (let r = 0; r < 8; r++) {
           for (let c = 0; c < 8; c++) {
-            if (isBlack(board[r][c])) {
+            const piece = board[r][c];
+            if (isBlack(piece)) {
               for (let tr = 0; tr < 8; tr++) {
                 for (let tc = 0; tc < 8; tc++) {
-                  if (isValidMove(board, {r, c}, {r: tr, c: tc}, board[r][c])) {
-                    moves.push({ from: {r, c}, to: {r: tr, c: tc} });
+                  if (isValidMove(board, {r, c}, {r: tr, c: tc}, piece)) {
+                    const target = board[tr][tc];
+                    let score = 0;
+
+                    // 1. Material Capture Value
+                    if (target === '♔') score += 10000;
+                    else if (target === '♕') score += 900;
+                    else if (target === '♖') score += 500;
+                    else if (target === '♗' || target === '♘') score += 320;
+                    else if (target === '♙') score += 100;
+
+                    // 2. Center Board Control Bonus (e4, d4, e5, d5, c4, f4)
+                    if (tr >= 2 && tr <= 5 && tc >= 2 && tc <= 5) score += 25;
+
+                    // 3. Pawn Advancement & Queen Promotion
+                    if (piece === '♟') {
+                      score += tr * 15;
+                      if (tr === 7) score += 800; // Immediate Queen promotion
+                    }
+
+                    // 4. Knight & Bishop Active Development
+                    if ((piece === '♞' || piece === '♝') && r === 0) {
+                      score += 30; // Encourage moving off back rank
+                    }
+
+                    // 5. Threat Defense (Master AI Avoids moving into capture unless advantageous)
+                    if (difficulty === 'master' || difficulty === 'medium') {
+                      let isThreatenedAtTarget = false;
+                      for (let wr = 0; wr < 8; wr++) {
+                        for (let wc = 0; wc < 8; wc++) {
+                          if (isWhite(board[wr][wc]) && isValidMove(board, {r: wr, c: wc}, {r: tr, c: tc}, board[wr][wc])) {
+                            isThreatenedAtTarget = true;
+                            break;
+                          }
+                        }
+                      }
+                      if (isThreatenedAtTarget) {
+                        const myValue = piece === '♛' ? 900 : piece === '♜' ? 500 : (piece === '♝'||piece === '♞') ? 320 : 100;
+                        if (target === '') score -= (myValue * 0.8); // Don't blunder free pieces!
+                      }
+                    }
+
+                    // Add random noise for Easy mode
+                    if (difficulty === 'easy') {
+                      score += (Math.random() * 200 - 100);
+                    }
+
+                    allMoves.push({ from: {r, c}, to: {r: tr, c: tc}, piece, score });
                   }
                 }
               }
@@ -136,41 +224,71 @@ export default function ChessGame() {
           }
         }
 
-        if (moves.length > 0) {
-          // Pick random move
-          const move = moves[Math.floor(Math.random() * moves.length)];
+        if (allMoves.length > 0) {
+          allMoves.sort((a, b) => b.score - a.score);
+          // Pick from top best moves based on difficulty
+          const sliceSize = difficulty === 'master' ? 1 : difficulty === 'medium' ? 2 : Math.min(5, allMoves.length);
+          const topPool = allMoves.slice(0, sliceSize);
+          const move = topPool[Math.floor(Math.random() * topPool.length)];
+
           const newBoard = board.map(row => [...row]);
-          newBoard[move.to.r][move.to.c] = board[move.from.r][move.from.c];
+          let finalPiece = move.piece;
+          // Black Pawn Promotion
+          if (move.piece === '♟' && move.to.r === 7) {
+            finalPiece = '♛';
+          }
+
+          const target = board[move.to.r][move.to.c];
+          newBoard[move.to.r][move.to.c] = finalPiece;
           newBoard[move.from.r][move.from.c] = '';
           setBoard(newBoard);
-          addLog(`Arya moved ${board[move.from.r][move.from.c]}`);
+
+          if (isWhite(target)) {
+            playMovePieceSound();
+            if (target === '♔') {
+              playDefeatSound();
+              addLog("💥 Checkmate! Arya won!");
+              setTurn('game_over_black');
+              return;
+            }
+          } else {
+            playMovePieceSound();
+          }
+
+          addLog(`Arya moved to ${String.fromCharCode(65 + move.to.c)}${8 - move.to.r}`);
+          setTurn('white');
         } else {
+          playWinFanfare();
           addLog(`🏆 CHECKMATE! You won!`);
+          setTurn('game_over_white');
         }
-        setTurn('white');
-      }, 1000); // Arya thinks for 1 second
+      }, 700);
       return () => clearTimeout(timer);
     }
-  }, [turn, board]);
+  }, [turn, board, difficulty]);
   
   const renderBoard = () => {
     const squares = [];
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
-        const isBlack = (row + col) % 2 !== 0;
+        const isBlackSquare = (row + col) % 2 !== 0;
         const piece = board[row][col];
         const isSelected = selected?.r === row && selected?.c === col;
         const isPossibleMove = selected ? isValidMove(board, selected, {r: row, c: col}, board[selected.r][selected.c]) : false;
+        const pObj = piece && SYMBOL_MAP[piece] ? SYMBOL_MAP[piece] : null;
 
         squares.push(
           <div key={`${row}-${col}`} onClick={() => handleSquareClick(row, col)} style={{
             aspectRatio: '1',
-            background: isSelected ? C.green+'aa' : isPossibleMove ? C.yellow+'55' : (isBlack ? C.blackSquare : C.whiteSquare),
+            background: isSelected ? C.green+'aa' : isPossibleMove ? C.yellow+'55' : (isBlackSquare ? C.blackSquare : C.whiteSquare),
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 36, color: '#111', textShadow: '0 2px 4px rgba(255,255,255,0.4)', cursor: piece || isPossibleMove ? 'pointer' : 'default',
-            boxShadow: isPossibleMove ? `inset 0 0 10px ${C.yellow}` : 'none'
+            cursor: piece || isPossibleMove ? 'pointer' : 'default',
+            boxShadow: isPossibleMove ? `inset 0 0 10px ${C.yellow}` : 'none',
+            padding: '2px'
           }}>
-            {piece}
+            {pObj ? (
+              <ChessPiece3D type={pObj.type} color={pObj.color} />
+            ) : piece}
           </div>
         );
       }
@@ -195,19 +313,42 @@ export default function ChessGame() {
 
       <div style={{ maxWidth: 400, margin: '0 auto', textAlign: 'center' }}>
         
-        {/* Arya (AI) Opponent Profile Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: C.card, padding: '10px 14px', borderRadius: 12, marginBottom: 16, border: `1px solid ${C.border}` }}>
+        {/* Arya (AI) Opponent Profile Bar & Difficulty Selector */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: C.card, padding: '10px 14px', borderRadius: 14, marginBottom: 12, border: `1px solid ${C.border}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontSize: 28 }}>🤖</div>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>Arya AI</div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: '#fff' }}>Arya AI Engine</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: C.green, fontWeight: 700, marginTop: 2 }}>
                 <span style={{ width: 6, height: 6, background: C.green, borderRadius: '50%', animation: 'pulse-green 2s infinite' }} />
-                Online & Playing
+                Tactical Bot Ready
               </div>
             </div>
           </div>
-          <div style={{ fontSize: 11, color: C.muted, fontWeight: 800, background: C.card2, padding: '4px 8px', borderRadius: 8 }}>Grandmaster</div>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {[
+              { id: 'easy', label: '🌱 Easy' },
+              { id: 'medium', label: '🤖 Smart' },
+              { id: 'master', label: '👑 Master' }
+            ].map(d => (
+              <button
+                key={d.id}
+                onClick={() => setDifficulty(d.id)}
+                style={{
+                  padding: '4px 8px',
+                  background: difficulty === d.id ? C.orange : C.card2,
+                  color: difficulty === d.id ? '#fff' : C.muted,
+                  border: `1px solid ${difficulty === d.id ? '#fff' : C.border}`,
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 900,
+                  cursor: 'pointer'
+                }}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{ marginBottom: 12, color: turn === 'white' ? C.cyan : C.orange, fontSize: 16, fontWeight: 800 }}>

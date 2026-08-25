@@ -319,73 +319,171 @@ export default function LudoGame() {
           0%, 100% { transform: scale(1); filter: brightness(1); }
           50% { transform: scale(1.1); filter: brightness(1.3); }
         }
+        .ludo-desktop-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          align-items: start;
+        }
+        @media (min-width: 850px) {
+          .ludo-desktop-grid {
+            grid-template-columns: minmax(400px, 1fr) 360px;
+            gap: 28px;
+          }
+        }
       `}</style>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20, maxWidth: '1100px', margin: '0 auto 20px' }}>
         <Link href="/play" style={{ textDecoration: 'none', color: C.muted, fontSize: 24, marginRight: 16 }}>←</Link>
-        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Real Ludo <span style={{ color: C.orange }}>Classic</span> 🎲</h1>
-        <button onClick={resetGame} style={{ marginLeft: 'auto', background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, padding: '6px 12px', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>🔄 Reset</button>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>Real Ludo <span style={{ color: C.orange }}>3D Classic</span> 🎲</h1>
+        <button onClick={resetGame} style={{ marginLeft: 'auto', background: '#1e2d45', border: `1px solid ${C.border}`, color: '#fff', padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 'bold', cursor: 'pointer' }}>🔄 Reset Game</button>
       </div>
 
-      {/* Player Turn Indicators */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 16 }}>
-        {Object.keys(PLAYERS).map(p => (
-          <div key={p} style={{ 
-            padding: '6px 12px', 
-            borderRadius: 20, 
-            background: turn === p ? PLAYERS[p].color : C.card, 
-            color: turn === p ? '#fff' : C.muted,
-            fontWeight: turn === p ? 800 : 400,
-            fontSize: 12,
-            border: `2px solid ${PLAYERS[p].color}`,
-            boxShadow: turn === p ? `0 0 15px ${PLAYERS[p].color}66` : 'none',
-            transition: 'all 0.3s'
-          }}>
-            {PLAYERS[p].name}
-          </div>
-        ))}
-      </div>
-
-      <div style={{ maxWidth: 400, margin: '0 auto', textAlign: 'center' }}>
-        {winner !== null ? (
-          <div style={{ background: C.card, padding: 30, borderRadius: 16, border: `2px solid ${PLAYERS[winner].color}`, textAlign: 'center', animation: 'pulse-glow 1s infinite' }}>
-            <div style={{ fontSize: 64, marginBottom: 10 }}>🏆</div>
-            <h2 style={{ color: PLAYERS[winner].color, margin: 0, fontSize: 28 }}>{PLAYERS[winner].name} Wins!</h2>
-            <p style={{ color: C.muted, margin: '10px 0 20px' }}>🎉 Badhai ho! 🎉</p>
-            <button onClick={resetGame} style={{ background: PLAYERS[winner].color, color: '#fff', border: 'none', padding: '14px 28px', borderRadius: 12, fontWeight: 800, fontSize: 16, cursor: 'pointer', boxShadow: `0 4px 15px ${PLAYERS[winner].color}66` }}>Play Again 🔄</button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: C.card, padding: '16px 20px', borderRadius: 16, marginBottom: 16, border: `3px solid ${PLAYERS[turn].color}`, boxShadow: `0 0 30px ${PLAYERS[turn].color}33`, transition: 'all 0.3s' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: C.muted, textTransform: 'uppercase', fontWeight: 'bold' }}>Current Turn</div>
-              <div style={{ fontSize: 24, fontWeight: 900, color: PLAYERS[turn].color, filter: `drop-shadow(0 0 5px ${PLAYERS[turn].color}88)` }}>{PLAYERS[turn].name}</div>
-            </div>
-            <div onClick={handleDiceRoll} style={{ width: 80, height: 80, background: PLAYERS[turn].color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, borderRadius: 16, cursor: gameState === 'roll' && !isRolling ? 'pointer' : 'not-allowed', color: '#fff', fontWeight: 900, animation: isRolling ? 'dice-roll-anim 0.3s infinite linear' : 'none', boxShadow: `0 8px 0 rgba(0,0,0,0.3), inset 0 4px 10px rgba(255,255,255,0.4)`, transition: 'all 0.1s', opacity: gameState === 'roll' ? 1 : 0.6 }}>
-              {isRolling ? '🎲' : (dice ? DICE_FACES[dice] : '🎲')}
-            </div>
-            <div style={{ textAlign: 'center', fontSize: 13, color: C.muted, width: 80 }}>
-              {gameState === 'roll' ? <span style={{ color: PLAYERS[turn].color, fontWeight: 'bold' }}>Roll Dice!</span> : <span style={{ color: C.green, fontWeight: 'bold', animation: 'pulse-green 1s infinite' }}>Select Token 👇</span>}
-            </div>
-          </div>
-        )}
-
-        <LudoBoard 
-          tokens={tokens}
-          dice={dice}
-          gameState={gameState}
-          turn={turn}
-          handleTokenClick={handleTokenClick}
-          validTokenIds={validTokenIds}
-          glowingTokens={glowingTokens}
-        />
-
-        <div style={{ marginTop: 20, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 12, width: '100%', textAlign: 'left' }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: C.muted, marginBottom: 8 }}>GAME LOGS</div>
-          {logs.map((log, i) => (
-            <div key={i} style={{ fontSize: 13, color: i === 0 ? C.text : C.muted, marginBottom: 4, opacity: 1 - (i * 0.2) }}>
-              {i === 0 ? '▶ ' : ''}{log}
+      <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+        
+        {/* Player Turn Indicators */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+          {Object.keys(PLAYERS).map(p => (
+            <div key={p} style={{ 
+              padding: '8px 16px', 
+              borderRadius: 20, 
+              background: turn === p ? PLAYERS[p].color : C.card, 
+              color: turn === p ? '#fff' : C.muted,
+              fontWeight: turn === p ? 900 : 600,
+              fontSize: 13,
+              border: `2px solid ${PLAYERS[p].color}`,
+              boxShadow: turn === p ? `0 0 15px ${PLAYERS[p].color}66` : 'none',
+              transition: 'all 0.3s'
+            }}>
+              {PLAYERS[p].name}
             </div>
           ))}
         </div>
+
+        {/* ── RESPONSIVE DUAL-COLUMN DESKTOP GRID ── */}
+        <div className="ludo-desktop-grid">
+          
+          {/* LEFT: BIG 15x15 LUDO BOARD */}
+          <div style={{ width: '100%', maxWidth: '650px', margin: '0 auto' }}>
+            <LudoBoard 
+              tokens={tokens}
+              dice={dice}
+              gameState={gameState}
+              turn={turn}
+              handleTokenClick={handleTokenClick}
+              validTokenIds={validTokenIds}
+              glowingTokens={glowingTokens}
+            />
+          </div>
+
+          {/* RIGHT: TURN STATUS, DICE CONTROLLER & GAME LOGS */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {winner !== null ? (
+              <div style={{ background: C.card, padding: 30, borderRadius: 20, border: `2px solid ${PLAYERS[winner].color}`, textAlign: 'center', animation: 'pulse-glow 1s infinite' }}>
+                <div style={{ fontSize: 64, marginBottom: 10 }}>🏆</div>
+                <h2 style={{ color: PLAYERS[winner].color, margin: 0, fontSize: 28 }}>{PLAYERS[winner].name} Wins!</h2>
+                <p style={{ color: C.muted, margin: '10px 0 20px' }}>🎉 Badhai ho! 🎉</p>
+                <button onClick={resetGame} style={{ background: PLAYERS[winner].color, color: '#fff', border: 'none', padding: '14px 28px', borderRadius: 12, fontWeight: 800, fontSize: 16, cursor: 'pointer', boxShadow: `0 4px 15px ${PLAYERS[winner].color}66` }}>Play Again 🔄</button>
+              </div>
+            ) : (
+              <div style={{ background: C.card, padding: '20px', borderRadius: 20, border: `3px solid ${PLAYERS[turn].color}`, boxShadow: `0 0 30px ${PLAYERS[turn].color}33`, transition: 'all 0.3s', textAlign: 'center' }}>
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, color: C.muted, textTransform: 'uppercase', fontWeight: 'bold' }}>Current Turn</div>
+                  <div style={{ fontSize: 26, fontWeight: 900, color: PLAYERS[turn].color, filter: `drop-shadow(0 0 5px ${PLAYERS[turn].color}88)` }}>{PLAYERS[turn].name}</div>
+                </div>
+
+                {/* Big Animated 3D Dice */}
+                <div style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}>
+                  <div onClick={handleDiceRoll} style={{ width: 90, height: 90, background: PLAYERS[turn].color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 52, borderRadius: 20, cursor: gameState === 'roll' && !isRolling ? 'pointer' : 'not-allowed', color: '#fff', fontWeight: 900, animation: isRolling ? 'dice-roll-anim 0.3s infinite linear' : 'none', boxShadow: `0 8px 0 rgba(0,0,0,0.3), inset 0 4px 10px rgba(255,255,255,0.4)`, transition: 'all 0.1s', opacity: gameState === 'roll' ? 1 : 0.6 }}>
+                    {isRolling ? '🎲' : (dice ? DICE_FACES[dice] : '🎲')}
+                  </div>
+                </div>
+
+                <div style={{ fontSize: 14, color: C.muted, marginTop: 4 }}>
+                  {gameState === 'roll' ? (
+                    <button
+                      onClick={handleDiceRoll}
+                      disabled={turn !== 'red' || isRolling}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        background: turn === 'red' && !isRolling ? `linear-gradient(135deg, ${PLAYERS.red.color}, #b91c1c)` : C.card2,
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 12,
+                        fontWeight: 900,
+                        fontSize: 14,
+                        cursor: turn === 'red' && !isRolling ? 'pointer' : 'not-allowed',
+                        boxShadow: turn === 'red' ? '0 4px 15px rgba(239,68,68,0.4)' : 'none'
+                      }}
+                    >
+                      {turn === 'red' ? '🎲 Click To Roll Dice!' : '🤖 Computer is Playing...'}
+                    </button>
+                  ) : (
+                    <div>
+                      <div style={{ color: C.green, fontWeight: 900, marginBottom: 6 }}>Apni Goti Chunein! 👇</div>
+                      {turn === 'red' && validTokenIds.length === 1 && (
+                        <button
+                          onClick={() => handleTokenClick(validTokenIds[0])}
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: `linear-gradient(135deg, ${C.green}, #059669)`,
+                            color: '#000',
+                            border: 'none',
+                            borderRadius: 12,
+                            fontWeight: 900,
+                            fontSize: 14,
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 15px rgba(16,185,129,0.4)',
+                            animation: 'token-glow-pulse 1s infinite'
+                          }}
+                        >
+                          👉 Goti Aage Badhayein! (+{dice})
+                        </button>
+                      )}
+                      {turn === 'red' && validTokenIds.length > 1 && (
+                        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+                          {validTokenIds.map((tId, idx) => (
+                            <button
+                              key={tId}
+                              onClick={() => handleTokenClick(tId)}
+                              style={{
+                                padding: '8px 12px',
+                                background: PLAYERS.red.color,
+                                color: '#fff',
+                                border: '2px solid #fff',
+                                borderRadius: 10,
+                                fontWeight: 900,
+                                fontSize: 12,
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 10px rgba(239,68,68,0.4)'
+                              }}
+                            >
+                              🔴 Goti {idx + 1} (+{dice})
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Game Logs */}
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, textAlign: 'left', maxHeight: 240, overflowY: 'auto' }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: C.muted, marginBottom: 10 }}>📜 GAME LOGS</div>
+              {logs.map((log, i) => (
+                <div key={i} style={{ fontSize: 13, color: i === 0 ? C.text : C.muted, marginBottom: 6, opacity: 1 - (i * 0.2) }}>
+                  {i === 0 ? '▶ ' : ''}{log}
+                </div>
+              ))}
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
     </div>
   );
