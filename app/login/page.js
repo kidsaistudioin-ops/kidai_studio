@@ -77,6 +77,23 @@ export default function LoginScreen() {
     localStorage.setItem('kidai_student_name', prof.name);
     localStorage.setItem('kidai_student_avatar', prof.avatar);
     localStorage.setItem('kidai_student_class', (prof.classLvl || 3).toString());
+  const handleInstantGuestPlay = () => {
+    playSound(523.25);
+    const guestNum = Math.floor(100 + Math.random() * 900);
+    const guestId = 'guest_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6);
+    const randomAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+    const guestName = `Hero #${guestNum}`;
+
+    localStorage.setItem('kidai_student_id', guestId);
+    localStorage.setItem('kidai_student_name', guestName);
+    localStorage.setItem('kidai_student_avatar', randomAvatar);
+    localStorage.setItem('kidai_student_class', '5');
+
+    // Fresh isolated stats for this new guest session (No overlap with any other kid)
+    localStorage.setItem(`kidai_${guestId}_xp`, '50');
+    localStorage.setItem(`kidai_${guestId}_coins`, '20');
+    localStorage.setItem(`kidai_${guestId}_creations`, JSON.stringify([]));
+
     router.push('/home');
   };
 
@@ -229,6 +246,32 @@ export default function LoginScreen() {
         >
           <span style={{ fontSize: 18 }}>📲</span>
           <span>Apne Phone / PC me App Install Karein ⚡</span>
+        </button>
+
+        {/* ⚡ 1-Click Instant Guest Play Button */}
+        <button
+          type="button"
+          onClick={handleInstantGuestPlay}
+          style={{
+            width: '100%',
+            padding: '12px 16px',
+            borderRadius: 16,
+            background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+            border: 'none',
+            color: '#000',
+            fontSize: 14,
+            fontWeight: 900,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            marginBottom: 20,
+            boxShadow: '0 4px 16px rgba(16,185,129,0.35)'
+          }}
+        >
+          <span style={{ fontSize: 18 }}>🎮</span>
+          <span>Instant Guest Play (Bina Form Bhare Direct Khelo) 🚀</span>
         </button>
 
         {/* 1-Tap Quick Switcher if family profiles exist */}
