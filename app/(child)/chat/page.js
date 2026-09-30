@@ -35,16 +35,16 @@ export default function ChatPage() {
     setTimeout(() => setToast({ visible: false, msg: '' }), 2000)
   }
 
-  // Load Chat History from LocalStorage (3 Days Expiry)
+  // Load User-Scoped Chat History from LocalStorage (3 Days Expiry)
   useEffect(() => {
-    const sId = localStorage.getItem('kidai_student_id');
-    if (sId) setStudentId(sId);
+    const sId = localStorage.getItem('kidai_student_id') || 'guest_default';
+    setStudentId(sId);
 
-    // Load XP from localStorage
-    const savedXp = localStorage.getItem('kidai_xp');
+    // Load user-scoped XP
+    const savedXp = localStorage.getItem(`kidai_${sId}_xp`) || localStorage.getItem('kidai_xp');
     if (savedXp) setXp(parseInt(savedXp, 10));
 
-    const saved = localStorage.getItem('kidai_chat_history');
+    const saved = localStorage.getItem(`kidai_${sId}_chat_history`);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -52,23 +52,25 @@ export default function ChatPage() {
         if (Date.now() - parsed.timestamp < 259200000) {
           setMessages(parsed.data);
         } else {
-          localStorage.removeItem('kidai_chat_history'); // 3 din baad auto delete
+          localStorage.removeItem(`kidai_${sId}_chat_history`); // 3 din baad auto delete
         }
       } catch (e) {}
     }
   }, []);
 
-  // Save Chat History to LocalStorage whenever it updates
+  // Save Chat History to User-Scoped LocalStorage whenever it updates
   useEffect(() => {
-    if (messages.length > 1) {
-      localStorage.setItem('kidai_chat_history', JSON.stringify({ timestamp: Date.now(), data: messages }));
+    if (messages.length > 1 && studentId) {
+      localStorage.setItem(`kidai_${studentId}_chat_history`, JSON.stringify({ timestamp: Date.now(), data: messages }));
     }
-  }, [messages]);
+  }, [messages, studentId]);
 
-  // Save XP whenever it changes
+  // Save User-Scoped XP whenever it changes
   useEffect(() => {
-    localStorage.setItem('kidai_xp', xp.toString());
-  }, [xp]);
+    if (studentId) {
+      localStorage.setItem(`kidai_${studentId}_xp`, xp.toString());
+    }
+  }, [xp, studentId]);
 
   // Jab page chhodein toh aawaz band ho jaye
   useEffect(() => {
@@ -118,6 +120,30 @@ export default function ChatPage() {
 
       setXp(x => x + 5)
       showToast('+5 XP! ⚡')
+
+      // 📊 Log AI Chat Tutor Tokens and Cost
+      try {
+        const studentName = localStorage.getItem('kidai_student_name') || 'Student';
+        fetch('/api/ai/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentId: studentId || 'guest_student',
+            studentName: `${studentName}`,
+            featureName: 'Arya AI Tutor Chat 🤖',
+            model: 'gpt-4o-mini',
+            promptTokens: Math.max(250, (text.length * 2) + 200),
+            completionTokens: Math.max(150, reply.length * 2),
+            totalTokens: Math.max(400, (text.length * 2) + (reply.length * 2) + 200),
+            imagesCount: 0,
+            gamesCreated: data.rawData?.newGameData ? 1 : 0,
+            metadata: {
+              questionSnippet: text.substring(0, 50),
+              hasNewGame: !!data.rawData?.newGameData
+            }
+          })
+        }).catch(() => {});
+      } catch(e) {}
       
       // Agar AI ne naya game generate kiya hai (Khelne ke liye)
       if (data.rawData?.newGameData || data.rawData?.suggestGame) {

@@ -105,10 +105,20 @@ export default function AdminDashboard() {
         </div>
 
         <div style={{ background: C.card, borderRadius: 16, border: `1px solid ${C.border}`, padding: 20, marginBottom: 30 }}>
-          <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>🔗 Admin Tools</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Link href="/admin/blog" style={{ textDecoration: 'none', background: `${C.cyan}22`, color: C.cyan, border: `1px solid ${C.cyan}44`, borderRadius: 999, padding: '8px 12px', fontWeight: 800, fontSize: 13 }}>Admin Blog</Link>
-            <Link href="/admin/scanner" style={{ textDecoration: 'none', background: `${C.orange}22`, color: C.orange, border: `1px solid ${C.orange}44`, borderRadius: 999, padding: '8px 12px', fontWeight: 800, fontSize: 13 }}>Admin Scanner</Link>
+          <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 12, color: C.cyan }}>🔗 AI & Platform Admin Control Suites</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <Link href="/admin/ai-costs" style={{ textDecoration: 'none', background: `linear-gradient(135deg, ${C.green}, #059669)`, color: '#000', borderRadius: 12, padding: '10px 18px', fontWeight: 900, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}>
+              💰 AI Token & Cost Monitor (GPT-4o-mini)
+            </Link>
+            <Link href="/admin/kids-activity" style={{ textDecoration: 'none', background: `${C.purple}22`, color: C.purple, border: `1px solid ${C.purple}66`, borderRadius: 12, padding: '10px 18px', fontWeight: 900, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+              🎨 Kids Activity & Creations Hub
+            </Link>
+            <Link href="/admin/blog" style={{ textDecoration: 'none', background: `${C.cyan}22`, color: C.cyan, border: `1px solid ${C.cyan}44`, borderRadius: 12, padding: '10px 14px', fontWeight: 800, fontSize: 13 }}>
+              ✍️ Admin Blog
+            </Link>
+            <Link href="/admin/scanner" style={{ textDecoration: 'none', background: `${C.orange}22`, color: C.orange, border: `1px solid ${C.orange}44`, borderRadius: 12, padding: '10px 14px', fontWeight: 800, fontSize: 13 }}>
+              📸 Admin Scanner
+            </Link>
           </div>
         </div>
 

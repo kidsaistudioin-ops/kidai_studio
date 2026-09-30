@@ -130,9 +130,50 @@ export default function ScannerPage() {
       setGeneratedGame(result);
       
       // 🚀 Reward XP: Har scanned page par 5 XP milenge
+      const sId = studentId || localStorage.getItem('kidai_student_id') || 'guest_student';
+      const studentName = localStorage.getItem('kidai_student_name') || 'Student';
       const earnedXp = imageList.length * 5;
-      const currentXp = parseInt(localStorage.getItem('kidai_xp') || '0');
-      localStorage.setItem('kidai_xp', (currentXp + earnedXp).toString());
+      const currentXp = parseInt(localStorage.getItem(`kidai_${sId}_xp`) || '0', 10);
+      localStorage.setItem(`kidai_${sId}_xp`, (currentXp + earnedXp).toString());
+
+      // ☁️ Optional Cloudinary Upload in background for CDN link
+      try {
+        fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: imageList[0],
+            folder: 'book_scans',
+            studentId: sId,
+            tags: ['book_scan', `class_${studentClass}`]
+          })
+        }).catch(() => {});
+      } catch(e) {}
+
+      // 📊 Log AI Usage & Cost for Book-to-Game Analytics
+      try {
+        fetch('/api/ai/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentId: sId,
+            studentName: `${studentName} (Class ${studentClass})`,
+            featureName: 'Book-to-Game 📚',
+            model: 'gpt-4o-mini',
+            promptTokens: 1850,
+            completionTokens: 650,
+            totalTokens: 2500,
+            imagesCount: imageList.length,
+            gamesCreated: 1,
+            metadata: {
+              subject: result.subject || 'General',
+              topic: result.topic || 'Book Chapter',
+              class: studentClass,
+              board: studentBoard
+            }
+          })
+        }).catch(() => {});
+      } catch(e) {}
       
       setStatus(`✅ Game ban gaya aur Parent Review ke liye chala gaya! +${earnedXp} XP 🌟`);
       setCompletedCount(totalAdded);

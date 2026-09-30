@@ -152,7 +152,23 @@ export default function HomePage() {
             Bacchon Ka <span style={{ background: `linear-gradient(90deg, ${C.orange}, ${C.yellow}, ${C.pink})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200%', animation: 'shimmer 3s linear infinite' }}>AI School & Game Arena</span> 🚀
           </h1>
           <p style={{ color: C.muted, fontSize: 16, maxWidth: 540, margin: '0 auto 24px', lineHeight: 1.6 }}>6-18 saal ke bacho ke liye — School homework scan karo, 3D Games khelo, aur AI seekho!</p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button 
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new Event('trigger-pwa-install'));
+                }
+              }} 
+              style={{
+                ...btnStyle(C.orange),
+                background: 'linear-gradient(135deg, #ff6b35, #ec4899)',
+                boxShadow: '0 6px 20px rgba(255,107,53,0.45)',
+                fontSize: 15,
+                padding: '13px 24px'
+              }}
+            >
+              📲 Install Mobile App ⚡
+            </button>
             {isLoggedIn ? (
               <>
                 <button style={btnStyle(C.green)} onClick={() => router.push('/home')}>🏠 Dashboard Kholo</button>
@@ -160,8 +176,8 @@ export default function HomePage() {
               </>
             ) : (
               <>
-                <button style={btnStyle(C.orange)} onClick={() => router.push('/play')}>🎮 Free Games Khelo</button>
-                <button style={btnStyle(C.cyan, false, true)} onClick={() => router.push('/signup')}>✅ Free Account Banao</button>
+                <button style={btnStyle(C.purple)} onClick={() => router.push('/play')}>🎮 Free Games Khelo</button>
+                <button style={btnStyle(C.cyan, false, true)} onClick={() => router.push('/login')}>🚀 1-Click Login</button>
               </>
             )}
           </div>

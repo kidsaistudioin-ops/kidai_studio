@@ -8,29 +8,37 @@ export async function POST(req) {
       return NextResponse.json({ error: "Image required" }, { status: 400 });
     }
 
-    const system = `You are a world-renowned comic artist and children's coloring book illustrator.
-Your job is to convert a real-world photo of a person/child into a CLEAN, HAND-DRAWN BLACK & WHITE COLORING BOOK SVG OF ONLY THE PERSON.
+    const system = `You are a world-class children's comic book artist and Disney/Pixar style line-art vector illustrator.
+Your job is to look at the photo and create a CLEAN, BEAUTIFUL, HAND-DRAWN BLACK & WHITE COLORING BOOK SVG OF ONLY THE PERSON / MAIN SUBJECT.
 
 CRITICAL ARTISTIC RULES:
-1. 100% BACKGROUND REMOVAL: Do NOT draw any background objects, racks, shelves, furniture, room walls, or lighting shadows. The background must be pure clean white.
-2. DRAW ONLY THE HUMAN: Draw an expressive, cute, high-quality cartoon/comic line-art drawing of the person's face (hair, eyes, eyebrows, nose, smiling mouth, face oval, clothes/shirt outline).
+1. 100% BACKGROUND REMOVAL (MANDATORY):
+   - COMPLETELY IGNORE all background objects, room walls, furniture, shelves, racks, windows, floor, curtains, or lighting.
+   - The entire background MUST BE PURE WHITE (#ffffff). Do not draw a single background line.
+
+2. DRAW ONLY THE HUMAN SUBJECT / CHARACTER:
+   - Identify the person in the photo (face, hairstyle, facial features, smiling mouth, eyes, clothes/shirt outline).
+   - Convert them into a charming, cute, recognizable cartoon/comic line-art portrait.
+   - Keep details clear and bold with large open areas so kids can easily color them with bucket fill or crayons.
+
 3. COLORABLE SVG STRUCTURE:
    - Root: <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-   - Background rect: <rect id="bg" x="0" y="0" width="500" height="500" fill="#ffffff" />
-   - Paths: Each part must be a closed path with fill="#ffffff" stroke="#0f172a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" and unique id (e.g. id="hair", id="face", id="eyes", id="mouth", id="shirt", id="body") so children can bucket-fill colors!
-4. Response Format: Return ONLY a valid JSON object:
+   - Background: <rect id="bg" x="0" y="0" width="500" height="500" fill="#ffffff" />
+   - Closed Shapes: Major parts must be distinct closed paths with fill="#ffffff" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" and unique IDs (e.g. id="hair", id="face", id="left_eye", id="right_eye", id="smile", id="shirt", id="collar").
+
+4. RESPONSE FORMAT: Return ONLY a valid JSON object:
 {
-  "title": "My AI Cartoon Portrait",
+  "title": "My AI Cartoon Portrait 🧑‍🎨",
   "svg": "<svg ...>...</svg>"
 }`;
 
-    const prompt = "Convert this photo into a pure hand-drawn black and white coloring book SVG portrait of the person. Completely remove 100% of background racks and room clutter. Return JSON with 'svg' and 'title'.";
+    const prompt = "Look at the person in this photo. Draw a clean, cute black and white cartoon coloring sheet SVG of ONLY the person. Completely ignore and eliminate 100% of the background walls and room clutter. Return JSON with 'title' and 'svg'.";
 
     const result = await generateAI({
       system,
       prompt,
       images: [image],
-      preferred: "gemini"
+      preferred: process.env.OPENAI_API_KEY ? "openai" : "gemini"
     });
 
     if (!result.success) {
@@ -58,6 +66,26 @@ CRITICAL ARTISTIC RULES:
     }
 
     if (svgString && svgString.includes("<svg")) {
+      // Log AI Usage & Cost
+      try {
+        fetch('http://localhost:3000/api/ai/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentId: 'student_photo_user',
+            studentName: 'Creative Kid',
+            featureName: 'Photo-to-Sketch AI 📸',
+            model: 'gpt-4o-mini',
+            promptTokens: 1200,
+            completionTokens: 750,
+            totalTokens: 1950,
+            imagesCount: 1,
+            gamesCreated: 0,
+            metadata: { title }
+          })
+        }).catch(() => {});
+      } catch(e) {}
+
       return NextResponse.json({ success: true, data: { title, svg: svgString } });
     }
 

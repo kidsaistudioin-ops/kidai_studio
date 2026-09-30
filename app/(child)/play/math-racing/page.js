@@ -63,15 +63,21 @@ export default function MathRacingGame() {
   // 🔗 BACKEND LINK: XP Save karna
   const saveGameResult = async (finalScore) => {
     try {
-      const studentId = 'student_123';
-      const calcXp = Math.floor(finalScore / 2); // Har 2 score par 1 XP (Kyunki Math hard hota hai)
+      const studentId = localStorage.getItem('kidai_student_id') || 'guest_default';
+      const calcXp = Math.floor(finalScore / 2); // Har 2 score par 1 XP
       if (calcXp <= 0) return;
       setEarnedXp(calcXp);
 
-      const { data: student } = await supabase.from('students').select('total_xp').eq('id', studentId).single();
-      if (student) {
-        await supabase.from('students').update({ total_xp: (student.total_xp || 0) + calcXp }).eq('id', studentId);
-      }
+      // Save user-scoped local XP
+      const currentXp = parseInt(localStorage.getItem(`kidai_${studentId}_xp`) || '0', 10);
+      localStorage.setItem(`kidai_${studentId}_xp`, (currentXp + calcXp).toString());
+
+      try {
+        const { data: student } = await supabase.from('students').select('total_xp').eq('id', studentId).single();
+        if (student) {
+          await supabase.from('students').update({ total_xp: (student.total_xp || 0) + calcXp }).eq('id', studentId);
+        }
+      } catch(err) {}
 
       const today = new Date().toISOString().split('T')[0];
       const { data: session } = await supabase.from('daily_sessions').select('*').eq('student_id', studentId).eq('session_date', today).single();

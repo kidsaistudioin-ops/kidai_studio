@@ -16,8 +16,9 @@ envKeys.forEach(k => {
 });
 
 console.log("\nCODE KO EXACTLY KYA NAAM CHAHIYE THA:");
-console.log("➔ \"GROQ_API_KEY\"   :", process.env.GROQ_API_KEY ? "✅ MIL GAYI" : "❌ NAHI MILI");
-console.log("➔ \"GEMINI_API_KEY\" :", process.env.GEMINI_API_KEY ? "✅ MIL GAYI" : "❌ NAHI MILI");
+console.log("➔ \"OPENAI_API_KEY\" :", process.env.OPENAI_API_KEY ? "✅ MIL GAYI (ChatGPT GPT-4o Active!)" : "❌ NAHI MILI");
+console.log("➔ \"GEMINI_API_KEY\" :", process.env.GEMINI_API_KEY ? "✅ MIL GAYI (Google Gemini Active!)" : "❌ NAHI MILI");
+console.log("➔ \"GROQ_API_KEY\"   :", process.env.GROQ_API_KEY ? "✅ MIL GAYI (Llama Fast Active!)" : "❌ NAHI MILI");
 console.log("=========================================\n");
 
 export async function POST(req) {

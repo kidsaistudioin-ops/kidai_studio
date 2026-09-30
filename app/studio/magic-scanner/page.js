@@ -168,7 +168,8 @@ export default function MagicScannerPage() {
     if (!processedImg) return;
     try { playStreakChime(); } catch(e) {}
 
-    const existing = JSON.parse(localStorage.getItem('kidai_studio_creations') || '[]');
+    const sId = localStorage.getItem('kidai_student_id') || 'guest_default';
+    const existing = JSON.parse(localStorage.getItem(`kidai_${sId}_creations`) || localStorage.getItem('kidai_studio_creations') || '[]');
     const newCreation = {
       id: Date.now().toString(),
       title: stickerName || 'Magic Scanned Sticker',
@@ -177,7 +178,7 @@ export default function MagicScannerPage() {
       preview: processedImg
     };
     existing.unshift(newCreation);
-    localStorage.setItem('kidai_studio_creations', JSON.stringify(existing.slice(0, 20)));
+    localStorage.setItem(`kidai_${sId}_creations`, JSON.stringify(existing.slice(0, 20)));
 
     const link = document.createElement('a');
     link.download = `KidAI-Sticker-${Date.now()}.png`;

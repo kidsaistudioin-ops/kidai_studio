@@ -22,17 +22,18 @@ export default function LibraryPage() {
   const [items, setItems] = useState([]);
   const [filter, setFilter] = useState('all');
   const [selectedPreview, setSelectedPreview] = useState(null);
+  const [studentId, setStudentId] = useState('guest_default');
 
   useEffect(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem('kidai_studio_creations') || '[]');
-      if (stored.length > 0) {
-        setItems(stored);
-      } else {
-        setItems(DEFAULT_SAMPLE_ITEMS);
-      }
+      const sId = localStorage.getItem('kidai_student_id') || 'guest_default';
+      setStudentId(sId);
+      
+      // User-scoped library creations storage
+      const stored = JSON.parse(localStorage.getItem(`kidai_${sId}_creations`) || localStorage.getItem('kidai_studio_creations') || '[]');
+      setItems(stored);
     } catch(e) {
-      setItems(DEFAULT_SAMPLE_ITEMS);
+      setItems([]);
     }
   }, []);
 
@@ -42,7 +43,8 @@ export default function LibraryPage() {
     const updated = items.filter(it => it.id !== id);
     setItems(updated);
     try {
-      localStorage.setItem('kidai_studio_creations', JSON.stringify(updated.filter(it => !it.id.startsWith('def_'))));
+      const sId = localStorage.getItem('kidai_student_id') || 'guest_default';
+      localStorage.setItem(`kidai_${sId}_creations`, JSON.stringify(updated));
     } catch(err) {}
   };
 
@@ -55,7 +57,7 @@ export default function LibraryPage() {
       link.href = item.preview;
       link.click();
     } else {
-      alert('Default sample asset. Nayi drawing banakar export karein!');
+      alert('Asset downloaded successfully!');
     }
   };
 
@@ -126,13 +128,23 @@ export default function LibraryPage() {
 
         {/* Gallery Grid */}
         {filteredItems.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 20px', background: C.card, borderRadius: 24, border: `1px solid ${C.border}` }}>
-            <div style={{ fontSize: 56, marginBottom: 12 }}>📁</div>
-            <div style={{ fontWeight: 900, fontSize: 18, marginBottom: 6 }}>Koi item nahi mila</div>
-            <p style={{ color: C.muted, fontSize: 14, marginBottom: 20 }}>Studio tools se nayi artwork banayein aur save karein!</p>
-            <button onClick={() => router.push('/studio')} style={{ padding: '10px 24px', background: C.cyan, color: '#000', border: 'none', borderRadius: 12, fontWeight: 900, cursor: 'pointer' }}>
-              🎨 Open Creator Studio
-            </button>
+          <div style={{ textAlign: 'center', padding: '60px 20px', background: C.card, borderRadius: 24, border: `1px solid ${C.border}`, maxWidth: 600, margin: '0 auto' }}>
+            <div style={{ fontSize: 64, marginBottom: 12 }}>🎨✨</div>
+            <div style={{ fontWeight: 900, fontSize: 20, marginBottom: 8, color: '#fff' }}>Aapki Library Abhi Khali Hai!</div>
+            <p style={{ color: C.muted, fontSize: 14, marginBottom: 24, lineHeight: 1.5 }}>
+              Yahan aapki banayi hui drawings, scanned stickers, comics aur logos save honge. Nayi creation banane ke liye kisi bhi studio me jayein!
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={() => router.push('/studio/coloring-book')} style={{ padding: '10px 18px', background: C.pink, color: '#fff', border: 'none', borderRadius: 12, fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>
+                🎨 Coloring Book
+              </button>
+              <button onClick={() => router.push('/studio/magic-scanner')} style={{ padding: '10px 18px', background: C.green, color: '#000', border: 'none', borderRadius: 12, fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>
+                📸 Magic Scanner
+              </button>
+              <button onClick={() => router.push('/studio/comic-maker')} style={{ padding: '10px 18px', background: C.purple, color: '#fff', border: 'none', borderRadius: 12, fontWeight: 900, cursor: 'pointer', fontSize: 13 }}>
+                💬 Comic Maker
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 20 }}>

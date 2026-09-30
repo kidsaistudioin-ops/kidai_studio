@@ -31,23 +31,32 @@ export default function ChildDashboard() {
 
     // Supabase se asli history ka data uthana
     async function loadRealStats() {
-      const studentId = 'student_123'; // NOTE: Baad mein isko actual logged-in user ID se replace karenge
+      const studentId = localStorage.getItem('kidai_student_id') || 'guest_default';
       
-      // Real Coins aur XP lana
-      const { data: studentData } = await supabase.from('students').select('coins, total_xp, referral_code').eq('id', studentId).single();
-      if (studentData) {
-        setCoins(studentData.coins || 0);
-        setXp(studentData.total_xp || 0);
-        // Referral code agar nahi hai toh generate karna
-        let code = studentData.referral_code;
-        if (!code) { code = 'KIDAI' + Math.floor(1000 + Math.random() * 9000); await supabase.from('students').update({ referral_code: code }).eq('id', studentId); }
-        setRefCode(code);
-      }
+      // Load user-scoped local fallback stats
+      const localXp = parseInt(localStorage.getItem(`kidai_${studentId}_xp`) || '0', 10);
+      const localCoins = parseInt(localStorage.getItem(`kidai_${studentId}_coins`) || '0', 10);
+      setXp(localXp);
+      setCoins(localCoins);
+      
+      // Real Coins aur XP lana from Supabase
+      try {
+        const { data: studentData } = await supabase.from('students').select('coins, total_xp, referral_code').eq('id', studentId).single();
+        if (studentData) {
+          setCoins(studentData.coins || localCoins);
+          setXp(studentData.total_xp || localXp);
+          // Referral code agar nahi hai toh generate karna
+          let code = studentData.referral_code;
+          if (!code) { code = 'KIDAI' + Math.floor(1000 + Math.random() * 9000); await supabase.from('students').update({ referral_code: code }).eq('id', studentId); }
+          setRefCode(code);
+        }
+      } catch(err) {}
 
-      const { data } = await supabase
-        .from('daily_sessions')
-        .select('quizzes_attempted, quizzes_correct')
-        .eq('student_id', studentId);
+      try {
+        const { data } = await supabase
+          .from('daily_sessions')
+          .select('quizzes_attempted, quizzes_correct')
+          .eq('student_id', studentId);
       
       if (data) {
         setRealStats({
@@ -90,9 +99,12 @@ export default function ChildDashboard() {
         }
         if (bestGrowth && maxDiff > 0) setGrowth(bestGrowth);
       }
-
+      setLoadingStats(false);
+    } catch (err) {
+      console.warn("Stats load error:", err);
       setLoadingStats(false);
     }
+  }
     loadRealStats();
   }, []);
 
@@ -127,7 +139,31 @@ export default function ChildDashboard() {
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('trigger-pwa-install'));
+              }
+            }}
+            style={{
+              background: 'linear-gradient(135deg, #ff6b35, #ec4899)',
+              border: 'none',
+              padding: '6px 14px',
+              borderRadius: 12,
+              fontWeight: 900,
+              fontSize: 12,
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: '0 4px 14px rgba(255, 107, 53, 0.35)'
+            }}
+            title="Apne Phone ya PC me App Install Karein"
+          >
+            <span>📲</span> Install App
+          </button>
           <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '6px 12px', borderRadius: 12, fontWeight: 900, display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ color: C.cyan }}>⚡</span> {loadingStats ? '...' : xp} XP
           </div>

@@ -245,17 +245,46 @@ function LogoTool() {
 }
 
 function StoryVideoTool() {
-  const [story, setStory] = useState('')
-  const [generated, setGenerated] = useState(false)
-  
+  const [story, setStory] = useState('Ek pyara sa bacha jo apne jaadui dost ke sath sitaron ki duniya me nikal pada...');
+  const [generated, setGenerated] = useState(false);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
+  const [activePreviewScene, setActivePreviewScene] = useState(0);
+
+  const previewScenes = [
+    { num: 1, icon: '🏡', title: 'Scene 1: Sunder Gaon', desc: 'Subah ki pehli kiran ke sath shandar shuruaat.' },
+    { num: 2, icon: '🌲', title: 'Scene 2: Jaadui Jungle', desc: 'Jungle me mila ek akalmand aur pyara sathi.' },
+    { num: 3, icon: '✨', title: 'Scene 3: Chamatkari Gufa', desc: 'Asmaan me chamakti roshni aur naya adventure.' },
+    { num: 4, icon: '⚡', title: 'Scene 4: Himmat & Kamyabi', desc: 'Mushkil ko hal karke hero ne din jeet liya.' },
+    { num: 5, icon: '🎉', title: 'Scene 5: Khushiyon Ka Jashn', desc: 'Sitaron ke neeche sabhi doston ka pyara celebration.' }
+  ];
+
   return (
-    <div style={{ background: C.card, borderRadius: 18, border: `1px solid ${C.orange}44`, padding: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-        <div style={{ fontSize: 24 }}>🎬</div>
-        <div>
-          <div style={{ fontWeight: 800, fontSize: 16, color: C.orange }}>Story Video <span style={{ background: C.orange, color: '#fff', fontSize: 9, padding: '2px 6px', borderRadius: 4 }}>BETA</span></div>
-          <div style={{ fontSize: 12, color: C.muted }}>Story se animated video banao!</div>
+    <div style={{ background: C.card, borderRadius: 18, border: `1px solid ${C.orange}44`, padding: 18 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ fontSize: 28 }}>🎬</div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 17, color: C.orange, display: 'flex', alignItems: 'center', gap: 6 }}>
+              Story Video Studio <span style={{ background: C.orange, color: '#fff', fontSize: 9, padding: '2px 6px', borderRadius: 4 }}>HD CINEMA</span>
+            </div>
+            <div style={{ fontSize: 12, color: C.muted }}>Story likhein aur 5-Scene Animated Video banayein!</div>
+          </div>
         </div>
+        <Link 
+          href="/studio/story-video"
+          style={{
+            padding: '6px 12px',
+            background: C.card2,
+            border: `1px solid ${C.orange}`,
+            color: C.orange,
+            borderRadius: 8,
+            fontSize: 12,
+            fontWeight: 800,
+            textDecoration: 'none'
+          }}
+        >
+          Open Studio ↗
+        </Link>
       </div>
       
       {!generated ? (
@@ -263,29 +292,76 @@ function StoryVideoTool() {
           <textarea 
             value={story} 
             onChange={e => setStory(e.target.value)} 
-            placeholder="Apni kahani likho..." 
+            placeholder="Apni kahani yahan likhein..." 
             rows={3}
-            style={{ width: '100%', padding: 12, borderRadius: 10, border: `1px solid ${C.border}`, background: C.card2, color: C.text, fontSize: 14, resize: 'none', marginBottom: 12, outline: 'none' }}
+            style={{ width: '100%', padding: 12, borderRadius: 12, border: `1px solid ${C.border}`, background: C.card2, color: C.text, fontSize: 14, resize: 'none', marginBottom: 12, outline: 'none', lineHeight: 1.4 }}
           />
-          <button onClick={() => story && setGenerated(true)} disabled={!story} style={{ width: '100%', padding: 12, background: story ? C.orange : C.card2, color: story ? '#fff' : C.muted, border: 'none', borderRadius: 10, fontWeight: 800, cursor: story ? 'pointer' : 'not-allowed' }}>
-            ✨ Generate Video
+          <button 
+            onClick={() => story && setGenerated(true)} 
+            disabled={!story} 
+            style={{ width: '100%', padding: 14, background: story ? `linear-gradient(135deg, ${C.orange}, ${C.pink})` : C.card2, color: story ? '#fff' : C.muted, border: 'none', borderRadius: 12, fontWeight: 900, fontSize: 15, cursor: story ? 'pointer' : 'not-allowed', boxShadow: story ? '0 4px 15px rgba(255,107,53,0.3)' : 'none' }}
+          >
+            ✨ Generate 5-Scene Story Video ▶
           </button>
         </>
       ) : (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 10 }}>🎉</div>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>5 Scenes Generate!</div>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto' }}>
-            {['🏡', '👴', '🌲', '✨', '🌟'].map((s, i) => (
-              <div key={i} style={{ width: 50, height: 50, background: C.card2, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>{s}</div>
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontWeight: 900, fontSize: 14, color: C.green }}>✅ 5 Scenes Storyboard Generated!</div>
+            <button onClick={() => setGenerated(false)} style={{ background: 'none', border: 'none', color: C.muted, fontSize: 12, cursor: 'pointer' }}>✏️ Edit</button>
+          </div>
+
+          {/* 5 Scenes Carousel */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8, marginBottom: 16 }}>
+            {previewScenes.map((s, i) => (
+              <div 
+                key={i} 
+                onClick={() => setActivePreviewScene(i)}
+                style={{ 
+                  background: activePreviewScene === i ? C.orange + '22' : C.card2, 
+                  border: `1px solid ${activePreviewScene === i ? C.orange : C.border}`,
+                  borderRadius: 12, 
+                  padding: 10,
+                  textAlign: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <div style={{ fontSize: 24, marginBottom: 4 }}>{s.icon}</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: activePreviewScene === i ? C.orange : C.text }}>{s.title}</div>
+              </div>
             ))}
           </div>
-          <button style={{ padding: '10px 20px', background: C.green, color: '#000', border: 'none', borderRadius: 10, fontWeight: 800, cursor: 'pointer' }}>▶️ Preview</button>
-          <p style={{ color: C.muted, fontSize: 11, marginTop: 12 }}>🔜 Full video coming soon!</p>
+
+          {/* Active Scene Mini-Player Banner */}
+          <div style={{ background: 'linear-gradient(135deg, #1e1b4b, #0f172a)', border: '2px solid #334155', borderRadius: 14, padding: 14, marginBottom: 14, textAlign: 'center' }}>
+            <div style={{ fontSize: 36, marginBottom: 4 }}>{previewScenes[activePreviewScene].icon}</div>
+            <div style={{ fontWeight: 900, fontSize: 14, color: '#fff', marginBottom: 2 }}>{previewScenes[activePreviewScene].title}</div>
+            <div style={{ fontSize: 12, color: C.muted }}>{previewScenes[activePreviewScene].desc}</div>
+          </div>
+
+          {/* Action Button: Play in Studio */}
+          <Link
+            href="/studio/story-video"
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: 14,
+              background: `linear-gradient(135deg, ${C.green}, #059669)`,
+              color: '#000',
+              textAlign: 'center',
+              textDecoration: 'none',
+              borderRadius: 12,
+              fontWeight: 900,
+              fontSize: 15,
+              boxShadow: '0 4px 15px rgba(16,185,129,0.3)'
+            }}
+          >
+            ▶️ Open Full Screen Cinema Player & Narration 🎬
+          </Link>
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function BrandPromoTool() {

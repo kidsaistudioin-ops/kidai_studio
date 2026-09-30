@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#07090f"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="rocketGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b35"/>
+      <stop offset="50%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="flameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <rect width="500" height="500" x="6" y="6" rx="122" fill="none" stroke="#ff6b35" stroke-width="4" opacity="0.4"/>
+
+  <!-- Glowing Aura -->
+  <circle cx="256" cy="256" r="160" fill="#7c3aed" opacity="0.25" filter="url(#glow)"/>
+
+  <!-- Stars -->
+  <circle cx="120" cy="130" r="8" fill="#06b6d4" opacity="0.8"/>
+  <circle cx="390" cy="110" r="12" fill="#f59e0b" opacity="0.9"/>
+  <circle cx="100" cy="380" r="6" fill="#10b981" opacity="0.7"/>
+  <circle cx="410" cy="390" r="9" fill="#ec4899" opacity="0.8"/>
+
+  <!-- Rocket Body -->
+  <g transform="translate(136, 110) scale(0.95)" filter="url(#glow)">
+    <!-- Exhaust Flame -->
+    <path d="M126,220 Q100,280 126,310 Q152,280 126,220 Z" fill="url(#flameGrad)"/>
+    <path d="M126,230 Q112,270 126,290 Q140,270 126,230 Z" fill="#fef08a"/>
+
+    <!-- Left & Right Fins -->
+    <path d="M80,180 L40,230 Q90,230 100,195 Z" fill="#7c3aed"/>
+    <path d="M172,180 L212,230 Q162,230 152,195 Z" fill="#7c3aed"/>
+
+    <!-- Main Fuselage -->
+    <path d="M126,20 Q180,60 176,190 L76,190 Q72,60 126,20 Z" fill="url(#rocketGrad)"/>
+    
+    <!-- Rocket Window / AI Core -->
+    <circle cx="126" cy="105" r="32" fill="#07090f" stroke="#06b6d4" stroke-width="8"/>
+    <circle cx="126" cy="105" r="18" fill="#06b6d4"/>
+    <circle cx="132" cy="99" r="6" fill="#ffffff"/>
+  </g>
+
+  <!-- Brand Label Text -->
+  <text x="256" y="445" font-family="'Nunito', sans-serif" font-weight="900" font-size="44" fill="#ffffff" text-anchor="middle" letter-spacing="4">
+    KID<tspan fill="#ff6b35">AI</tspan>
+  </text>
+</svg>

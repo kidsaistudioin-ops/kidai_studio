@@ -1,0 +1,64 @@
+{
+  "name": "KidAI Studio — Bachon Ka AI Super App",
+  "short_name": "KidAI Studio",
+  "description": "AI-Powered Learning, Games, Homework Scanner & Creative Art Studio for Kids",
+  "start_url": "/home",
+  "id": "/home",
+  "display": "standalone",
+  "background_color": "#07090f",
+  "theme_color": "#ff6b35",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "hi",
+  "categories": ["education", "kids", "games", "entertainment"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Seekho Games",
+      "short_name": "Seekho",
+      "description": "AI Micro-Games & Syllabus Learning",
+      "url": "/seekho",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Creator Studio",
+      "short_name": "Studio",
+      "description": "Coloring Book, Scanner & Comics",
+      "url": "/studio",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Arya AI Tutor",
+      "short_name": "Arya Chat",
+      "description": "Chat with AI Tutor Arya",
+      "url": "/chat",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Play Arena",
+      "short_name": "Play Arena",
+      "description": "Chess, Ludo & Racing Games",
+      "url": "/play",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    }
+  ]
+}

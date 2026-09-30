@@ -293,7 +293,8 @@ export default function ComicMakerPage() {
   // Save to Library & Print
   const handleSaveAndExport = async () => {
     try { playStreakChime(); } catch(e) {}
-    const existing = JSON.parse(localStorage.getItem('kidai_studio_creations') || '[]');
+    const sId = localStorage.getItem('kidai_student_id') || 'guest_default';
+    const existing = JSON.parse(localStorage.getItem(`kidai_${sId}_creations`) || localStorage.getItem('kidai_studio_creations') || '[]');
     const newCreation = {
       id: Date.now().toString(),
       title: `${comicTitle} (${pages.length} Pages)`,
@@ -302,7 +303,7 @@ export default function ComicMakerPage() {
       preview: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="%237c3aed"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="60">💬</text></svg>'
     };
     existing.unshift(newCreation);
-    localStorage.setItem('kidai_studio_creations', JSON.stringify(existing.slice(0, 20)));
+    localStorage.setItem(`kidai_${sId}_creations`, JSON.stringify(existing.slice(0, 20)));
 
     window.print();
     showToast('🎉 Multi-Page Comic Saved to Studio Library!');

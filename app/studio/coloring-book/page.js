@@ -409,10 +409,186 @@ const ARTWORKS = [
       { id: 'body', name: 'Metal Body Chassis', d: 'M160,250 L340,250 L340,410 L160,410 Z', defaultColor: '#ffffff' },
       { id: 'chest', name: 'Heart Plasma Core', d: 'M250,330 a35,35 0 1,0 0.1,0 Z', defaultColor: '#ffffff' }
     ]
+  },
+
+  // 🦸 SUPERHEROES (3 Designs)
+  {
+    id: 'superhero_caped',
+    name: 'Flying Super Captain 🦸‍♂️',
+    category: 'Superheroes',
+    icon: '🦸‍♂️',
+    paths: [
+      { id: 'cape', name: 'Flying Red Cape', d: 'M140,220 L70,390 L210,380 L180,240 Z M320,240 L290,380 L430,390 L360,220 Z', defaultColor: '#ffffff' },
+      { id: 'suit', name: 'Hero Body Suit', d: 'M170,220 L330,220 L310,430 L190,430 Z', defaultColor: '#ffffff' },
+      { id: 'emblem', name: 'Chest Star Shield', d: 'M250,250 L270,290 L230,290 Z', defaultColor: '#ffffff' },
+      { id: 'belt', name: 'Power Gold Belt', d: 'M190,380 L310,380 L310,405 L190,405 Z', defaultColor: '#ffffff' },
+      { id: 'head', name: 'Hero Face & Hair', d: 'M200,160 a50,50 0 1,0 100,0 a50,50 0 1,0 -100,0 Z', defaultColor: '#ffffff' },
+      { id: 'hair', name: 'Hero Hairstyle', d: 'M190,140 C210,80 290,80 310,140 C280,110 220,110 190,140 Z', defaultColor: '#ffffff' },
+      { id: 'mask', name: 'Hero Eye Mask', d: 'M210,150 L290,150 L280,175 L220,175 Z', defaultColor: '#ffffff' }
+    ]
+  },
+  {
+    id: 'spider_mask',
+    name: 'Spider Mask Hero 🕷️',
+    category: 'Superheroes',
+    icon: '🕷️',
+    paths: [
+      { id: 'head', name: 'Spider Mask Head', d: 'M250,140 C170,140 160,260 210,350 C230,380 270,380 290,350 C340,260 330,140 250,140 Z', defaultColor: '#ffffff' },
+      { id: 'eye_l', name: 'Left White Web Eye', d: 'M200,240 L240,260 L210,290 Z', defaultColor: '#ffffff' },
+      { id: 'eye_r', name: 'Right White Web Eye', d: 'M300,240 L260,260 L290,290 Z', defaultColor: '#ffffff' },
+      { id: 'web1', name: 'Center Web Lines', d: 'M250,140 L250,370 M170,240 L330,240 M190,180 L310,300 M310,180 L190,300', defaultColor: '#ffffff' }
+    ]
+  },
+  {
+    id: 'iron_armor',
+    name: 'Titan Iron Mech 🦾',
+    category: 'Superheroes',
+    icon: '🦾',
+    paths: [
+      { id: 'helmet', name: 'Gold Face Plate', d: 'M190,130 L310,130 L320,240 L250,290 L180,240 Z', defaultColor: '#ffffff' },
+      { id: 'jaw', name: 'Armor Jaw', d: 'M205,240 L295,240 L250,285 Z', defaultColor: '#ffffff' },
+      { id: 'eye_l', name: 'Left Glow Arc', d: 'M210,200 L240,205 L235,215 L210,210 Z', defaultColor: '#ffffff' },
+      { id: 'eye_r', name: 'Right Glow Arc', d: 'M290,200 L260,205 L265,215 L290,210 Z', defaultColor: '#ffffff' },
+      { id: 'chest', name: 'Titan Chestplate', d: 'M160,310 L340,310 L310,440 L190,440 Z', defaultColor: '#ffffff' },
+      { id: 'arc_core', name: 'Arc Reactor Core', d: 'M250,375 a30,30 0 1,0 0.1,0 Z', defaultColor: '#ffffff' }
+    ]
+  },
+
+  // ⚡ ANIME & CHIBI (3 Designs)
+  {
+    id: 'chibi_ninja',
+    name: 'Shadow Chibi Ninja 🥷',
+    category: 'Anime',
+    icon: '🥷',
+    paths: [
+      { id: 'hood', name: 'Ninja Head Hood', d: 'M250,130 a90,90 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'headband', name: 'Hidden Village Headband', d: 'M165,180 L335,180 L330,215 L170,215 Z', defaultColor: '#ffffff' },
+      { id: 'plate', name: 'Metal Crest Plate', d: 'M220,185 L280,185 L280,210 L220,210 Z', defaultColor: '#ffffff' },
+      { id: 'eyes_open', name: 'Determined Eyes Area', d: 'M180,225 L320,225 L315,260 L185,260 Z', defaultColor: '#ffffff' },
+      { id: 'robe', name: 'Ninja Gi Robe', d: 'M170,280 L330,280 L350,430 L150,430 Z', defaultColor: '#ffffff' },
+      { id: 'belt_sash', name: 'Red Ninja Sash', d: 'M160,360 L340,360 L340,390 L160,390 Z', defaultColor: '#ffffff' }
+    ]
+  },
+  {
+    id: 'magical_girl',
+    name: 'Star Magic Anime Girl 👧',
+    category: 'Anime',
+    icon: '👧',
+    paths: [
+      { id: 'twintail_l', name: 'Left Twintail Hair', d: 'M180,170 C100,180 80,320 120,380 C150,330 140,240 180,210 Z', defaultColor: '#ffffff' },
+      { id: 'twintail_r', name: 'Right Twintail Hair', d: 'M320,170 C400,180 420,320 380,380 C350,330 360,240 320,210 Z', defaultColor: '#ffffff' },
+      { id: 'face', name: 'Chibi Anime Face', d: 'M250,210 a70,70 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'bangs', name: 'Anime Hair Bangs', d: 'M180,170 C220,210 280,210 320,170 C300,120 200,120 180,170 Z', defaultColor: '#ffffff' },
+      { id: 'dress', name: 'Sailor Star Dress', d: 'M190,280 L310,280 L340,430 L160,430 Z', defaultColor: '#ffffff' },
+      { id: 'ribbon_bow', name: 'Chest Big Ribbon', d: 'M210,290 L290,290 L250,330 Z', defaultColor: '#ffffff' }
+    ]
+  },
+  {
+    id: 'spark_pet',
+    name: 'Thunder Sparkle Pet ⚡',
+    category: 'Anime',
+    icon: '⚡',
+    paths: [
+      { id: 'ear_l', name: 'Left Lightning Ear', d: 'M190,160 L120,70 L150,170 Z', defaultColor: '#ffffff' },
+      { id: 'ear_r', name: 'Right Lightning Ear', d: 'M310,160 L380,70 L350,170 Z', defaultColor: '#ffffff' },
+      { id: 'head', name: 'Cute Electric Face', d: 'M250,220 a85,85 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'cheek_l', name: 'Left Electric Cheek', d: 'M180,250 a20,20 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'cheek_r', name: 'Right Electric Cheek', d: 'M320,250 a20,20 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'body', name: 'Chubby Pet Body', d: 'M180,290 C150,440 350,440 320,290 Z', defaultColor: '#ffffff' },
+      { id: 'tail', name: 'Lightning Bolt Tail', d: 'M320,360 L400,320 L370,280 L430,220 L360,260 Z', defaultColor: '#ffffff' }
+    ]
+  },
+
+  // 🧁 KAWAII SWEETS (3 Designs)
+  {
+    id: 'rainbow_cupcake',
+    name: 'Rainbow Glaze Cupcake 🧁',
+    category: 'Kawaii',
+    icon: '🧁',
+    paths: [
+      { id: 'cup_wrapper', name: 'Pleated Cup Wrapper', d: 'M150,280 L180,440 L320,440 L350,280 Z', defaultColor: '#ffffff' },
+      { id: 'frosting_bot', name: 'Fluffy Frosting Base', d: 'M130,280 C130,210 370,210 370,280 Z', defaultColor: '#ffffff' },
+      { id: 'frosting_mid', name: 'Swirl Frosting Layer', d: 'M160,225 C160,160 340,160 340,225 Z', defaultColor: '#ffffff' },
+      { id: 'frosting_top', name: 'Top Swirl Peak', d: 'M200,170 C200,120 300,120 300,170 Z', defaultColor: '#ffffff' },
+      { id: 'cherry_star', name: 'Golden Star Topper', d: 'M250,90 L260,115 L285,115 L265,130 L275,155 L250,140 L225,155 L235,130 L215,115 L240,115 Z', defaultColor: '#ffffff' }
+    ]
+  },
+  {
+    id: 'boba_strawberry',
+    name: 'Happy Strawberry Boba 🧋',
+    category: 'Kawaii',
+    icon: '🧋',
+    paths: [
+      { id: 'cup', name: 'Clear Boba Tumbler', d: 'M160,170 L180,430 C180,460 320,460 320,430 L340,170 Z', defaultColor: '#ffffff' },
+      { id: 'tea_liquid', name: 'Sweet Milk Tea', d: 'M165,220 L180,425 C180,450 320,450 320,425 L335,220 Z', defaultColor: '#ffffff' },
+      { id: 'straw', name: 'Jumbo Boba Straw', d: 'M235,80 L265,80 L265,230 L235,230 Z', defaultColor: '#ffffff' },
+      { id: 'lid', name: 'Dome Cup Lid', d: 'M150,170 C150,120 350,120 350,170 Z', defaultColor: '#ffffff' },
+      { id: 'pearl1', name: 'Tapioca Pearl 1', d: 'M200,390 a16,16 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'pearl2', name: 'Tapioca Pearl 2', d: 'M250,410 a16,16 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'pearl3', name: 'Tapioca Pearl 3', d: 'M290,390 a16,16 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'pearl4', name: 'Tapioca Pearl 4', d: 'M225,350 a16,16 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'pearl5', name: 'Tapioca Pearl 5', d: 'M270,360 a16,16 0 1,0 0.1,0 Z', defaultColor: '#ffffff' }
+    ]
+  },
+  {
+    id: 'magic_donut',
+    name: 'Sprinkle Magic Donut 🍩',
+    category: 'Kawaii',
+    icon: '🍩',
+    paths: [
+      { id: 'dough', name: 'Golden Baked Dough', d: 'M250,100 C340,100 420,160 420,250 C420,340 340,400 250,400 C160,400 80,340 80,250 C80,160 160,100 250,100 Z', defaultColor: '#ffffff' },
+      { id: 'hole', name: 'Donut Center Hole', d: 'M250,200 a50,50 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'glaze', name: 'Pink Strawberry Glaze', d: 'M250,110 C320,110 400,160 400,240 C370,260 360,230 330,250 C310,270 300,240 270,260 C240,240 220,270 190,250 C170,270 150,240 120,260 C100,240 100,160 170,110 Z', defaultColor: '#ffffff' }
+    ]
+  },
+
+  // 🦕 DINOSAURS (2 Designs)
+  {
+    id: 'triceratops_baby',
+    name: 'Baby Shield Triceratops 🦕',
+    category: 'Dinosaurs',
+    icon: '🦕',
+    paths: [
+      { id: 'frill', name: 'Crown Horned Shield', d: 'M250,110 C140,110 130,250 200,260 C210,180 290,180 300,260 C370,250 360,110 250,110 Z', defaultColor: '#ffffff' },
+      { id: 'head', name: 'Dino Snout & Face', d: 'M250,220 a65,65 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'horn_nose', name: 'Nose Horn', d: 'M250,210 L250,150 L260,210 Z', defaultColor: '#ffffff' },
+      { id: 'horn_l', name: 'Left Brow Horn', d: 'M190,180 L140,110 L180,170 Z', defaultColor: '#ffffff' },
+      { id: 'horn_r', name: 'Right Brow Horn', d: 'M310,180 L360,110 L320,170 Z', defaultColor: '#ffffff' },
+      { id: 'body', name: 'Sturdy Dino Body', d: 'M160,290 C120,440 380,440 340,290 Z', defaultColor: '#ffffff' }
+    ]
+  },
+  {
+    id: 'pterodactyl_sky',
+    name: 'Sky Soaring Pterodactyl 🦅',
+    category: 'Dinosaurs',
+    icon: '🦅',
+    paths: [
+      { id: 'wing_l', name: 'Left Giant Wing', d: 'M220,260 L40,140 L160,330 Z', defaultColor: '#ffffff' },
+      { id: 'wing_r', name: 'Right Giant Wing', d: 'M280,260 L460,140 L340,330 Z', defaultColor: '#ffffff' },
+      { id: 'body', name: 'Pterosaur Body', d: 'M220,240 C220,380 280,380 280,240 Z', defaultColor: '#ffffff' },
+      { id: 'head', name: 'Crested Flying Beak', d: 'M250,220 L180,110 L320,160 Z', defaultColor: '#ffffff' }
+    ]
+  },
+
+  // 🧜‍♀️ MERMAIDS (1 Design)
+  {
+    id: 'mermaid_pearl',
+    name: 'Deep Pearl Sea Mermaid 🧜‍♀️',
+    category: 'Fairytale',
+    icon: '🧜‍♀️',
+    paths: [
+      { id: 'tail_fin', name: 'Sparkling Tail Flukes', d: 'M250,420 L160,490 L250,450 L340,490 Z', defaultColor: '#ffffff' },
+      { id: 'tail', name: 'Shimmer Scale Tail', d: 'M200,310 C200,430 250,430 250,430 C250,430 300,430 300,310 Z', defaultColor: '#ffffff' },
+      { id: 'body', name: 'Mermaid Torso', d: 'M210,220 L290,220 L300,320 L200,320 Z', defaultColor: '#ffffff' },
+      { id: 'top', name: 'Seashell Coral Top', d: 'M210,250 a20,20 0 1,0 40,0 M250,250 a20,20 0 1,0 40,0', defaultColor: '#ffffff' },
+      { id: 'head', name: 'Princess Face', d: 'M250,170 a55,55 0 1,0 0.1,0 Z', defaultColor: '#ffffff' },
+      { id: 'hair', name: 'Flowing Ocean Hair', d: 'M250,110 C160,110 140,260 170,360 C190,290 190,180 250,140 C310,180 310,290 330,360 C360,260 340,110 250,110 Z', defaultColor: '#ffffff' },
+      { id: 'tiara', name: 'Pearl Star Tiara', d: 'M220,130 L250,100 L280,130 Z', defaultColor: '#ffffff' }
+    ]
   }
 ];
 
-const CATEGORIES = ['All (50+)', 'Plain Sheet', 'Animals', 'Space', 'Fairytale', 'Vehicles', 'Nature', 'Yummy', 'Robots'];
+const CATEGORIES = ['All (70+)', 'Superheroes', 'Anime', 'Kawaii', 'Dinosaurs', 'Fairytale', 'Animals', 'Space', 'Vehicles', 'Nature', 'Robots', 'Plain Sheet'];
 
 export default function ColoringBookPage() {
   const router = useRouter();
@@ -441,18 +617,15 @@ export default function ColoringBookPage() {
 
   const [savedCreations, setSavedCreations] = useState([]);
 
-  // Load saved creations from localStorage
+  // Load saved creations from user-scoped localStorage
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('kidai_studio_creations') || '[]');
-      const colorings = stored.filter(item => item.type === 'Coloring Sheet' || item.type === 'Drawing Sheet');
-      setSavedCreations(colorings);
-    } catch(e) {}
+    refreshSavedCreations();
   }, []);
 
   const refreshSavedCreations = () => {
     try {
-      const stored = JSON.parse(localStorage.getItem('kidai_studio_creations') || '[]');
+      const sId = localStorage.getItem('kidai_student_id') || 'guest_default';
+      const stored = JSON.parse(localStorage.getItem(`kidai_${sId}_creations`) || localStorage.getItem('kidai_studio_creations') || '[]');
       const colorings = stored.filter(item => item.type === 'Coloring Sheet' || item.type === 'Drawing Sheet');
       setSavedCreations(colorings);
     } catch(e) {}
@@ -461,9 +634,10 @@ export default function ColoringBookPage() {
   const handleDeleteSavedItem = (id) => {
     try {
       playMovePieceSound();
-      const stored = JSON.parse(localStorage.getItem('kidai_studio_creations') || '[]');
+      const sId = localStorage.getItem('kidai_student_id') || 'guest_default';
+      const stored = JSON.parse(localStorage.getItem(`kidai_${sId}_creations`) || localStorage.getItem('kidai_studio_creations') || '[]');
       const updated = stored.filter(item => item.id !== id);
-      localStorage.setItem('kidai_studio_creations', JSON.stringify(updated));
+      localStorage.setItem(`kidai_${sId}_creations`, JSON.stringify(updated));
       refreshSavedCreations();
       showToast('Artwork removed from gallery.');
     } catch(e) {}
@@ -614,6 +788,36 @@ export default function ColoringBookPage() {
       setCanvasHistory([blankSnap]);
     }
     showToast('Canvas Cleared! ✨');
+  };
+
+  const handleAiMagicColor = () => {
+    if (!selectedArtwork || !selectedArtwork.paths || selectedArtwork.paths.length === 0) {
+      showToast('Pehle koi drawing choose karein! 🎨');
+      return;
+    }
+    try { playCorrectSound(); } catch(e) {}
+    
+    // Curated child-friendly harmonious palette presets
+    const PALETTES = [
+      ['#ff6b35', '#f59e0b', '#10b981', '#06b6d4', '#7c3aed', '#ec4899', '#3b82f6', '#f43f5e', '#84cc16'],
+      ['#ec4899', '#a855f7', '#6366f1', '#38bdf8', '#4ade80', '#facc15', '#fb923c', '#e11d48', '#14b8a6'],
+      ['#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#f43f5e', '#f59e0b', '#10b981', '#6366f1', '#fb7185'],
+      ['#f97316', '#eab308', '#22c55e', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#84cc16', '#38bdf8']
+    ];
+    const chosen = PALETTES[Math.floor(Math.random() * PALETTES.length)];
+    
+    const newColors = { ...colorState };
+    selectedArtwork.paths.forEach((p, idx) => {
+      if (p.id === 'bg' || p.id === 'sky' || p.id === 'water') {
+        newColors[p.id] = '#e0f2fe';
+      } else {
+        newColors[p.id] = chosen[idx % chosen.length];
+      }
+    });
+
+    setColorState(newColors);
+    setHistory(prev => [...prev, newColors]);
+    showToast('🪄 AI Magic Colors Filled! Click any part to customize! ✨');
   };
 
   const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -1157,8 +1361,9 @@ export default function ColoringBookPage() {
         if (canvasRef.current) ctx.drawImage(canvasRef.current, 0, 0, 1000, 1000);
         const pngData = exportCanvas.toDataURL('image/png');
         
-        // Save to localStorage
-        const existing = JSON.parse(localStorage.getItem('kidai_studio_creations') || '[]');
+        // Save to user-scoped localStorage
+        const sId = localStorage.getItem('kidai_student_id') || 'guest_default';
+        const existing = JSON.parse(localStorage.getItem(`kidai_${sId}_creations`) || localStorage.getItem('kidai_studio_creations') || '[]');
         const newCreation = {
           id: Date.now().toString(),
           title: selectedArtwork.name,
@@ -1167,7 +1372,7 @@ export default function ColoringBookPage() {
           preview: pngData
         };
         existing.unshift(newCreation);
-        localStorage.setItem('kidai_studio_creations', JSON.stringify(existing.slice(0, 30)));
+        localStorage.setItem(`kidai_${sId}_creations`, JSON.stringify(existing.slice(0, 30)));
         refreshSavedCreations();
 
         const link = document.createElement('a');
@@ -1725,8 +1930,36 @@ export default function ColoringBookPage() {
               <strong>1. Background Cutter</strong> se peeche ke racks/deewar hatayein → <strong>2. Clean Face</strong> se chahra saaf karein → <strong>3. Done</strong> dabakar Drawing Screen par le jayein!
             </p>
 
+            {/* AI Vision Highlight Button */}
+            <div style={{ marginBottom: 16 }}>
+              <button
+                onClick={() => handleGenerateAiPainterSketch(uploadedRawPhoto)}
+                disabled={isAiPainterGenerating}
+                style={{
+                  width: '100%',
+                  padding: '14px 18px',
+                  background: isAiPainterGenerating ? C.card2 : `linear-gradient(135deg, ${C.purple}, #ec4899)`,
+                  color: '#fff',
+                  border: `2px solid ${isAiPainterGenerating ? C.border : '#f472b6'}`,
+                  borderRadius: 16,
+                  fontWeight: 900,
+                  fontSize: 15,
+                  cursor: isAiPainterGenerating ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                  boxShadow: '0 6px 25px rgba(236,72,153,0.4)',
+                  animation: isAiPainterGenerating ? 'pulse 1.5s infinite' : 'none'
+                }}
+              >
+                <span style={{ fontSize: 22 }}>🤖✨</span>
+                <span>{isAiPainterGenerating ? '🎨 AI Vision Artist Drawing & Removing Room Background...' : '✨ Create Clean AI Cartoon Sketch (100% Background Removed)'}</span>
+              </button>
+            </div>
+
             {/* Quick Action Tools Bar */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, marginBottom: 16 }}>
               <button
                 onClick={() => handleAutoBgToggle(!autoRemoveBg)}
                 style={{
@@ -1746,7 +1979,7 @@ export default function ColoringBookPage() {
                 }}
               >
                 <span>✂️</span>
-                <span>{autoRemoveBg ? 'Background Cut: ON ✅' : 'Cut Background ✂️'}</span>
+                <span>{autoRemoveBg ? 'Auto-Cut: ON ✅' : 'Cut Background ✂️'}</span>
               </button>
 
               <button
@@ -2113,8 +2346,28 @@ export default function ColoringBookPage() {
 
             {/* Group 4: Quick Actions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ fontSize: 11, fontWeight: 900, color: C.pink }}>ACTIONS</div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: C.pink }}>ACTIONS & AI</div>
               <div style={{ display: 'flex', gap: 8 }}>
+                <button 
+                  onClick={handleAiMagicColor} 
+                  style={{ 
+                    padding: '8px 14px', 
+                    background: 'linear-gradient(135deg, #7c3aed, #ec4899)', 
+                    color: '#fff', 
+                    border: 'none', 
+                    borderRadius: 12, 
+                    fontWeight: 900, 
+                    fontSize: 12, 
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(124,58,237,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  title="AI se automatic sundar matching colors bharwayein"
+                >
+                  <span>🪄</span> AI Rang Bharo
+                </button>
                 <button onClick={handleUndo} style={{ padding: '8px 14px', background: C.card2, color: '#fff', border: `1px solid ${C.border}`, borderRadius: 12, fontWeight: 900, fontSize: 12, cursor: 'pointer' }}>
                   ↩️ Undo
                 </button>
