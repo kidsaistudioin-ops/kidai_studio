@@ -946,12 +946,17 @@ export default function ColoringBookPage() {
           }
         });
 
+        const svgBlob = new Blob([json.data.svg], { type: 'image/svg+xml;charset=utf-8' });
+        const URL = window.URL || window.webkitURL || window;
+        const blobURL = URL.createObjectURL(svgBlob);
+
         const newArt = {
           id: 'ai_portrait_' + Date.now(),
-          name: json.data.title || 'My AI Painter Portrait 🎨',
+          name: json.data.title || 'My AI Cartoon Portrait 🎨',
           category: 'My Photos',
           icon: '🧑‍🎨',
           isPlain: false,
+          photoUrl: blobURL,
           paths: [
             { id: 'bg', d: 'M0,0 H500 V500 H0 Z', defaultColor: '#ffffff' },
             ...(extractedPaths.length > 0 ? extractedPaths : [
@@ -962,9 +967,6 @@ export default function ColoringBookPage() {
           ]
         };
 
-        const svgBlob = new Blob([json.data.svg], { type: 'image/svg+xml;charset=utf-8' });
-        const URL = window.URL || window.webkitURL || window;
-        const blobURL = URL.createObjectURL(svgBlob);
         setConvertedSketchData(blobURL);
         setSelectedArtwork(newArt);
         setShowPhotoModal(false);
@@ -1210,12 +1212,15 @@ export default function ColoringBookPage() {
         category: 'My Photos', 
         icon: '📸', 
         isPlain: true, 
+        photoUrl: convertedSketchData,
         paths: [{ id: 'bg', d: 'M0,0 H500 V500 H0 Z', defaultColor: '#ffffff' }] 
       });
       setShowPhotoModal(false);
-      const ctx = canvasRef.current.getContext('2d');
-      ctx.clearRect(0, 0, 500, 500);
-      ctx.drawImage(img, 0, 0, 500, 500);
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        ctx.clearRect(0, 0, 500, 500);
+        ctx.drawImage(img, 0, 0, 500, 500);
+      }
       showToast('🎉 Photo Sketch Loaded onto Canvas! Rang bharein ya print karein.');
     };
     img.src = convertedSketchData;
@@ -2587,6 +2592,19 @@ export default function ColoringBookPage() {
                     transition: 'fill 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 />
+
+                {/* Render Custom Real Photo / AI Sketch Image Overlay */}
+                {selectedArtwork.photoUrl && (
+                  <image 
+                    href={selectedArtwork.photoUrl} 
+                    x="0" 
+                    y="0" 
+                    width="500" 
+                    height="500" 
+                    preserveAspectRatio="xMidYMid meet" 
+                    style={{ pointerEvents: 'none' }}
+                  />
+                )}
 
                 {selectedArtwork.paths.filter(p => p.id !== 'bg').map(path => (
                   <path

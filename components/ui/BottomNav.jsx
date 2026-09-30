@@ -1,37 +1,39 @@
 'use client';
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation';
 
 const NAV_ITEMS = [
-  { href: '/home',    icon: '🏠', label: 'Home' },
-  { href: '/seekho',  icon: '📖', label: 'Seekho' },
-  { href: '/scanner', icon: '📸', label: 'Scan' },
-  { href: '/studio',  icon: '🎨', label: 'Studio' },
-  { href: '/play',    icon: '🎮', label: 'Play' },
-  { href: '/library', icon: '🎒', label: 'Library' },
-  { href: '/profile', icon: '👤', label: 'Profile' },
-]
+  { href: '/home',   icon: '🏠', label: 'Home' },
+  { href: '/seekho', icon: '📖', label: 'Seekho' },
+  { href: '/studio', icon: '🎨', label: 'Studio' },
+  { href: '/play',   icon: '🎮', label: 'Play' },
+  { href: '/chat',   icon: '🤖', label: 'Arya AI' },
+];
 
 export default function BottomNav() {
-  const pathname = usePathname()
-  const router = useRouter()
+  const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <nav style={{
       position: 'fixed',
-      bottom: 0,
+      bottom: 12,
       left: '50%',
       transform: 'translateX(-50%)',
-      width: '100%',
-      maxWidth: 500,
-      background: 'rgba(7,9,15,.98)',
+      width: 'calc(100% - 24px)',
+      maxWidth: 440,
+      background: 'rgba(15, 23, 42, 0.95)',
       backdropFilter: 'blur(20px)',
-      borderTop: '1px solid #1e2d45',
+      border: '1.5px solid rgba(255, 255, 255, 0.12)',
+      borderRadius: 24,
       display: 'flex',
-      padding: '8px 4px 16px',
-      zIndex: 100,
+      alignItems: 'center',
+      justifyContent: 'space-around',
+      padding: '8px 6px',
+      zIndex: 999,
+      boxShadow: '0 12px 36px rgba(0, 0, 0, 0.7), 0 0 20px rgba(124, 58, 237, 0.15)'
     }}>
       {NAV_ITEMS.map(item => {
-        const active = pathname === item.href || pathname.startsWith(item.href + '/')
+        const active = pathname === item.href || (item.href !== '/home' && pathname.startsWith(item.href));
         return (
           <button
             key={item.href}
@@ -41,28 +43,48 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 2,
-              padding: '6px 2px',
-              borderRadius: 12,
+              justifyContent: 'center',
+              gap: 3,
+              padding: '6px 4px',
+              borderRadius: 16,
               border: 'none',
-              background: active ? 'rgba(255,107,53,.15)' : 'transparent',
+              background: active ? 'linear-gradient(135deg, rgba(255,107,53,0.25), rgba(236,72,153,0.25))' : 'transparent',
               cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              position: 'relative'
             }}
           >
+            {active && (
+              <div style={{
+                position: 'absolute',
+                top: -8,
+                width: 16,
+                height: 3,
+                borderRadius: 99,
+                background: '#ff6b35',
+                boxShadow: '0 0 8px #ff6b35'
+              }} />
+            )}
             <span style={{
               fontSize: 22,
               display: 'block',
               transform: active ? 'scale(1.15)' : 'scale(1)',
-              transition: 'transform .2s',
-            }}>{item.icon}</span>
+              transition: 'transform 0.2s',
+              filter: active ? 'drop-shadow(0 0 6px rgba(255,107,53,0.6))' : 'none'
+            }}>
+              {item.icon}
+            </span>
             <span style={{
-              fontSize: 10,
-              fontWeight: 700,
-              color: active ? '#ff6b35' : '#64748b',
-            }}>{item.label}</span>
+              fontSize: 11,
+              fontWeight: 900,
+              color: active ? '#ffedd5' : '#64748b',
+              letterSpacing: '0.2px'
+            }}>
+              {item.label}
+            </span>
           </button>
-        )
+        );
       })}
     </nav>
-  )
+  );
 }

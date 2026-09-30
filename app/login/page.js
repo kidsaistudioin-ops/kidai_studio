@@ -77,6 +77,9 @@ export default function LoginScreen() {
     localStorage.setItem('kidai_student_name', prof.name);
     localStorage.setItem('kidai_student_avatar', prof.avatar);
     localStorage.setItem('kidai_student_class', (prof.classLvl || 3).toString());
+    router.push('/home');
+  };
+
   const handleInstantGuestPlay = () => {
     playSound(523.25);
     const guestNum = Math.floor(100 + Math.random() * 900);
