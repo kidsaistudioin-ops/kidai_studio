@@ -179,7 +179,53 @@ Current codebase me ye 4 main files upgrade hongi:
 
 ---
 
-## 6. PHASE 2 ROADMAP: AI GOVT EXAM SIMULATOR & REMEDIAL RE-TEST
+## 6. INTERACTIVE PARENT & TEACHER CURATOR (HUMAN-IN-THE-LOOP STUDIO)
+
+> **💡 The Parent-in-the-Loop Concept:**  
+> Jab system PDF se text nikaal kar chapter banata hai, toh parents/teachers ko ek dedicated interface diya jayega jahan wo extracted text ko **verify, edit ya missing page photo se add** kar sakein.
+
+```mermaid
+flowchart TD
+    A["📄 Extracted PDF Chapter Draft<br/>(Auto-parsed by System)"] --> B{"Parent Review Screen (/dashboard)"}
+    B -->|"Option 1: Perfect! (No Edits)"| C["✅ 1-Click Select & Approve<br/>Instant activation for kid's game arena"]
+    B -->|"Option 2: Minor Typo / Teacher Cut"| D["✏️ Inline Text Editor<br/>Edit text, add custom tips, remove skipped pages"]
+    B -->|"Option 3: Missing Page / Extra Homework"| E["📸 Snap Extra Page / Notebook<br/>Attach camera photo directly to this chapter!"]
+    C --> F["🚀 100% Customized Syllabus Sandbox"]
+    D --> F
+    E --> F
+```
+
+### 🛠️ 3 Power Capabilities For Parents & Teachers:
+
+#### 1. 1-Click Quick Approval (Sabse Aasan):
+* Screen par chapter ka summary aur topics aayenge (jaise *Chapter 3: Heavy vs Light*).
+* Agar sab sahi dikh raha hai, parent sirf **"Select Entire Chapter ✅"** dabayega aur wo chapter turant bachhe ke daily quest me active ho jayega.
+
+#### 2. Inline Text Edit & Customization:
+* Agar school teacher ne kaha ki *"Page 12 ka paragraph syllabus me nahi aayega"* ya parent ko koi definition aasan Karni hai:
+* Parent text par tap karke seedha **edit / delete** kar sakta hai.
+
+#### 3. 📸 Snap Missing Page / Extra School Worksheet:
+* Agar PDF me koi page dhundhla tha, ya school ne alag se koi **Printed Worksheet / Homework Assignment** diya hai:
+* Parent button dabayega: **"📸 Add Homework Page Photo"** ➔ Phone camera se photo click karega ➔ Wo photo usi chapter ke sath attach ho jayegi!
+* AI us custom worksheet se bhi bachhe ke liye game bana dega.
+
+### 🗄️ Database Table for Parent Overrides:
+```sql
+CREATE TABLE parent_chapter_customizations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID NOT NULL,
+  chapter_id UUID REFERENCES curriculum_chapters(id),
+  custom_text TEXT,
+  extra_image_urls TEXT[], -- Array of attached worksheet photos
+  is_verified_by_parent BOOLEAN DEFAULT TRUE,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+---
+
+## 7. PHASE 2 ROADMAP: AI GOVT EXAM SIMULATOR & REMEDIAL RE-TEST
 
 > **Goal:** Testbook / Adda247 jaisa massive scale platform build karna, lekin **100% Generative AI & Autonomous Remedial Re-Test** capabilities ke saath.
 
@@ -210,7 +256,7 @@ flowchart LR
 
 ---
 
-## 7. COST, TOKEN ECONOMICS & INFRASTRUCTURE FEASIBILITY
+## 8. COST, TOKEN ECONOMICS & INFRASTRUCTURE FEASIBILITY
 
 ### 💰 Unit Cost Breakdown (Using GPT-4o-mini Rates):
 * **Input Rate:** $0.15 / 1 Million tokens (~₹12.60)
@@ -234,7 +280,9 @@ flowchart LR
 - [x] Class 1 to 5 NCERT Curriculum mapped (18 Core Books).
 - [x] Universal Concept Taxonomy for Private Schools defined (7 Categories).
 - [x] Supabase PostgreSQL Schema designed with GIN keyword indexing.
+- [x] Human-in-the-Loop Parent/Teacher Curator Studio & Snap-Worksheet feature documented.
 - [ ] Phase 1: Implement PDF Ingestion & Keyword Anchor tables in Supabase.
+- [ ] Phase 1: Build Parent Curriculum Review & Worksheet Snap UI in `/dashboard`.
 - [ ] Phase 1: Update `app/api/ai/scan/route.js` with Image-First Conflict Guard.
 - [ ] Phase 2: Create `/exam-arena` dedicated CBT layout for older aspirants.
 - [ ] Phase 2: Build Autonomous Remedial Re-Test Generator engine.
